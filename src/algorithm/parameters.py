@@ -363,7 +363,11 @@ def set_params(command_line_args, create_files=True):
                         "operator not specified for use with multiple " \
                         "fitness functions."
                     raise Exception(s)
-
+        ### NEW 11-11-2020: Generate grammar automatically, based on the dataset
+        if params['GRAMMAR_FILE'] == '' or params['GRAMMAR_FILE'] == 'default':
+            # TODO something
+            pass
+        
         # Parse grammar file and set grammar class.
         params['BNF_GRAMMAR'] = grammar.Grammar(path.join("..", "grammars",
                                                 params['GRAMMAR_FILE']))
