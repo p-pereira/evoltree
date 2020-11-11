@@ -4,12 +4,16 @@ Created on Fri Jul 12 11:29:16 2019
 
 @author: pedro
 """
+from representation import grammar
 from algorithm.parameters import params
+import numpy as np
 from utilities.stats.trackers import runtime_error_cache
 from utilities.fitness.error_metric import auc_metric
 from scipy.optimize import minimize
+from utilities.fitness.math_functions import sigmoid, inverse, symmetric, reLu, leakyReLu, sqrt
+from random import sample
 from utilities.fitness.get_data import get_data
-from sklearn.tree import _tree
+from scipy.optimize import leastsq
 
 def lamarck(ind, results, pool):
     """
@@ -44,7 +48,7 @@ def lamarck_pop(pop):
     
     if params['MULTICORE']:
         pool = params['POOL']
-        
+
     for name, ind in enumerate(pop):
         ind.name = name
         results = lamarck(ind, results, pool)
@@ -72,58 +76,38 @@ def lamarck_pop(pop):
     
 # save tree rules
 def tree_to_code(tree, feature_names):
+    #print(feature_names)
+    """
+    Converts a traditional decision tree to the used grammar.
+    
+    :param tree: The traditional decision tree.
+    :param feature_names: The data attributes used for training.
+    :return: The tree rules in the grammar's format.
+    """
+    from sklearn.tree import _tree
     tree_ = tree.tree_
     feature_name = [
         feature_names[i] if i != _tree.TREE_UNDEFINED else "undefined!"
         for i in tree_.feature
     ]
+    #f = open(("./dt-rules.txt"), "w+")
     rules = ""
-    #f = open((directory + str(i) + ".txt"), "w+")
-    #f.write("def tree({}):".format(", ".join(feature_names)))
-    #print("def tree({}):".format(", ".join(feature_names)))
     
-    mapping_dict = {0 : 'high',
-                    1 : 'low',
-                    2 : 'medium',
-                    3 : 'none',
-                    4 : 'verylow'}
-
     def recurse(node, depth, rules):
-        #indent = "  " * depth
-        
         if tree_.feature[node] != _tree.TREE_UNDEFINED:
             name = feature_name[node]
             threshold = tree_.threshold[node]
-            #f.write("np.where(x['{}'] <= ({}), ".format(name, threshold))
-            rules += "np.where(x['{}'] <= ({}), ".format(name, threshold)
-            #f.write("\n{}if {} <= {}:".format(indent, name, threshold))
-            #print("{}if {} <= {}:".format(indent, name, threshold))
+            rules = rules + "np.where(x['{}'] <= {}, ".format(name, round(threshold, 6))
             rules = recurse(tree_.children_left[node], depth + 1, rules)
-            #f.write("\n{}else:  # if {} > {}".format(indent, name, threshold))
-            #f.write(", ")
-            rules += ", "
-            #print("{}else:  # if {} > {}".format(indent, name, threshold))
+            rules = rules + ", "
             rules = recurse(tree_.children_right[node], depth + 1, rules)
-            rules += ")"
+            rules = rules + ")"
             return rules
-            #f.write(")")
         else:
-            # class probabilities array in the following order:
-                ## High, Low, Medium, None, VeryLow
-            array_probs = tree_.value[node][0].tolist()
-            pos = array_probs.index(max(array_probs)) # get index of max prob
-            chosen_class = mapping_dict.get(pos)
-            #f.write("'{}'".format(chosen_class))
-            rules += "'{}'".format(chosen_class)
-            #prob = 1 - round(tree_.value[node][0][0] / (tree_.value[node][0][0] + tree_.value[node][0][1]), 3)
-            #f.write("({})".format(prob))
-            #print("{}return {}".format(indent, tree_.value[node]))
+            prob =  round(1 - tree_.value[node][0][0] / (tree_.value[node][0][0] + tree_.value[node][0][1]), 3)
+            rules = rules + "({})".format(prob)
             return rules
     rules = recurse(0, 1, rules)
-    #f.close()
-    #f = open((directory + str(i) + ".txt"), "r")
-    #rules = f.read()
-    #f.close()
     return rules
 
 # save tree rules
@@ -160,11 +144,25 @@ def tree_to_file(tree, feature_names):
             #print("{}return {}".format(indent, tree_.value[node]))
     recurse(0, 1)
     f.close()
+    
+# Aux function to apply Lamarck in symbolic expressions
+def applyLamarckToPhen(phenotype, vals2):
     global phenotype2, x, y
     phenotype2 = phenotype
     #print(phenotype2)
     x, y, x_test, y_test = get_data(params['DATASET_TRAIN'], False)
-        
+    
+    if params['N_SAMPLING'] > 0:
+        N = params['N_SAMPLING']
+        pos = np.where(y == 'Sale')[0]
+        neg = np.where(y == 'NoSale')[0]
+        randPos = sample(list(pos), N)
+        randNeg = sample(list(neg), N)
+        x = x.iloc[(randPos+randNeg),:]
+        y = y.iloc[(randPos+randNeg)]
+    
+    #global res
+    
     def aux_function(a):
         #print(a)
         global phenotype2
@@ -184,6 +182,57 @@ def tree_to_file(tree, feature_names):
     #t1 = time.time()
     
     #print("num vals: ", len(vals2), "time: ", round(t1-t0, 2))
+    if res.x.size == 1:
+        phenotype5 = phenotype2.replace("a[0]", str(round(float(res.x), 3)), 1)
+    else:
+        #print(phenotype2)
+        phenotype5 = phenotype2
+        for i in range(res.x.size):
+            phenotype5 = phenotype5.replace("a[" + str(i) + "]", str(round(res.x[i], 3)), 1)
+        #print(phenotype5)
+
+    #print(res.x.size)
+    #print(phenotype5)
+    return phenotype5
+
+
+# Aux function to apply Lamarck in symbolic expressions
+def applyLamarckToPhen2(phenotype, vals2):
+    global phenotype2, x, y
+    phenotype2 = phenotype
+    #print(phenotype2)
+    x, y, x_test, y_test = get_data(params['DATASET_TRAIN'], False)
+    
+    if params['N_SAMPLING'] > 0:
+        N = params['N_SAMPLING']
+        pos = np.where(y == 'Sale')[0]
+        neg = np.where(y == 'NoSale')[0]
+        randPos = sample(list(pos), N)
+        randNeg = sample(list(neg), N)
+        x = x.iloc[(randPos+randNeg),:]
+        y = y.iloc[(randPos+randNeg)]
+
+    y2 = np.where(y == 'Sale', 1, 0)
+
+    #global res
+    def func(a, y):
+        #print(a)
+        global phenotype2
+        phenotype3 = phenotype2
+        for i in range(len(a)):    
+            phenotype3 = phenotype3.replace("a[" + str(i) + "]", str(round(a[i], 3)), 1)
+        
+        yhat = eval(phenotype2)
+        return (y - yhat)
+    
+    import time
+    t0 = time.time()
+    out = leastsq(func, vals2, args=(y2))
+    t1 = time.time()
+    res = out[0]
+    
+    
+    print("num vals: ", len(vals2), "time: ", round(t1-t0, 2))
     if res.x.size == 1:
         phenotype5 = phenotype2.replace("a[0]", str(round(float(res.x), 3)), 1)
     else:

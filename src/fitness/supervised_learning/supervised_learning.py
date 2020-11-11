@@ -1,15 +1,16 @@
 import numpy as np
 np.seterr(all="raise")
-from random import sample
 
 from algorithm.parameters import params
 from utilities.fitness.get_data import get_data
+from algorithm.mapper import treatNums
 from utilities.fitness.optimize_constants import optimize_constants
-
+from random import sample
 from fitness.base_ff_classes.base_ff import base_ff
-
-from utilities.utils import treat_phenotype
-from stats.stats import stats
+from utilities.fitness.math_functions import inverse, sigmoid, reLu, leakyReLu, symmetric
+import numpy as np
+import pandas as pd
+import time
 
 class supervised_learning(base_ff):
     """
@@ -42,7 +43,7 @@ class supervised_learning(base_ff):
         if params['DATASET_TEST']:
             self.training_test = True
 
-    def evaluate(self, ind, **kwargs):
+    def evaluate(self, ind, savePred=False, **kwargs):
         """
         Note that math functions used in the solutions are imported from either
         utilities.fitness.math_functions or called from numpy.
@@ -53,6 +54,8 @@ class supervised_learning(base_ff):
         evaluation is to be performed.
         :return: The fitness of the evaluated individual.
         """
+        #print(ind)
+
         dist = kwargs.get('dist', 'training')
 
         if dist == "training":
@@ -60,53 +63,14 @@ class supervised_learning(base_ff):
             x = self.training_in
             y = self.training_exp
             # If data sampling is used
-            if params['N_SAMPLING'] == 'max':
-                none = list(np.where(y == 'none')[0])
-                very_low = list(np.where(y == 'verylow')[0])
-                low = list(np.where(y == 'low')[0])
-                medium = list(np.where(y == 'medium')[0])
-                high = list(np.where(y == 'high')[0])
-                
-                M = max([len(very_low), len(low), len(medium), len(high)])
-                
-                randNone = sample(list(none), M)
-                x = x.iloc[(randNone+very_low + low + 
-                            medium + high),:]
-                y = y.iloc[(randNone+very_low + low + 
-                            medium + high)]
-                
-            elif params['N_SAMPLING'] > 0 and stats['gen'] % 10 != 0:
+            if params['N_SAMPLING'] > 0:
                 N = params['N_SAMPLING']
-                none = np.where(y == 'none')[0]
-                very_low = np.where(y == 'verylow')[0]
-                low = np.where(y == 'low')[0]
-                medium = np.where(y == 'medium')[0]
-                high = np.where(y == 'high')[0]
-                
-                if N > len(list(none)):
-                    randNone = sample(list(none), len(list(none)))
-                else:
-                    randNone = sample(list(none), N)
-                if N > len(list(very_low)):
-                    randVery_low = sample(list(very_low), len(list(very_low)))
-                else:
-                    randVery_low = sample(list(very_low), N)
-                if N > len(list(low)):
-                    randLow = sample(list(low), len(list(low)))
-                else:
-                    randLow = sample(list(low), N)
-                if N > len(list(medium)):
-                    randMedium = sample(list(medium), len(list(medium)))
-                else:
-                    randMedium = sample(list(medium), N)
-                if N > len(list(high)):
-                    randhigh = sample(list(high), len(list(high)))
-                else:
-                    randhigh = sample(list(high), N)
-                x = x.iloc[(randNone+randVery_low + randLow + 
-                            randMedium + randhigh),:]
-                y = y.iloc[(randNone+randVery_low + randLow + 
-                            randMedium + randhigh)]
+                pos = np.where(y == 'Sale')[0]
+                neg = np.where(y == 'NoSale')[0]
+                randPos = sample(list(pos), N)
+                randNeg = sample(list(neg), N)
+                x = x.iloc[(randPos+randNeg),:]
+                y = y.iloc[(randPos+randNeg)]
             
         elif dist == "test":
             # Set test datasets.
@@ -116,6 +80,7 @@ class supervised_learning(base_ff):
         else:
             raise ValueError("Unknown dist: " + dist)
 
+        
         if params['OPTIMIZE_CONSTANTS']:
             # if we are training, then optimize the constants by
             # gradient descent and save the resulting phenotype
@@ -131,11 +96,7 @@ class supervised_learning(base_ff):
                 phen = ind.phenotype_consec_consts
                 c = ind.opt_consts
                 # phen will refer to x (ie test_in), and possibly to c
-                try: # NEW 19/06/2020: treat leading zeros problem
-                    yhat = eval(phen)
-                except:
-                    phen = treat_phenotype(phen)
-                    yhat = eval(phen)
+                yhat = eval(phen)
                 assert np.isrealobj(yhat)
 
                 # let's always call the error function with the
@@ -144,21 +105,25 @@ class supervised_learning(base_ff):
 
         else:
             # phenotype won't refer to C
-            phenotype = ind.phenotype
-            try: # NEW 19/06/2020: treat leading zeros problem
-                yhat = eval(phenotype)
+            try:
+                start = time.time()
+                yhat = eval(ind.phenotype)
+                end = time.time()
+                #print(savePred)
+                if savePred:
+                    d = pd.DataFrame({'y': y, 'pred':yhat},index=None)
+                    d.to_csv(params['FILE_PATH']+'/preds.csv', sep=";",index=False)
+                    f = open(params['FILE_PATH']+'/time_preds.txt', 'w')
+                    f.write(str((end-start)/len(y)))
+                    f.close()
+                #yhat = exec(ind.phenotype)
                 assert np.isrealobj(yhat)
     
                 # let's always call the error function with the true
                 # values first, the estimate second
                 return params['ERROR_METRIC'](y, yhat)
-            except:
-                phenotype = treat_phenotype(phenotype)
-                yhat = eval(phenotype)
-                ind.phenotype = phenotype
+            except Exception as e:
+                #print(e)
+                #ind.invalid = True
+                return 0
             
-                assert np.isrealobj(yhat)
-    
-                # let's always call the error function with the true
-                # values first, the estimate second
-                return params['ERROR_METRIC'](y, yhat)

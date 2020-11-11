@@ -4,7 +4,6 @@ from copy import copy
 
 from algorithm.parameters import params
 from utilities.stats import trackers
-
 import pandas as pd
 
 def save_stats_to_file(stats, end=False):
@@ -126,8 +125,7 @@ def save_first_front_to_file(stats, end=False, name="first"):
         
         # Save individuals' fitness on test data <<- NEW
         f = params['FITNESS_FUNCTION']
-        indTest = [f.fitness_functions[0](ind, dist='test'), 
-                   f.fitness_functions[1](ind, dist='test')]
+        indTest = [f.fitness_functions[0](ind, dist='test'), f.fitness_functions[1](ind, dist='test')]
         #print(indTest)
         
         savefile.write((str(indTest) + "\n"))
@@ -166,7 +164,7 @@ def generate_folders_and_files():
         makedirs(params['FILE_PATH'])
 
     #NEW
-    if params['FOLDER_NAME'] == "":
+    if params['FOLDER_NAME'] is None:
         if not path.isdir(path.join(params['FILE_PATH'], str(params['TIME_STAMP']))):
             makedirs(path.join(params['FILE_PATH'], str(params['TIME_STAMP'])))
         params['FILE_PATH'] = path.join(params['FILE_PATH'], str(params['TIME_STAMP']))

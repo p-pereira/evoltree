@@ -1,7 +1,7 @@
 from math import ceil
 import numpy as np
-np.seterr(all="raise")
-
+#np.seterr(all="raise")
+np.seterr(divide='ignore', invalid='ignore')
 
 def return_one_percent(num, pop_size):
     """
@@ -248,3 +248,42 @@ def sci_notation(n, prec=3):
     exponent = ilog(n, base)
     mantissa = n / base**exponent
     return '{0:.{1}f}e{2:+d}'.format(mantissa, prec, exponent)
+
+def inverse(x):
+    if type(x)==int:
+        if x==0:
+            return 0
+        else:
+            return 1/x
+    else:
+        x = np.where(x==0, 1, x)
+        return 1/x
+
+def sigmoid(x):
+    try:
+        return 1 / (1 + np.exp(-x))
+    except FloatingPointError:
+        if type(x) == int:
+            if x > 0:
+                res = 1
+            else:
+                res = 0
+            return res
+        else:
+            return np.where(x > 0, 1, 0)
+
+def symmetric(x):
+    return -x
+
+def reLu(x):
+    return np.maximum(0,x)
+
+def leakyReLu(x):
+    return np.where(x > 0, x, x * 0.01)
+
+def sqrt(x):
+    if type(x)==int and x<=0:
+        return 0
+    else:
+        x = np.where(x<=0, 0, x)
+        return np.sqrt(x)

@@ -104,9 +104,11 @@ def get_soo_stats(individuals, end):
         savefile.write((str(indTest) + "\n"))
         savefile.close()
 
-    if not trackers.best_ever or best > trackers.best_ever:
+    # We don't want the best fitness ever, but the best in each generation...
+    #if not trackers.best_ever or best > trackers.best_ever:
         # Save best individual in trackers.best_ever.
-        trackers.best_ever = best
+        #trackers.best_ever = best
+    trackers.best_ever = best
 
     if end or params['VERBOSE'] or not params['DEBUG']:
         # Update all stats.
@@ -270,7 +272,7 @@ def get_moo_stats(individuals, end):
 
             # Set main fitness as training fitness.
             ind.fitness = ind.training_fitness
-
+    
     # Save stats to list.
     if params['VERBOSE'] or (not params['DEBUG'] and not end):
         trackers.stats_list.append(copy(stats))

@@ -14,12 +14,12 @@ params = {
 
         # Evolutionary Parameters
         'POPULATION_SIZE': 100,
-        'GENERATIONS': 100,
+        'GENERATIONS': 25,
         'HILL_CLIMBING_HISTORY': 100000,
         'SCHC_COUNT_METHOD': "count_all",
 
         # Set optional experiment name
-        'EXPERIMENT_NAME': "MGEDT",
+        'EXPERIMENT_NAME': "review",
         # Set default number of runs to be done.
         # ONLY USED WITH EXPERIMENT MANAGER.
         'RUNS': 1,
@@ -28,12 +28,12 @@ params = {
         'FITNESS_FUNCTION': "supervised_learning.classification, minimise_nodes", #"supervised_learning.classification",#
 
         # Select problem dataset
-        'DATASET_TRAIN': "Promos/TEST_new/Train-IDF-1.csv",
-        'DATASET_TEST': "Promos/TEST_new/Test-IDF-1.csv",
+        'DATASET_TRAIN': "Promos/TEST2/Train-IDF-2.csv",
+        'DATASET_TEST': "Promos/TEST2/Test-IDF-2.csv",
         'DATASET_DELIMITER': ";",
 
         # Set grammar file
-        'GRAMMAR_FILE': "Promos/Promos_ord_new.bnf",
+        'GRAMMAR_FILE': "supervised_learning/Promos_IDF2.bnf",
 
         # Set the number of depths permutations are calculated for
         # (starting from the minimum path of the grammar).
@@ -41,19 +41,19 @@ params = {
         'PERMUTATION_RAMPS': 5,
 
         # Select error metric
-        'ERROR_METRIC': "f1_score2",
+        'ERROR_METRIC': "auc_metric2",
 
         # Optimise constants in the supervised_learning fitness function.
         'OPTIMIZE_CONSTANTS': False,
 
         # Specify target for target problems
-        'TARGET': "ValueSale",
+        'TARGET': "target",
 
         # Set max sizes of individuals
-        'MAX_TREE_DEPTH': 90,  # SET TO 90 DUE TO PYTHON EVAL() STACK LIMIT.
+        'MAX_TREE_DEPTH': 50,  # SET TO 90 DUE TO PYTHON EVAL() STACK LIMIT.
                                # INCREASE AT YOUR OWN RISK.
         'MAX_TREE_NODES': None,
-        'CODON_SIZE': 300,
+        'CODON_SIZE': 300,#300,
         'MAX_GENOME_LENGTH': None,
         'MAX_WRAPS': 0,
 
@@ -61,7 +61,7 @@ params = {
         # Set initialisation operator.
         'INITIALISATION': "operators.initialisation.PI_grow",
         # Set the maximum geneome length for initialisation.
-        'INIT_GENOME_LENGTH': 100,
+        'INIT_GENOME_LENGTH': 2000,#100,
         # Set the maximum tree depth for initialisation.
         'MAX_INIT_TREE_DEPTH': 20,#20,
         # Set the minimum tree depth for initialisation.
@@ -73,7 +73,7 @@ params = {
         # For tournament selection
         'TOURNAMENT_SIZE': 2,
         # For truncation selection
-        'SELECTION_PROPORTION': 0.5,
+        'SELECTION_PROPORTION': 0.5,#0.25,
         # Allow for selection of invalid individuals during selection process.
         'INVALID_SELECTION': False,
 
@@ -99,13 +99,13 @@ params = {
         # Set number of mutation events
         'MUTATION_EVENTS': 1,
         # Prevents mutation from generating invalids.
-        'NO_MUTATION_INVALIDS': True,
+        'NO_MUTATION_INVALIDS': True, #True, #
 
         # REPLACEMENT
         # Set replacement operator.
         'REPLACEMENT': "operators.replacement.nsga2_replacement",#"operators.replacement.generational",#
         # Set elite size.
-        'ELITE_SIZE': 30, 
+        'ELITE_SIZE': 30, #
 
         # DEBUGGING
         # Use this to turn on debugging mode. This mode doesn't write any files
@@ -129,7 +129,7 @@ params = {
 
         # MULTIPROCESSING
         # Multi-core parallel processing of phenotype evaluations.
-        'MULTICORE': True,
+        'MULTICORE': False,
         # Set the number of cpus to be used for multiprocessing
         'CORES': 5,#cpu_count(),
 
@@ -139,11 +139,11 @@ params = {
         'SAVE_STATE': False,
         # Specify how often the state of the current evolutionary run is
         # saved (i.e. every n-th generation). Requires int value.
-        'SAVE_STATE_STEP': 10,
+        'SAVE_STATE_STEP': 1,
         # Load an evolutionary run from a saved state. You must specify the
         # full file path to the desired state file. Note that state files have
         # no file type.
-        'LOAD_STATE': None,
+        'LOAD_STATE': None,#"C:/Users/pedro/Documents/TestsR/Python/results/TEST-1Holdout/IDF/state",
 
         # SEEDING
         # Specify a list of PonyGE2 individuals with which to seed the initial
@@ -151,13 +151,13 @@ params = {
         'SEED_INDIVIDUALS': [],
         # Specify a target seed folder in the 'seeds' directory that contains a
         # population of individuals with which to seed a run.
-        'TARGET_SEED_FOLDER': "MGEDT",
+        'TARGET_SEED_FOLDER': "MGEDT_TEST",
         # Set a target phenotype string for reverse mapping into a GE
         # individual
         'REVERSE_MAPPING_TARGET': None,
         # Set Random Seed for all Random Number Generators to be used by
         # PonyGE2, including the standard Python RNG and the NumPy RNG.
-        'RANDOM_SEED': 1234,
+        'RANDOM_SEED': None,
 
         # CACHING
         # The cache tracks unique individuals across evolution by saving a
@@ -167,10 +167,10 @@ params = {
         'CACHE': True,
         # Uses the cache to look up the fitness of duplicate individuals. CACHE
         # must be set to True if you want to use this.
-        'LOOKUP_FITNESS': True,
+        'LOOKUP_FITNESS': False,
         # Uses the cache to give a bad fitness to duplicate individuals. CACHE
         # must be True if you want to use this (obviously)
-        'LOOKUP_BAD_FITNESS': True,
+        'LOOKUP_BAD_FITNESS': False,
         # Removes duplicate individuals from the population by replacing them
         # with mutated versions of the original individual. Hopefully this will
         # encourage diversity in the population.
@@ -189,12 +189,12 @@ params = {
         'MACHINE': machine_name,
         
         # N value for data sampling
-        # if a value is assigned, N*5 random records will be used to train the model
+        # if a value is assigned, N*2 random records will be used to train the model
         'N_SAMPLING': 0,
 
         # Folder name to store the results
         # if None, timestamp is used
-        'FOLDER_NAME': "TEST_new",
+        'FOLDER_NAME': "MGEDT",
 
         # Data transformation, important when reading the dataset
         # Factor, IDF, RAW or 1HOT

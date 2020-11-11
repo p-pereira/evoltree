@@ -2,6 +2,7 @@ from os import path
 
 import numpy as np
 import pandas as pd
+import shelve
 
 from algorithm.parameters import params
 
@@ -52,15 +53,25 @@ def get_Xy_train_test_separate(train_filename, test_filename, skip_header=0):
                     break
         f.close()
     
+    ################NEW #### NEW AGAIN
+    if params['DATA_TRANSF'] == "1HOT":
+        f = shelve.open(train_filename)
+        trainData = f['train']
+        f.close()
+    else:
+        trainData = pd.read_csv(train_filename, delimiter = delimiter)
+        if params['DATA_TRANSF'] == 'Factor':
+            for col in trainData.columns:
+                trainData[col] = trainData[col].astype(str)
     # Read in all training data.
-    #train_Xy = np.genfromtxt(train_filename, skip_header=skip_header,
-    #                         delimiter=delimiter)
-    train_Xy = pd.read_csv(train_filename, delimiter=delimiter)
-    target = params["TARGET"]
+    #train_Xy = np.genfromtxt(train_filename, skip_header=skip_header, delimiter=delimiter)
+    
     try:
         # Separate out input (X) and output (y) data.
-        train_X = train_Xy.drop(target, axis=1) #.transpose()  # all columns but last
-        train_y = train_Xy[target] #.transpose()  # last column
+        #train_X = train_Xy[:, :-1].transpose()  # all columns but last
+        #train_y = train_Xy[:, -1].transpose()  # last column
+        train_X = trainData.drop('target', axis=1)  # all columns but last
+        train_y = trainData['target'] # last column
     
     except IndexError:
         s = "utilities.fitness.get_data.get_Xy_train_test_separate\n" \
@@ -69,13 +80,22 @@ def get_Xy_train_test_separate(train_filename, test_filename, skip_header=0):
         raise Exception(s)
 
     if test_filename:
-        # Read in all testing data.
-        #test_Xy = np.genfromtxt(test_filename, skip_header=skip_header,
-        #                        delimiter=delimiter)
-        test_Xy = pd.read_csv(test_filename, delimiter=delimiter)
+        if params['DATA_TRANSF'] == "1HOT":
+            f = shelve.open(test_filename)
+            testData = f['test']
+            f.close()
+        else:
+            # Read in all testing data.
+            #test_Xy = np.genfromtxt(test_filename, skip_header=skip_header, delimiter=delimiter)
+            testData = pd.read_csv(test_filename, delimiter = delimiter)
+            if params['DATA_TRANSF'] == 'Factor':
+                for col in testData.columns:
+                    testData[col] = testData[col].astype(str)
         # Separate out input (X) and output (y) data.
-        test_X = test_Xy.drop(target, axis=1) #.transpose()  # all columns but last
-        test_y = test_Xy[target] #.transpose()  # last column
+        #test_X = test_Xy[:, :-1].transpose()  # all columns but last
+        #test_y = test_Xy[:, -1].transpose()  # last column
+        test_X = testData.drop('target', axis=1)  # all columns but last
+        test_y = testData['target'] # last column
 
     else:
         test_X, test_y = None, None

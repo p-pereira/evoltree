@@ -4,6 +4,7 @@ import numpy as np
 from algorithm.parameters import params
 from representation.tree import Tree
 from utilities.representation.python_filter import python_filter
+import re
 
 
 def mapper(genome, tree):
@@ -63,6 +64,8 @@ def mapper(genome, tree):
         # Set values for invalid individuals.
         phenotype, nodes, depth, used_codons = None, np.NaN, np.NaN, np.NaN
 
+    #if phenotype != None:
+    #    phenotype = re.sub(r'\b0+', '', phenotype)
     return phenotype, genome, tree, nodes, invalid, depth, used_codons
 
 
@@ -171,7 +174,8 @@ def map_ind_from_genome(genome):
         # All non-terminals have not been completely expanded, invalid
         # solution.
         return None, genome, None, nodes, True, max_depth, used_input
-
+    
+    #output = re.sub(r'\b0+', '', output)
     return output, genome, None, nodes, False, max_depth, used_input
 
 
@@ -307,3 +311,249 @@ def genome_tree_map(tree, genome, output, index, depth, max_depth, nodes,
             invalid = True
 
     return output, index, nodes, depth, max_depth, invalid
+
+############# NEW ###################
+def map_genome_from_ind_DTIDF(expression, genome=[]):
+    """
+    Converts a phenotype/expression to the genome (numerical array) based on the grammar.
+    This function is for Decision Trees and IDF transformation.
+    It receives the phenotype as argument and returns the genome.
+    
+    :param expression: An individual's phenotype.
+    :param genomr: The genome that is being bulit from scratch.
+    :return: The correspondent individual's genome.
+    """
+    if expression[0] == 'n': #it's a np.where condition, treat it
+        genome.append(0) # the first option: result
+        # now, get the attribute from expression
+        att = expression[expression.find("[")+1:expression.find("]")]
+        newExp = expression[expression.find("]"):]
+        # and get its index in the grammar:
+        #   get grammar first
+        #params['BNF_GRAMMAR'] = grammar.Grammar("../grammars/supervised_learning/Promos_IDF.bnf")
+        gramm = params['BNF_GRAMMAR']
+        #   get the rules that contain the data attributes
+        attrsRules = gramm.rules['<idx>']
+        #   and finally, extract the list of attributes
+        attrs = [ attrsRules['choices'][i]['choice'][0]['symbol'] for i in range(0, len(attrsRules['choices']))]
+        # get the attribute index on the grammar
+        indx = attrs.index(att)
+        # and insert it in the genome!
+        genome.append(indx)
+        
+        # next step: comparison sign
+        comp = newExp[newExp.find("]")+2:newExp.find("]")+4]
+        #   remove white spaces, just in case
+        comp = comp.replace(" ","")
+        # get index
+        if comp == "==":
+            genome.append(0)
+        elif comp == "<":
+            genome.append(1)
+        elif comp == "<=":
+            genome.append(3)
+        else:
+            genome.append(2)
+        
+        # next step: get the comparison value
+        val = newExp[newExp.find(comp)+2:newExp.find(',')]
+        val = val.replace(' ','') #remove empty spaces...
+        if '.' in val: # if it is decimal:
+            digsAfter = val[val.find('.')+1:] # digits after '.'
+            if val[0] == '0': # if it is 0.<digits>
+                genome.append(2) # Third option
+                genome.extend(np.repeat(0, len(digsAfter)-1)) # number of times that chose <digits><digit>
+                genome.append(1) # eventually chooses <digit>
+                genome.extend([int(dig) for dig in digsAfter])
+            else:
+                genome.append(0) # first option
+                digsBef = val[0:val.find('.')] # digits before '.'
+                genome.extend(np.repeat(0, len(digsBef)-1)) # number of times that chose <digits><digit>
+                genome.append(1) # eventually chooses <digit>
+                genome.extend([int(dig) for dig in digsBef])
+                
+                genome.extend(np.repeat(0, len(digsAfter)-1)) # number of times that chose <digits><digit>
+                genome.append(1) # eventually chooses <digit>
+                genome.extend([int(dig) for dig in digsAfter])
+        else: # it's integer
+            genome.append(1) # Second option
+            #   get the number of digits
+            nrDigs = len(val)
+            genome.extend(np.repeat(0, nrDigs-1)) # number of times that chose <digits><digit>
+            genome.append(1)
+            genome.extend([int(dig) for dig in val])
+                
+        newExp = newExp[newExp.find(',')+2:]
+        genome = map_genome_from_ind_DTIDF(newExp, genome)
+    else:
+        genome.append(1) # the second option: leaf
+        if ',' in expression: # there's something after this leaf
+            val = expression[0:expression.find(',')]
+            val = val.replace(')','')
+            if '0.' in val: # if it is decimal:
+                genome.append(0) #first option
+                digsAfter = val[val.find('.')+1:] # digits after '.'
+                genome.extend(np.repeat(0, len(digsAfter)-1)) # number of times that chose <digits><digit>
+                genome.append(1) # eventually chooses <digit>
+                genome.extend([int(dig) for dig in digsAfter])
+            else:
+                genome.append(1) #second option
+            # remove the value and continue
+            newExp = expression[expression.find(',')+2:]
+            genome = map_genome_from_ind_DTIDF(newExp, genome)
+        else:
+            val = expression[0:]
+            val = val.replace(')','')
+            if '0.' in val: # if it is decimal:
+                genome.append(0) #first option
+                digsAfter = val[val.find('.')+1:] # digits after '.'
+                genome.extend(np.repeat(0, len(digsAfter)-1)) # number of times that chose <digits><digit>
+                genome.append(1) # eventually chooses <digit>
+                genome.extend([int(dig) for dig in digsAfter])
+            else:
+                genome.append(1) #second option
+                # END
+    
+    return genome
+
+
+def map_genome_from_ind_DTRAW(expression, genome=[]):
+    """
+    Converts a phenotype/expression to the genome (numerical array) based on the grammar.
+    This function is for Decision Trees and RAW transformation.
+    It receives the phenotype as argument and returns the genome.
+    
+    :param expression: An individual's phenotype.
+    :param genomr: The genome that is being bulit from scratch.
+    :return: The correspondent individual's genome.
+    """
+    if expression[0] == 'n': #it's a np.where condition, treat it
+        genome.append(0) # the first option: result
+        # now, get the attribute from expression
+        att = expression[expression.find("[")+4:expression.find("]")]
+        newExp = expression[expression.find("]"):]
+        # and get its index in the grammar:
+        #   get grammar first
+        #params['BNF_GRAMMAR'] = grammar.Grammar("../grammars/supervised_learning/Promos_IDF.bnf")
+        gramm = params['BNF_GRAMMAR']
+        #   get the rules that contain the data attributes
+        attrsRules = gramm.rules['<idx>']
+        #   and finally, extract the list of attributes
+        attrs = [ attrsRules['choices'][i]['choice'][0]['symbol'] for i in range(0, len(attrsRules['choices']))]
+        # get the attribute index on the grammar
+        indx = attrs.index(att)
+        # and insert it in the genome!
+        genome.append(indx)
+        
+        # next step: comparison sign
+        comp = newExp[newExp.find("]")+2:newExp.find("]")+4]
+        #   remove white spaces, just in case
+        comp = comp.replace(" ","")
+        # get index
+        if comp == "==":
+            genome.append(0)
+        elif comp == "<":
+            genome.append(1)
+        elif comp == "<=":
+            genome.append(3)
+        else:
+            genome.append(2)
+        
+        # next step: get the comparison value
+        val = newExp[newExp.find(comp)+2:newExp.find(',')]
+        if '.' in val:
+            val = val[0:val.find('.')] # remove '.'
+        val = val.replace(' ','') #remove empty spaces...
+        # it's allways integer
+        #   get the number of digits
+        nrDigs = len(val)
+        genome.extend(np.repeat(0, nrDigs-1)) # number of times that chose <digits><digit>
+        genome.append(1)
+        genome.extend([int(dig) for dig in val])
+                
+        newExp = newExp[newExp.find(',')+2:]
+        genome = map_genome_from_ind_DTRAW(newExp, genome)
+    else:
+        genome.append(1) # the second option: leaf
+        if ',' in expression: # there's something after this leaf
+            val = expression[0:expression.find(',')]
+            val = val.replace(')','')
+            if '.' in val: # if it is decimal:
+                genome.append(0) #first option
+                digsAfter = val[val.find('.')+1:] # digits after '.'
+                genome.extend(np.repeat(0, len(digsAfter)-1)) # number of times that chose <digits><digit>
+                genome.append(1) # eventually chooses <digit>
+                genome.extend([int(dig) for dig in digsAfter])
+            else:
+                genome.append(1) #second option
+            # remove the value and continue
+            newExp = expression[expression.find(',')+2:]
+            genome = map_genome_from_ind_DTRAW(newExp, genome)
+        else:
+            val = expression[0:]
+            val = val.replace(')','')
+            if '.' in val: # if it is decimal:
+                genome.append(0) #first option
+                digsAfter = val[val.find('.')+1:] # digits after '.'
+                genome.extend(np.repeat(0, len(digsAfter)-1)) # number of times that chose <digits><digit>
+                genome.append(1) # eventually chooses <digit>
+                genome.extend([int(dig) for dig in digsAfter])
+            else:
+                genome.append(1) #second option
+                # END
+    
+    return genome
+
+def map_genome_from_ind_SYMB(expression, genome=[]):
+    """
+    Converts a phenotype/expression to the genome (numerical array) based on the grammar.
+    This function is for Symbolic expressions only.
+    It receives the phenotype as argument and returns the genome.
+    
+    :param expression: An individual's phenotype.
+    :param genomr: The genome that is being bulit from scratch.
+    :return: The correspondent individual's genome.
+    """
+
+    if len(genome) == 0: # starting
+        expression = expression[8:-1] # removing 'sigmoid(...)'
+        if expression[0] == 'x': # attribute is selected
+            genome.append(0) # first option selected
+            genome.append(1) # for atribute selection
+            # now, get the attribute from expression
+            att = expression[expression.find("[")+1:expression.find("]")]
+            # and get its index in the grammar:
+            #   get grammar first
+            gramm = params['BNF_GRAMMAR']
+            #   get the rules that contain the data attributes
+            attrsRules = gramm.rules['<idx>']
+            #   and finally, extract the list of attributes
+            attrs = [ attrsRules['choices'][i]['choice'][0]['symbol'] for i in range(0, len(attrsRules['choices']))]
+            # get the attribute index on the grammar
+            indx = attrs.index(att)
+            # and insert it in the genome!
+            genome.append(indx)
+
+# Treat numeric values because of leading zeros...
+def treatNums(rules):
+    rules2 = re.sub(r'\((1.0)\)', '(1)', rules)
+    #allNums = re.findall("\d+\.\d+", rules)
+    #rules2 = rules
+    #for a in allNums:
+    #    if float(a) == 1.0:
+    #        a2 = "1"
+    #        rules2 = re.sub(a, a2, rules2)
+        #a2 = str(round(float(a), 4))
+    """
+    allNums2 = re.findall("0\d+", rules2)
+    for a2 in allNums2:
+        if float(a2) != 0:
+            a3 = a2.lstrip('0')
+            rules2 = re.sub(a2, a3, rules2)
+        else:
+            a3 = str(float(a2))
+            rules2 = re.sub(a2, a3, rules2)
+    
+    #rules3 = re.sub(r'\b0+', '', rules2)
+    """
+    return(rules2)

@@ -11,21 +11,28 @@ from utilities.algorithm.general import check_python_version
 import matplotlib.pyplot as plt
 import pandas as pd
 from os import path
+
 check_python_version()
 
 from stats.stats import get_stats
 from algorithm.parameters import params, set_params
 import sys
 
+from warnings import simplefilter
+# ignore all future warnings
+simplefilter(action='ignore', category=FutureWarning)
 
 def mane():
+    #import GE
     """ Run program """
-
+    
     # Run evolution
     individuals = params['SEARCH_LOOP']()
 
     # Print final review
     get_stats(individuals, end=True)
+    
+    # Load and plot statistics
     
     if params['SAVE_PLOTS']:
         if hasattr(params['FITNESS_FUNCTION'], 'multi_objective'):
@@ -77,7 +84,12 @@ def mane():
             plt.ylim(top=100)
             plt.savefig(fileName2)
             plt.close()
-
+        
+    ### save predictions
+    #best = individuals[0] #max(individuals)
+    #indTest = round(params['FITNESS_FUNCTION'](best, dist='test', savePred=True),2)
+    #print(indTest)
+    
 
 if __name__ == "__main__":
     set_params(sys.argv[1:])  # exclude the ponyge.py arg itself

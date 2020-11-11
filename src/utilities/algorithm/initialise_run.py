@@ -36,8 +36,8 @@ def initialise_run_params(create_files):
                                      str(start.microsecond),
                                      str(getpid()),
                                      str(params['RANDOM_SEED'])])
-    if not params['SILENT']:
-        print("\nStart:\t", start, "\n")
+    #if not params['SILENT']:
+        #print("\nStart:\t", start, "\n")
 
     # Generate save folders and files
     if params['DEBUG']:

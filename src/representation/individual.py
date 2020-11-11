@@ -1,18 +1,19 @@
 import numpy as np
+import random
+from random import sample
+import re
 
+
+from algorithm.mapper import map_genome_from_ind_DTRAW
+from algorithm.mapper import map_tree_from_genome
+from operators.lamarck import tree_to_code
 from algorithm.mapper import mapper
 from algorithm.parameters import params
-
 from utilities.fitness.get_data import get_data
-from operators.lamarck import tree_to_code
+from utilities.fitness.math_functions import sigmoid, inverse, symmetric, reLu, leakyReLu, sqrt
+from operators.lamarck import applyLamarckToPhen, applyLamarckToPhen2
 import math
-from algorithm.mapper import map_tree_from_genome
-import random
-import re
-if params["GRAMMAR_FILE"] == "supervised_learning/Promos_ord_new.bnf":
-    from algorithm.dt_new.dt_new import get_genome_from_dt_idf
-else:
-    from algorithm.dt_old.dt_old import get_genome_from_dt_idf
+
 
 class Individual(object):
     """
@@ -141,122 +142,43 @@ class Individual(object):
         :returns: The changed individual.
         """
         from sklearn import tree
-        #try:
-        ind = self.deep_copy()
-        #print(type(ind))
-        phenotype = ind.phenotype
-        # Check number of nodes (np.where)
-        nrNodes = phenotype.count("np.where")
-        #if nrNodes > 3: # it must have at least 3 nodes
-        #print('I\'m in!')
-        if nrNodes == 0: # Expressions without root node, only 1 leaf, are replaced by a traditional decision tree
-            x, y, x_test, y_test = \
-            get_data(params['DATASET_TRAIN'], params['DATASET_TEST'])
-            dt = tree.DecisionTreeClassifier()
-            dt = dt.fit(x, y)
-            # get the tree rules
-            rules = tree_to_code(dt, x.columns.tolist() + ['target'])
-            ind.phenotype = rules
-            ind.evaluate()
-            if hasattr(params['FITNESS_FUNCTION'], 'multi_objective'):
-                if ind.fitness[0] < self.fitness[0] or math.isnan(self.fitness[0]):
-                    genome = get_genome_from_dt_idf(ind.phenotype)
-                    ind.genome = genome
-                    mapped = map_tree_from_genome(genome)
-                    ind.tree = mapped[2]
-                    ind.nodes = mapped[3]
-                    ind.evaluate()
-                    #print('It improved!!!')
-                    return ind
-                else:
-                    return self
-            else:
-                if ind.fitness > self.fitness or math.isnan(self.fitness):
-                    # replace genome
-                    genome = get_genome_from_dt_idf(ind.phenotype)
-
-                    ind.genome = genome
-                    mapped = map_tree_from_genome(genome)
-                    ind.tree = mapped[2]
-                    ind.nodes = mapped[3]
-                    return ind
-                else:
-                    return self
-        else:
-            # select a random node (can't be the first)
-            randNode = random.randint(0, nrNodes-1) # -1 due to the index starting at 0
-            # get all nodes' positions
-            allNodes = [node.start() for node in re.finditer('np.where', phenotype)]
-            # get node position
-            nodePosition = allNodes[randNode]
-            # get the expression
-            #   get opened and closed brackets' positions
-            openBrPos = [m.start() for m in re.finditer('\(', phenotype[nodePosition:])]
-            closeBrPos = [m.start() for m in re.finditer('\)', phenotype[nodePosition:])]
-            allBrPos = sorted(openBrPos + closeBrPos)
-            # get the position where the expression to be replaced ends
-            openBr = 0
-            closeBr = 0
-            position = 1
-            for i in range(0,len(allBrPos)):
-                pos = allBrPos[i]
-                if pos in openBrPos:
-                    openBr = openBr + 1
-                elif pos in closeBrPos:
-                    closeBr = closeBr + 1
-                if openBr == closeBr:
-                    position = pos
-                    break
-            # expression to be replaced:
-            replaceExp = phenotype[nodePosition:(position+nodePosition+1)]
-            #   subtree leafs, to identify records that fall there
-            """toReplace = re.findall("\([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?\)", replaceExp)
-            for val in toReplace:
-                replaceExp = replaceExp.replace(val, '100')
-            """
-            rep = {"verylow" : "100", "low" : "100",
-                   "none" : "100", "medium" : "100",
-                   "high" : "100"}
-            pattern = re.compile("|".join(rep.keys()))
-            replaceExp = pattern.sub(lambda m: rep[re.escape(m.group(0))],
-                                     replaceExp)
-            # new expression with this values
-            newExp = phenotype[0:nodePosition] + replaceExp + phenotype[(position+nodePosition+1):]
-            # get data
-            x, y, x_test, y_test = \
-            get_data(params['DATASET_TRAIN'], params['DATASET_TEST'])
-            
-            #print(newExp)
-            # index of records that fall on the changed expression
-            index = np.where(eval(newExp) == '100')[0]
-            if len(index) > 0:
-                x = x.iloc[index,:]
-                y = y.iloc[index]
-                # train a traditional decision tree
-                dt = tree.DecisionTreeClassifier(max_depth=10)
+        try:
+            ind = self.deep_copy()
+            #print(type(ind))
+            phenotype = ind.phenotype
+            # Check number of nodes (np.where)
+            nrNodes = phenotype.count("np.where")
+            #if nrNodes > 3: # it must have at least 3 nodes
+            #print('I\'m in!')
+            if nrNodes == 0: # Expressions without root node, only 1 leaf, are replaced by a traditional decision tree
+                x, y, x_test, y_test = \
+                get_data(params['DATASET_TRAIN'], params['DATASET_TEST'])
+                if params['N_SAMPLING'] > 0:
+                    N = params['N_SAMPLING']
+                    pos = np.where(y == 'Sale')[0]
+                    neg = np.where(y == 'NoSale')[0]
+                    randPos = sample(list(pos), N)
+                    randNeg = sample(list(neg), N)
+                    x = x.iloc[(randPos+randNeg),:]
+                    y = y.iloc[(randPos+randNeg)]
+                dt = tree.DecisionTreeClassifier()
                 dt = dt.fit(x, y)
                 # get the tree rules
                 rules = tree_to_code(dt, x.columns.tolist() + ['target'])
-                # add the rules to the old phenotype
-                newPhenotype = phenotype[0:nodePosition] + rules + phenotype[(position+nodePosition+1):]
-                #print(phenotype)
-                #print(newPhenotype)
-                
-                ind.phenotype = newPhenotype
+                ind.phenotype = rules
                 ind.evaluate()
-                #print(ind.fitness)
-                #print(self.fitness)
                 if hasattr(params['FITNESS_FUNCTION'], 'multi_objective'):
-                    if ind.fitness[0] < self.fitness[0] or \
-                    math.isnan(self.fitness[0]):                            
-                        genome = get_genome_from_dt_idf(ind.phenotype)
-                        
+                    if ind.fitness[0] < self.fitness[0] or math.isnan(self.fitness[0]):
+                        if params['DATA_TRANSF'] == 'IDF':
+                            from algorithm.dt2.dt2_idf import get_genome_from_dt_idf
+                            genome = get_genome_from_dt_idf(ind.phenotype)
+                        elif params['DATA_TRANSF'] == 'RAW':
+                            genome = map_genome_from_ind_DTRAW(ind.phenotype)
                         ind.genome = genome
                         mapped = map_tree_from_genome(genome)
                         ind.tree = mapped[2]
                         ind.nodes = mapped[3]
                         ind.evaluate()
-                        #print('It improved!!!')
                         return ind
                     else:
                         return self
@@ -264,8 +186,11 @@ class Individual(object):
                     if ind.fitness > self.fitness or math.isnan(self.fitness):
                         #print('It improved!!!')
                         # replace genome
-                        #print(newPhenotype)
-                        genome = get_genome_from_dt_idf(ind.phenotype)
+                        if params['DATA_TRANSF'] == 'IDF':
+                            from algorithm.dt2.dt2_idf import get_genome_from_dt_idf
+                            genome = get_genome_from_dt_idf(ind.phenotype)
+                        elif params['DATA_TRANSF'] == 'RAW':
+                            genome = map_genome_from_ind_DTRAW(ind.phenotype)
                         ind.genome = genome
                         mapped = map_tree_from_genome(genome)
                         ind.tree = mapped[2]
@@ -273,11 +198,176 @@ class Individual(object):
                         return ind
                     else:
                         return self
-            else: 
-                # if no record falls in the chosen, the original individual is 
-                # returned and will, eventually, die. :)
-                return self
-        """except Exception as e:
-            print(e)
+            else:
+                # select a random node (can't be the first)
+                randNode = random.randint(0, nrNodes-1) # -1 due to the index starting at 0
+                # get all nodes' positions
+                allNodes = [node.start() for node in re.finditer('np.where', phenotype)]
+                # get node position
+                nodePosition = allNodes[randNode]    
+                # get the expression
+                #   get opened and closed brackets' positions
+                openBrPos = [m.start() for m in re.finditer('\(', phenotype[nodePosition:])]
+                closeBrPos = [m.start() for m in re.finditer('\)', phenotype[nodePosition:])]
+                allBrPos = sorted(openBrPos + closeBrPos)
+                # get the position where the expression to be replaced ends
+                openBr = 0
+                closeBr = 0
+                position = 1
+                for i in range(0,len(allBrPos)):
+                    pos = allBrPos[i]
+                    if pos in openBrPos:
+                        openBr = openBr + 1
+                    elif pos in closeBrPos:
+                        closeBr = closeBr + 1
+                    if openBr == closeBr:
+                        position = pos
+                        break
+                # expression to be replaced:
+                replaceExp = phenotype[nodePosition:(position+nodePosition+1)]
+                #   subtree leafs, to identify records that fall there
+                toReplace = re.findall("\([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?\)", replaceExp)
+                for val in toReplace:
+                    replaceExp = replaceExp.replace(val, '100')
+               # new expression with this values
+                newExp = phenotype[0:nodePosition] + replaceExp + phenotype[(position+nodePosition+1):]
+                # get data
+                x, y, x_test, y_test = \
+                get_data(params['DATASET_TRAIN'], params['DATASET_TEST'])
+                """
+                if params['N_SAMPLING'] > 0:
+                    N = params['N_SAMPLING']
+                    pos = np.where(y == 'Sale')[0]
+                    neg = np.where(y == 'NoSale')[0]
+                    randPos = sample(list(pos), N)
+                    randNeg = sample(list(neg), N)
+                    x = x.iloc[(randPos+randNeg),:]
+                    y = y.iloc[(randPos+randNeg)]
+                    #print(x.shape)
+                """
+                # index of records that fall on the changed expression
+                index = np.where(eval(newExp) == 100)[0]
+                if len(index) > 0:
+                    x = x.iloc[index,:]
+                    y = y.iloc[index]
+                    # train a traditional decision tree
+                    dt = tree.DecisionTreeClassifier(max_depth=10)
+                    dt = dt.fit(x, y)
+                    # get the tree rules
+                    rules = tree_to_code(dt, x.columns.tolist() + ['target'])
+                    # add the rules to the old phenotype
+                    newPhenotype = phenotype[0:nodePosition] + rules + phenotype[(position+nodePosition+1):]
+                    #print(phenotype)
+                    #print(newPhenotype)
+                    
+                    ind.phenotype = newPhenotype
+                    ind.evaluate()
+                    #print(ind.fitness)
+                    #print(self.fitness)
+                    if hasattr(params['FITNESS_FUNCTION'], 'multi_objective'):
+                        if ind.fitness[0] < self.fitness[0] or math.isnan(self.fitness[0]):
+                            if params['DATA_TRANSF'] == 'IDF':
+                                #print(newPhenotype)
+                                from algorithm.dt2.dt2_idf import get_genome_from_dt_idf
+                                genome = get_genome_from_dt_idf(ind.phenotype)
+                            elif params['DATA_TRANSF'] == 'RAW':
+                                genome = map_genome_from_ind_DTRAW(newPhenotype)
+                            ind.genome = genome
+                            mapped = map_tree_from_genome(genome)
+                            ind.tree = mapped[2]
+                            ind.nodes = mapped[3]
+                            ind.evaluate()
+                            return ind
+                        else:
+                            return self
+                    else:
+                        if ind.fitness > self.fitness or math.isnan(self.fitness):
+                            #print('It improved!!!')
+                            # replace genome
+                            if params['DATA_TRANSF'] == 'IDF':
+                                #print(newPhenotype)
+                                from algorithm.dt2.dt2_idf import get_genome_from_dt_idf
+                                genome = get_genome_from_dt_idf(ind.phenotype)
+                            elif params['DATA_TRANSF'] == 'RAW':
+                                genome = map_genome_from_ind_DTRAW(newPhenotype)
+                            ind.genome = genome
+                            mapped = map_tree_from_genome(genome)
+                            ind.tree = mapped[2]
+                            ind.nodes = mapped[3]
+                            return ind
+                        else:
+                            return self
+                else:
+                    return self
+        except Exception as e:
+            #print(e)
             return self
-        """
+    
+    def applyLamarckSYMB(self):
+        try:
+            ind = self.deep_copy()
+            x, y, x_test, y_test = get_data(params['DATASET_TRAIN'], False)
+            #yhat0 = eval(phenotype)
+            #auc0 = auc_metric(y, yhat0)
+            phenotype = ind.phenotype
+            # Choose a random position and get 2 numerical values to optimize
+            #   First, get the numeric values
+            #numVals = re.findall("[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?", phenotype)
+            numVals = re.findall("[-]?\d*\.\d+|[-]?\d+", phenotype)
+            #   Some expressions do not have numeric values, so they need to be introduced in a random position
+            #   something like: sigmoid(a + b * expression)
+            l = len(numVals)
+            if l > 0: # in case there's already at least 2 numeric values...
+                # select 2 random numeric values
+                #vals = random.sample(numVals, 2)
+                # replace the numeric values in the phenotype for 2 variables
+                phenotype1 = phenotype
+                #print(phenotype1, "1")
+                #if l > 50:
+                #    l = 50
+                #    numVals = random.choices(numVals, k=l)
+                for i in range(l):
+                    phenotype1 = phenotype1.replace(numVals[i], "a[" + str(i) + "]", 1)
+                numVals = [float(i) for i in numVals]
+                #print(phenotype1, "2")
+                # extract numbers from the string...
+                #vals2 = [x.replace('(', '') for x in vals]
+                #vals2 = [x.replace(')', '') for x in vals2]
+                #vals2 = np.array(list(map(float, vals2)))
+                #vals2 = [x * 1e-10 for x in vals2]
+                
+            else: # add a + b * <phenotype> at a random position
+                # get '(' positions and choose a random
+                parenth = [m.start() for m in re.finditer('\(', phenotype)]
+                pos = random.sample(parenth, 1)[0]
+                # insert a + b * ... in the phenotype
+                phenotype1 = phenotype[0:pos+1] + ' a[1] * ' + phenotype[pos+1:-1] + " + a[0])"
+                numVals = [0, 1]
+            #print("num vals: ", len(numVals))
+            phenotype3 = applyLamarckToPhen(phenotype1, numVals)
+            #yhat1 = eval(phenotype3)
+            #auc1 = auc_metric(y, yhat1)
+            ind.phenotype = phenotype3
+            ind.evaluate()
+            #print(phenotype3)
+            #print(ind.fitness)
+            if ind.fitness > self.fitness:
+                #print('Improved!', self.fitness, ind.fitness, phenotype3)
+                if params["MODEL"] == "SYMB":
+                    from algorithm.symb.symb import get_genome_from_symb_expression
+                else:
+                    from algorithm.net.net import get_genome_from_symb_expression
+                #print(ind.phenotype)
+                #print(self.phenotype)
+                genome = get_genome_from_symb_expression(ind.phenotype)
+                ind.genome = genome
+                mapped = map_tree_from_genome(genome)
+                ind.tree = mapped[2]
+                ind.nodes = mapped[3]
+                return ind
+            else:
+                #print("Didn't improve!  ", auc1, auc0, phenotype3)
+                return self
+        except Exception as e:
+        #    print(e)
+            return self

@@ -1,7 +1,7 @@
 import warnings
 
 import numpy as np
-from sklearn.metrics import f1_score as sklearn_f1_score
+from sklearn.metrics.classification import f1_score as sklearn_f1_score
 from sklearn.metrics import roc_auc_score
 
 
@@ -164,13 +164,9 @@ def auc_metric2(y, yhat):
     yhat = np.nan_to_num(yhat)
     #if type(yhat) == np.float64:
     #    yhat = np.repeat(yhat, len(y))
-    try:
-        auc = roc_auc_score(y, yhat)*100
-        return(-auc)
-    except Exception as e:
-        #print(e)
-        auc = 999
-        return(auc)
+    
+    auc = roc_auc_score(y, yhat)*100
+    return(-auc)
 
     #print(auc)
     #return(auc)

@@ -10,10 +10,7 @@ from representation.tree import Tree
 from representation.latent_tree import latent_tree_random_ind
 from scripts import GE_LR_parser
 from utilities.representation.python_filter import python_filter
-if params["GRAMMAR_FILE"] == "supervised_learning/Promos_ord_new.bnf":
-    from algorithm.dt_new.dt_new import get_genome_from_dt_idf
-else:
-    from algorithm.dt_old.dt_old import get_genome_from_dt_idf
+from algorithm.dt2.dt2_idf import get_genome_from_dt_idf
 
 
 def initialisation(size):

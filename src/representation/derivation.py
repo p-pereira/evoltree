@@ -336,9 +336,15 @@ def pi_grow(tree, max_depth):
         # Find the index of the chosen production and set a matching codon
         # based on that index.
         prod_index = productions['choices'].index(chosen_prod)
-        codon = randrange(productions['no_choices'],
-                          params['BNF_GRAMMAR'].codon_size,
-                          productions['no_choices']) + prod_index
+        
+        if params['BNF_GRAMMAR'].codon_size > productions['no_choices']:
+            codon = randrange(productions['no_choices'], 
+                              params['BNF_GRAMMAR'].codon_size, 
+                              productions['no_choices']) + prod_index
+        else:
+            ##### NEW!! Testing...
+            codon = randrange(0, productions['no_choices'], 1) + prod_index
+            #print(codon)
 
         # Set the codon for the current node and append codon to the genome.
         node.codon = codon

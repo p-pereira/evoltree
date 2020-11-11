@@ -41,7 +41,6 @@ def step(individuals):
             
         else:
             new_pop2 = lamarck_pop(new_pop)
-        new_pop2 = sorted(new_pop2, key= lambda ind: ind.fitness)
         # Store population in file
         """
         with open(params['FILE_PATH'] + 'befLamarck.txt', 'a', encoding = "utf-8") as f:
@@ -58,7 +57,6 @@ def step(individuals):
         #"""
         # Replace the old population with the new population.
         individuals = replacement(new_pop2, individuals)
-        individuals = sorted(individuals, key= lambda ind: ind.fitness)
     else:
         """with open('res/afterOps.txt', 'a', encoding = "utf-8") as f:
             for item in new_pop:
@@ -66,11 +64,9 @@ def step(individuals):
             f.write("\n %s \n" % "############NEW ITERATION ###############")
             f.close()
         """
-        individuals = sorted(individuals, key= lambda ind: ind.fitness)
         # Replace the old population with the new population.
         individuals = replacement(new_pop, individuals)
-        individuals = sorted(individuals, key= lambda ind: ind.fitness)
-    
+        
     # Generate statistics for run so far
     get_stats(individuals)
     
