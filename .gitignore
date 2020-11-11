@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+#### NEW 11-11-2020
+datasets/Promos/**/*
