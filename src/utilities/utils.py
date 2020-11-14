@@ -6,24 +6,21 @@ Created on Fri Jun 19 14:49:04 2020
 """
 import re
 
-def treat_num(num):
-    try:
-        n = int(num.lstrip('0'))
-        return str(n)
-    except:
+def roundAllNums(rules):
+    allNums = re.findall("\d+\.\d+", rules)
+    rules2 = rules
+    for a in allNums:
+        if float(a) == 1.0:
+            a2 = "1"
+            rules2 = re.sub(a, a2, rules2)
         
-        n = float(num.lstrip('0'))
-        return str(n)
+    return(rules2)
 
-def treat_phenotype(phenotype):      
-    allNums = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?", 
-                         phenotype)
-    for index, num in enumerate(allNums):
-        try: #only replaces numbers with leading zeros
-            _ = eval(num)
-        except:
-            t_num = treat_num(num)
-            phenotype = re.sub("\({num}\),".format(num=num), 
-                               "({num2}),".format(num2=t_num), 
-                               phenotype)
-    return phenotype
+# Function to remove leading zeros from phenotypes
+def remove_leading_zeros(phenotype):
+    return re.sub(r'([^\.^\d])0+(\d)', r'\1\2', phenotype)
+
+def create_lamarck_mapper():
+    # TODO create python mapper script
+    a=0
+    

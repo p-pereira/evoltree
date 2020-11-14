@@ -3,11 +3,9 @@ np.seterr(all="raise")
 
 from algorithm.parameters import params
 from utilities.fitness.get_data import get_data
-from algorithm.mapper import treatNums
 from utilities.fitness.optimize_constants import optimize_constants
 from random import sample
 from fitness.base_ff_classes.base_ff import base_ff
-from utilities.fitness.math_functions import inverse, sigmoid, reLu, leakyReLu, symmetric
 import numpy as np
 import pandas as pd
 import time
@@ -109,21 +107,28 @@ class supervised_learning(base_ff):
                 start = time.time()
                 yhat = eval(ind.phenotype)
                 end = time.time()
-                #print(savePred)
-                if savePred:
-                    d = pd.DataFrame({'y': y, 'pred':yhat},index=None)
-                    d.to_csv(params['FILE_PATH']+'/preds.csv', sep=";",index=False)
-                    f = open(params['FILE_PATH']+'/time_preds.txt', 'w')
-                    f.write(str((end-start)/len(y)))
-                    f.close()
-                #yhat = exec(ind.phenotype)
-                assert np.isrealobj(yhat)
-    
-                # let's always call the error function with the true
-                # values first, the estimate second
-                return params['ERROR_METRIC'](y, yhat)
-            except Exception as e:
-                #print(e)
-                #ind.invalid = True
-                return 0
+            except SyntaxError: # invalid solutions due to leading zeros
+                #print("Fixed leading zeros!")
+                from utilities.utils import remove_leading_zeros
+                ind.phenotype = remove_leading_zeros(ind.phenotype)
+                from importlib import import_module
+                i = import_module(params["LAMARCK_MAPPER"])
+                ind.genotype = i.get_genome_from_dt_idf(ind.phenotype)
+                start = time.time()
+                yhat = eval(ind.phenotype)
+                end = time.time()
+            #print(savePred)
+            if savePred:
+                d = pd.DataFrame({'y': y, 'pred':yhat},index=None)
+                d.to_csv(params['FILE_PATH']+'/preds.csv', sep=";",index=False)
+                f = open(params['FILE_PATH']+'/time_preds.txt', 'w')
+                f.write(str((end-start)/len(y)))
+                f.close()
+            #yhat = exec(ind.phenotype)
+            assert np.isrealobj(yhat)
+
+            # let's always call the error function with the true
+            # values first, the estimate second
+            return params['ERROR_METRIC'](y, yhat)
+            
             

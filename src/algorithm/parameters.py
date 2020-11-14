@@ -13,13 +13,13 @@ params = {
         'STEP': 'step',
 
         # Evolutionary Parameters
-        'POPULATION_SIZE': 100,
-        'GENERATIONS': 25,
+        'POPULATION_SIZE': 5,
+        'GENERATIONS': 5,
         'HILL_CLIMBING_HISTORY': 100000,
         'SCHC_COUNT_METHOD': "count_all",
 
         # Set optional experiment name
-        'EXPERIMENT_NAME': "review",
+        'EXPERIMENT_NAME': "Test",
         # Set default number of runs to be done.
         # ONLY USED WITH EXPERIMENT MANAGER.
         'RUNS': 1,
@@ -28,12 +28,13 @@ params = {
         'FITNESS_FUNCTION': "supervised_learning.classification, minimise_nodes", #"supervised_learning.classification",#
 
         # Select problem dataset
-        'DATASET_TRAIN': "Promos/TEST2/Train-IDF-2.csv",
-        'DATASET_TEST': "Promos/TEST2/Test-IDF-2.csv",
+        'DATASET_TRAIN': "Promos/TEST2/Train-IDF-1.csv",
+        'DATASET_TEST': "Promos/TEST2/Test-IDF-1.csv",
         'DATASET_DELIMITER': ";",
 
         # Set grammar file
-        'GRAMMAR_FILE': "supervised_learning/Promos_IDF2.bnf",
+        # if '' or 'auto', it is automatically created based on data
+        'GRAMMAR_FILE': "auto",
 
         # Set the number of depths permutations are calculated for
         # (starting from the minimum path of the grammar).
@@ -105,7 +106,7 @@ params = {
         # Set replacement operator.
         'REPLACEMENT': "operators.replacement.nsga2_replacement",#"operators.replacement.generational",#
         # Set elite size.
-        'ELITE_SIZE': 30, #
+        'ELITE_SIZE': 0,#30,
 
         # DEBUGGING
         # Use this to turn on debugging mode. This mode doesn't write any files
@@ -129,9 +130,9 @@ params = {
 
         # MULTIPROCESSING
         # Multi-core parallel processing of phenotype evaluations.
-        'MULTICORE': False,
+        'MULTICORE': True,
         # Set the number of cpus to be used for multiprocessing
-        'CORES': 5,#cpu_count(),
+        'CORES': 6,#cpu_count(),
 
         # STATE SAVING/LOADING
         # Save the state of the evolutionary run every generation. You can
@@ -151,13 +152,13 @@ params = {
         'SEED_INDIVIDUALS': [],
         # Specify a target seed folder in the 'seeds' directory that contains a
         # population of individuals with which to seed a run.
-        'TARGET_SEED_FOLDER': "MGEDT_TEST",
+        'TARGET_SEED_FOLDER': "",#"MGEDT_TEST",
         # Set a target phenotype string for reverse mapping into a GE
         # individual
         'REVERSE_MAPPING_TARGET': None,
         # Set Random Seed for all Random Number Generators to be used by
         # PonyGE2, including the standard Python RNG and the NumPy RNG.
-        'RANDOM_SEED': None,
+        'RANDOM_SEED': 1234,
 
         # CACHING
         # The cache tracks unique individuals across evolution by saving a
@@ -190,23 +191,18 @@ params = {
         
         # N value for data sampling
         # if a value is assigned, N*2 random records will be used to train the model
-        'N_SAMPLING': 0,
+        'N_SAMPLING': 1000,
 
         # Folder name to store the results
         # if None, timestamp is used
         'FOLDER_NAME': "MGEDT",
-
-        # Data transformation, important when reading the dataset
-        # Factor, IDF, RAW or 1HOT
-        'DATA_TRANSF': 'IDF',
-        
-        # The model to be created by GE
-        # DT (decision trees) or SYMB (symbolic expression)
-        'MODEL' : 'DT',
         
         # If LAMARCKIAN approach is used or not
         # True or False
-        'LAMARCK': False,
+        'LAMARCK': True,
+        ### NEW 13-11-2020: parameter used to create the mapper automatically
+        # Lamarck special mapper operator (created if not exists or empty)
+        'LAMARCK_MAPPER' : 'utilities.lamarck.dt_new.dt_new',
         
         # Save initial population to feed in Lamarck approach: only for testing purposes
         # True or False
@@ -364,9 +360,33 @@ def set_params(command_line_args, create_files=True):
                         "fitness functions."
                     raise Exception(s)
         ### NEW 11-11-2020: Generate grammar automatically, based on the dataset
-        if params['GRAMMAR_FILE'] == '' or params['GRAMMAR_FILE'] == 'default':
-            # TODO something
-            pass
+        if params['GRAMMAR_FILE'] == '' or params['GRAMMAR_FILE'] == 'auto':
+            gramm_filename = path.join(params['EXPERIMENT_NAME'], 
+                                       params['FOLDER_NAME'],
+                                       "grammar.bnf")
+            import os
+            os.makedirs(path.join("..", "grammars", params['EXPERIMENT_NAME'], 
+                                  params['FOLDER_NAME']), exist_ok=True)
+            # Get base grammar
+            default_filepath = path.join("..", "grammars", "base.bnf")
+            bnf = open(default_filepath, 'r')
+            content = bnf.read() + "\n"
+            bnf.close()
+            # Get data headers
+            data_file = open(path.join('..', 'datasets', 
+                                       params['DATASET_TRAIN']), 'r')
+            headers = data_file.readline()[:-1] # ignore last character: '\n'.
+            data_file.close()
+            headers = headers.replace(";" + params['TARGET'], "")
+            headers = headers.replace(";", "'\" | \"'")
+            # Build grammar file based on base
+            idx = "<idx>\t\t\t::= \"'" + headers + "'\""
+            new_filepath = path.join("..", "grammars", gramm_filename)
+            new_f = open(new_filepath, 'w')
+            new_f.write(content)
+            new_f.write(idx)
+            new_f.close()
+            params['GRAMMAR_FILE'] = gramm_filename
         
         # Parse grammar file and set grammar class.
         params['BNF_GRAMMAR'] = grammar.Grammar(path.join("..", "grammars",

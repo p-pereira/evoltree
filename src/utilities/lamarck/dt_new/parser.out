@@ -1,0 +1,461 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Grammar
+
+Rule 0     S' -> result
+Rule 1     result -> npwhere ( x [ idx ] comparison value , node , node )
+Rule 2     node -> result
+Rule 3     node -> ( leaf )
+Rule 4     leaf -> NUMBER . digits
+Rule 5     leaf -> NUMBER
+Rule 6     digits -> digits digit
+Rule 7     digits -> digit
+Rule 8     digit -> NUMBER
+Rule 9     comparison -> = =
+Rule 10    comparison -> <
+Rule 11    comparison -> >
+Rule 12    comparison -> < =
+Rule 13    value -> digits . digits
+Rule 14    value -> digits
+Rule 15    idx -> idapplication
+Rule 16    idx -> idoperator
+Rule 17    idx -> idaffmanager
+Rule 18    idx -> idbrowser
+Rule 19    idx -> idpartner
+Rule 20    idx -> idcampaign
+Rule 21    idx -> idverticaltype
+Rule 22    idx -> regioncontinent
+Rule 23    idx -> country_name
+Rule 24    idx -> accmanager
+
+Terminals, with rules where they appear
+
+(                    : 1 3
+)                    : 1 3
+,                    : 1 1
+.                    : 4 13
+<                    : 10 12
+=                    : 9 9 12
+>                    : 11
+NUMBER               : 4 5 8
+[                    : 1
+]                    : 1
+accmanager           : 24
+country_name         : 23
+error                : 
+idaffmanager         : 17
+idapplication        : 15
+idbrowser            : 18
+idcampaign           : 20
+idoperator           : 16
+idpartner            : 19
+idverticaltype       : 21
+npwhere              : 1
+regioncontinent      : 22
+x                    : 1
+
+Nonterminals, with rules where they appear
+
+comparison           : 1
+digit                : 6 7
+digits               : 4 6 13 13 14
+idx                  : 1
+leaf                 : 3
+node                 : 1 1
+result               : 2 0
+value                : 1
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . result
+    (1) result -> . npwhere ( x [ idx ] comparison value , node , node )
+
+    npwhere         shift and go to state 2
+
+    result                         shift and go to state 1
+
+state 1
+
+    (0) S' -> result .
+
+
+
+state 2
+
+    (1) result -> npwhere . ( x [ idx ] comparison value , node , node )
+
+    (               shift and go to state 3
+
+
+state 3
+
+    (1) result -> npwhere ( . x [ idx ] comparison value , node , node )
+
+    x               shift and go to state 4
+
+
+state 4
+
+    (1) result -> npwhere ( x . [ idx ] comparison value , node , node )
+
+    [               shift and go to state 5
+
+
+state 5
+
+    (1) result -> npwhere ( x [ . idx ] comparison value , node , node )
+    (15) idx -> . idapplication
+    (16) idx -> . idoperator
+    (17) idx -> . idaffmanager
+    (18) idx -> . idbrowser
+    (19) idx -> . idpartner
+    (20) idx -> . idcampaign
+    (21) idx -> . idverticaltype
+    (22) idx -> . regioncontinent
+    (23) idx -> . country_name
+    (24) idx -> . accmanager
+
+    idapplication   shift and go to state 7
+    idoperator      shift and go to state 8
+    idaffmanager    shift and go to state 9
+    idbrowser       shift and go to state 10
+    idpartner       shift and go to state 11
+    idcampaign      shift and go to state 12
+    idverticaltype  shift and go to state 13
+    regioncontinent shift and go to state 14
+    country_name    shift and go to state 15
+    accmanager      shift and go to state 16
+
+    idx                            shift and go to state 6
+
+state 6
+
+    (1) result -> npwhere ( x [ idx . ] comparison value , node , node )
+
+    ]               shift and go to state 17
+
+
+state 7
+
+    (15) idx -> idapplication .
+
+    ]               reduce using rule 15 (idx -> idapplication .)
+
+
+state 8
+
+    (16) idx -> idoperator .
+
+    ]               reduce using rule 16 (idx -> idoperator .)
+
+
+state 9
+
+    (17) idx -> idaffmanager .
+
+    ]               reduce using rule 17 (idx -> idaffmanager .)
+
+
+state 10
+
+    (18) idx -> idbrowser .
+
+    ]               reduce using rule 18 (idx -> idbrowser .)
+
+
+state 11
+
+    (19) idx -> idpartner .
+
+    ]               reduce using rule 19 (idx -> idpartner .)
+
+
+state 12
+
+    (20) idx -> idcampaign .
+
+    ]               reduce using rule 20 (idx -> idcampaign .)
+
+
+state 13
+
+    (21) idx -> idverticaltype .
+
+    ]               reduce using rule 21 (idx -> idverticaltype .)
+
+
+state 14
+
+    (22) idx -> regioncontinent .
+
+    ]               reduce using rule 22 (idx -> regioncontinent .)
+
+
+state 15
+
+    (23) idx -> country_name .
+
+    ]               reduce using rule 23 (idx -> country_name .)
+
+
+state 16
+
+    (24) idx -> accmanager .
+
+    ]               reduce using rule 24 (idx -> accmanager .)
+
+
+state 17
+
+    (1) result -> npwhere ( x [ idx ] . comparison value , node , node )
+    (9) comparison -> . = =
+    (10) comparison -> . <
+    (11) comparison -> . >
+    (12) comparison -> . < =
+
+    =               shift and go to state 19
+    <               shift and go to state 20
+    >               shift and go to state 21
+
+    comparison                     shift and go to state 18
+
+state 18
+
+    (1) result -> npwhere ( x [ idx ] comparison . value , node , node )
+    (13) value -> . digits . digits
+    (14) value -> . digits
+    (6) digits -> . digits digit
+    (7) digits -> . digit
+    (8) digit -> . NUMBER
+
+    NUMBER          shift and go to state 25
+
+    value                          shift and go to state 22
+    digits                         shift and go to state 23
+    digit                          shift and go to state 24
+
+state 19
+
+    (9) comparison -> = . =
+
+    =               shift and go to state 26
+
+
+state 20
+
+    (10) comparison -> < .
+    (12) comparison -> < . =
+
+    NUMBER          reduce using rule 10 (comparison -> < .)
+    =               shift and go to state 27
+
+
+state 21
+
+    (11) comparison -> > .
+
+    NUMBER          reduce using rule 11 (comparison -> > .)
+
+
+state 22
+
+    (1) result -> npwhere ( x [ idx ] comparison value . , node , node )
+
+    ,               shift and go to state 28
+
+
+state 23
+
+    (13) value -> digits . . digits
+    (14) value -> digits .
+    (6) digits -> digits . digit
+    (8) digit -> . NUMBER
+
+    .               shift and go to state 29
+    ,               reduce using rule 14 (value -> digits .)
+    NUMBER          shift and go to state 25
+
+    digit                          shift and go to state 30
+
+state 24
+
+    (7) digits -> digit .
+
+    .               reduce using rule 7 (digits -> digit .)
+    NUMBER          reduce using rule 7 (digits -> digit .)
+    ,               reduce using rule 7 (digits -> digit .)
+    )               reduce using rule 7 (digits -> digit .)
+
+
+state 25
+
+    (8) digit -> NUMBER .
+
+    .               reduce using rule 8 (digit -> NUMBER .)
+    NUMBER          reduce using rule 8 (digit -> NUMBER .)
+    ,               reduce using rule 8 (digit -> NUMBER .)
+    )               reduce using rule 8 (digit -> NUMBER .)
+
+
+state 26
+
+    (9) comparison -> = = .
+
+    NUMBER          reduce using rule 9 (comparison -> = = .)
+
+
+state 27
+
+    (12) comparison -> < = .
+
+    NUMBER          reduce using rule 12 (comparison -> < = .)
+
+
+state 28
+
+    (1) result -> npwhere ( x [ idx ] comparison value , . node , node )
+    (2) node -> . result
+    (3) node -> . ( leaf )
+    (1) result -> . npwhere ( x [ idx ] comparison value , node , node )
+
+    (               shift and go to state 31
+    npwhere         shift and go to state 2
+
+    node                           shift and go to state 32
+    result                         shift and go to state 33
+
+state 29
+
+    (13) value -> digits . . digits
+    (6) digits -> . digits digit
+    (7) digits -> . digit
+    (8) digit -> . NUMBER
+
+    NUMBER          shift and go to state 25
+
+    digits                         shift and go to state 34
+    digit                          shift and go to state 24
+
+state 30
+
+    (6) digits -> digits digit .
+
+    .               reduce using rule 6 (digits -> digits digit .)
+    NUMBER          reduce using rule 6 (digits -> digits digit .)
+    ,               reduce using rule 6 (digits -> digits digit .)
+    )               reduce using rule 6 (digits -> digits digit .)
+
+
+state 31
+
+    (3) node -> ( . leaf )
+    (4) leaf -> . NUMBER . digits
+    (5) leaf -> . NUMBER
+
+    NUMBER          shift and go to state 36
+
+    leaf                           shift and go to state 35
+
+state 32
+
+    (1) result -> npwhere ( x [ idx ] comparison value , node . , node )
+
+    ,               shift and go to state 37
+
+
+state 33
+
+    (2) node -> result .
+
+    ,               reduce using rule 2 (node -> result .)
+    )               reduce using rule 2 (node -> result .)
+
+
+state 34
+
+    (13) value -> digits . digits .
+    (6) digits -> digits . digit
+    (8) digit -> . NUMBER
+
+    ,               reduce using rule 13 (value -> digits . digits .)
+    NUMBER          shift and go to state 25
+
+    digit                          shift and go to state 30
+
+state 35
+
+    (3) node -> ( leaf . )
+
+    )               shift and go to state 38
+
+
+state 36
+
+    (4) leaf -> NUMBER . . digits
+    (5) leaf -> NUMBER .
+
+    .               shift and go to state 39
+    )               reduce using rule 5 (leaf -> NUMBER .)
+
+
+state 37
+
+    (1) result -> npwhere ( x [ idx ] comparison value , node , . node )
+    (2) node -> . result
+    (3) node -> . ( leaf )
+    (1) result -> . npwhere ( x [ idx ] comparison value , node , node )
+
+    (               shift and go to state 31
+    npwhere         shift and go to state 2
+
+    node                           shift and go to state 40
+    result                         shift and go to state 33
+
+state 38
+
+    (3) node -> ( leaf ) .
+
+    ,               reduce using rule 3 (node -> ( leaf ) .)
+    )               reduce using rule 3 (node -> ( leaf ) .)
+
+
+state 39
+
+    (4) leaf -> NUMBER . . digits
+    (6) digits -> . digits digit
+    (7) digits -> . digit
+    (8) digit -> . NUMBER
+
+    NUMBER          shift and go to state 25
+
+    digits                         shift and go to state 41
+    digit                          shift and go to state 24
+
+state 40
+
+    (1) result -> npwhere ( x [ idx ] comparison value , node , node . )
+
+    )               shift and go to state 42
+
+
+state 41
+
+    (4) leaf -> NUMBER . digits .
+    (6) digits -> digits . digit
+    (8) digit -> . NUMBER
+
+    )               reduce using rule 4 (leaf -> NUMBER . digits .)
+    NUMBER          shift and go to state 25
+
+    digit                          shift and go to state 30
+
+state 42
+
+    (1) result -> npwhere ( x [ idx ] comparison value , node , node ) .
+
+    $end            reduce using rule 1 (result -> npwhere ( x [ idx ] comparison value , node , node ) .)
+    ,               reduce using rule 1 (result -> npwhere ( x [ idx ] comparison value , node , node ) .)
+    )               reduce using rule 1 (result -> npwhere ( x [ idx ] comparison value , node , node ) .)
+

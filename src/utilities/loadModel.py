@@ -6,14 +6,10 @@ Created on Fri Feb  7 14:11:57 2020
 
 load an individual or entire population and apply to new data
 """
-
-import pandas as pd
 from operators.initialisation import load_population
 from algorithm.parameters import set_params, params
 from representation.individual import Individual
-from utilities.fitness.error_metric import auc_metric
-from scripts import GE_LR_parser
-from algorithm.dt2.dt2_idf import get_genome_from_dt_idf
+from importlib import import_module
 import time
 from os import getcwd, path
 
@@ -130,6 +126,7 @@ def loadSpecificInd(file_name):
             raise Exception(s)
     else:
         ### new: save phenotype only and get the genotype form it
+        get_genome_from_dt_idf = import_module(params['LAMARCK_MAPPER'])
         genotype = get_genome_from_dt_idf(phenotype)
         # Generate individual from genome.
         ind = Individual(genotype, None)

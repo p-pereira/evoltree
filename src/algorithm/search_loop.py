@@ -56,25 +56,24 @@ def search_loop():
                 f.write("%s\n" % item)
             f.close()
         
-        if params['TARGET_SEED_FOLDER'] != "":
-            if not os.path.exists("../seeds/" + params['TARGET_SEED_FOLDER']):
-                os.makedirs("../seeds/" + params['TARGET_SEED_FOLDER'], exist_ok=True)
-            cont=0
-            for item in individuals:
-                if item.phenotype != None:
-                    with open(("../seeds/" + params['TARGET_SEED_FOLDER'] 
-                               + "/" + str(cont) + ".txt"), 'w+', 
-                              encoding="utf-8") as f:
-                        f.write("Phenotype:\n")
-                        f.write("%s\n" % item.phenotype)
-                        #f.write("Genotype:\n")
-                        #f.write("%s\n" % item.genome)
-                        #f.write("Tree:\n")
-                        #f.write("%s\n" % str(item.tree))
-                        f.write("Training fitness:\n")
-                        f.write("%s\n" % item.fitness)
-                        f.close()
-                    cont = cont+1
+    if params['TARGET_SEED_FOLDER'] != "":
+        if not os.path.exists("../seeds/" + params['TARGET_SEED_FOLDER']):
+            os.makedirs("../seeds/" + params['TARGET_SEED_FOLDER'], 
+                        exist_ok=True)
+        for cont, item in enumerate(individuals):
+            if item.phenotype != None:
+                with open(("../seeds/" + params['TARGET_SEED_FOLDER'] 
+                           + "/" + str(cont) + ".txt"), 'w+', 
+                          encoding="utf-8") as f:
+                    f.write("Phenotype:\n")
+                    f.write("%s\n" % item.phenotype)
+                    #f.write("Genotype:\n")
+                    #f.write("%s\n" % item.genome)
+                    #f.write("Tree:\n")
+                    #f.write("%s\n" % str(item.tree))
+                    f.write("Training fitness:\n")
+                    f.write("%s\n" % item.fitness)
+                    f.close()
         
     
     return individuals

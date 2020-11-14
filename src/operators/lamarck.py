@@ -4,16 +4,8 @@ Created on Fri Jul 12 11:29:16 2019
 
 @author: pedro
 """
-from representation import grammar
 from algorithm.parameters import params
-import numpy as np
 from utilities.stats.trackers import runtime_error_cache
-from utilities.fitness.error_metric import auc_metric
-from scipy.optimize import minimize
-from utilities.fitness.math_functions import sigmoid, inverse, symmetric, reLu, leakyReLu, sqrt
-from random import sample
-from utilities.fitness.get_data import get_data
-from scipy.optimize import leastsq
 
 def lamarck(ind, results, pool):
     """
@@ -24,22 +16,12 @@ def lamarck(ind, results, pool):
     """
 
     if params['MULTICORE']:
-        if params['MODEL'] == 'DT':
-            # Add the individual to the pool of jobs.
-            results.append(pool.apply_async(ind.applyLamarck, ()))
-        else:
-            results.append(pool.apply_async(ind.applyLamarckSYMB, ()))
+        # Add the individual to the pool of jobs.
+        results.append(pool.apply_async(ind.applyLamarck, ()))
         return results
     else:
-        try:
-            if params['MODEL'] == 'DT':
-                ind2 = ind.applyLamarck()
-            else:
-                ind2 = ind.applyLamarckSYMB()
-            results.append(ind2)
-        except Exception as e:
-            print(e)
-            results.append(ind)
+        ind2 = ind.applyLamarck()
+        results.append(ind2)
     
     return results
 
@@ -75,8 +57,8 @@ def lamarck_pop(pop):
         return results
     
 # save tree rules
+# TODO check if code is used
 def tree_to_code(tree, feature_names):
-    #print(feature_names)
     """
     Converts a traditional decision tree to the used grammar.
     
@@ -144,104 +126,3 @@ def tree_to_file(tree, feature_names):
             #print("{}return {}".format(indent, tree_.value[node]))
     recurse(0, 1)
     f.close()
-    
-# Aux function to apply Lamarck in symbolic expressions
-def applyLamarckToPhen(phenotype, vals2):
-    global phenotype2, x, y
-    phenotype2 = phenotype
-    #print(phenotype2)
-    x, y, x_test, y_test = get_data(params['DATASET_TRAIN'], False)
-    
-    if params['N_SAMPLING'] > 0:
-        N = params['N_SAMPLING']
-        pos = np.where(y == 'Sale')[0]
-        neg = np.where(y == 'NoSale')[0]
-        randPos = sample(list(pos), N)
-        randNeg = sample(list(neg), N)
-        x = x.iloc[(randPos+randNeg),:]
-        y = y.iloc[(randPos+randNeg)]
-    
-    #global res
-    
-    def aux_function(a):
-        #print(a)
-        global phenotype2
-        #print(phenotype2)
-        phenotype3 = phenotype2
-        for i in range(len(a)):    
-            phenotype3 = phenotype3.replace("a[" + str(i) + "]", str(round(a[i], 3)), 1)
-        global x, y
-        #print(phenotype3)
-        pred = eval(phenotype3)
-        auc = auc_metric(y, pred) #round(auc_metric(y, pred),2)
-        return -auc
-    import time
-    #t0 = time.time()
-    #print(phenotype2)
-    res = minimize(aux_function, vals2, method='Powell', options={'maxiter' : 1, 'maxfev' : 1})
-    #t1 = time.time()
-    
-    #print("num vals: ", len(vals2), "time: ", round(t1-t0, 2))
-    if res.x.size == 1:
-        phenotype5 = phenotype2.replace("a[0]", str(round(float(res.x), 3)), 1)
-    else:
-        #print(phenotype2)
-        phenotype5 = phenotype2
-        for i in range(res.x.size):
-            phenotype5 = phenotype5.replace("a[" + str(i) + "]", str(round(res.x[i], 3)), 1)
-        #print(phenotype5)
-
-    #print(res.x.size)
-    #print(phenotype5)
-    return phenotype5
-
-
-# Aux function to apply Lamarck in symbolic expressions
-def applyLamarckToPhen2(phenotype, vals2):
-    global phenotype2, x, y
-    phenotype2 = phenotype
-    #print(phenotype2)
-    x, y, x_test, y_test = get_data(params['DATASET_TRAIN'], False)
-    
-    if params['N_SAMPLING'] > 0:
-        N = params['N_SAMPLING']
-        pos = np.where(y == 'Sale')[0]
-        neg = np.where(y == 'NoSale')[0]
-        randPos = sample(list(pos), N)
-        randNeg = sample(list(neg), N)
-        x = x.iloc[(randPos+randNeg),:]
-        y = y.iloc[(randPos+randNeg)]
-
-    y2 = np.where(y == 'Sale', 1, 0)
-
-    #global res
-    def func(a, y):
-        #print(a)
-        global phenotype2
-        phenotype3 = phenotype2
-        for i in range(len(a)):    
-            phenotype3 = phenotype3.replace("a[" + str(i) + "]", str(round(a[i], 3)), 1)
-        
-        yhat = eval(phenotype2)
-        return (y - yhat)
-    
-    import time
-    t0 = time.time()
-    out = leastsq(func, vals2, args=(y2))
-    t1 = time.time()
-    res = out[0]
-    
-    
-    print("num vals: ", len(vals2), "time: ", round(t1-t0, 2))
-    if res.x.size == 1:
-        phenotype5 = phenotype2.replace("a[0]", str(round(float(res.x), 3)), 1)
-    else:
-        #print(phenotype2)
-        phenotype5 = phenotype2
-        for i in range(res.x.size):
-            phenotype5 = phenotype5.replace("a[" + str(i) + "]", str(round(res.x[i], 3)), 1)
-        #print(phenotype5)
-
-    #print(res.x.size)
-    #print(phenotype5)
-    return phenotype5

@@ -130,3 +130,4 @@ dmypy.json
 
 #### NEW 11-11-2020
 datasets/Promos/**/*
+results/*
