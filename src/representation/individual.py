@@ -150,7 +150,10 @@ class Individual(object):
             dt = tree.DecisionTreeClassifier()
             dt = dt.fit(x, y)
             # get the tree rules
-            rules = tree_to_code(dt, x.columns.tolist() + ['target'])
+            try: ### NEW 16-11-2020
+                rules = tree_to_code(dt, x.columns.tolist() + ['target'])
+            except: # decision tree is too small, generates error
+                return self
             ind.phenotype = rules
             ind.evaluate()
             if hasattr(params['FITNESS_FUNCTION'], 'multi_objective'):
@@ -225,7 +228,10 @@ class Individual(object):
                 dt = tree.DecisionTreeClassifier(max_depth=10)
                 dt = dt.fit(x, y)
                 # get the tree rules
-                rules = tree_to_code(dt, x.columns.tolist() + ['target'])
+                try: ### NEW 16-11-2020
+                    rules = tree_to_code(dt, x.columns.tolist() + ['target'])
+                except: # decision tree is too small, generates error
+                    return self
                 # add the rules to the old phenotype
                 newPhenotype = phenotype[0:nodePosition] + rules + phenotype[(position+nodePosition+1):]
                 

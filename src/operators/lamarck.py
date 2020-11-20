@@ -57,7 +57,6 @@ def lamarck_pop(pop):
         return results
     
 # save tree rules
-# TODO check if code is used
 def tree_to_code(tree, feature_names):
     """
     Converts a traditional decision tree to the used grammar.
@@ -93,6 +92,7 @@ def tree_to_code(tree, feature_names):
     return rules
 
 # save tree rules
+# TODO check if code is used
 def tree_to_file(tree, feature_names):
     from sklearn.tree import _tree
     tree_ = tree.tree_

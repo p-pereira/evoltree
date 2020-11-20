@@ -13,7 +13,7 @@ params = {
         'STEP': 'step',
 
         # Evolutionary Parameters
-        'POPULATION_SIZE': 5,
+        'POPULATION_SIZE': 50,
         'GENERATIONS': 5,
         'HILL_CLIMBING_HISTORY': 100000,
         'SCHC_COUNT_METHOD': "count_all",
@@ -130,7 +130,7 @@ params = {
 
         # MULTIPROCESSING
         # Multi-core parallel processing of phenotype evaluations.
-        'MULTICORE': True,
+        'MULTICORE': False,
         # Set the number of cpus to be used for multiprocessing
         'CORES': 6,#cpu_count(),
 
@@ -201,8 +201,8 @@ params = {
         # True or False
         'LAMARCK': True,
         ### NEW 13-11-2020: parameter used to create the mapper automatically
-        # Lamarck special mapper operator (created if not exists or empty)
-        'LAMARCK_MAPPER' : 'utilities.lamarck.dt_new.dt_new',
+        # Lamarck special mapper operator (created automatically if '' or 'auto')
+        'LAMARCK_MAPPER' : 'auto',
         
         # Save initial population to feed in Lamarck approach: only for testing purposes
         # True or False
@@ -410,4 +410,10 @@ def set_params(command_line_args, create_files=True):
 
             # Parse seed individual and store in params.
             params['SEED_INDIVIDUALS'] = [GE_LR_parser.main()]
-
+        
+        ### NEW 20-11-2020: Generate Lamarck mapper automatically
+        if params['LAMARCK_MAPPER'] == '' or params['LAMARCK_MAPPER'] == 'auto':
+            #Test
+            from utilities.utils import create_lamarck_mapper
+            params['LAMARCK_MAPPER'] = create_lamarck_mapper(params)
+        
