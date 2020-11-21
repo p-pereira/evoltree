@@ -468,13 +468,6 @@ def load_population(target,otherDir=getcwd()):
             ### new: save phenotype only and get the genotype form it
             i = import_module(params['LAMARCK_MAPPER'])
             genotype = i.get_genome_from_dt_idf(phenotype)
-            """ Unnecessary with this new approach
-            # Set target for GE LR Parser.
-            params['REVERSE_MAPPING_TARGET'] = phenotype
-            
-            # Parse target phenotype.
-            ind = GE_LR_parser.main()
-            """
             # Generate individual from genome.
             ind = Individual(genotype, None)
         # Set individual's fitness
