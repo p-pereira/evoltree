@@ -134,3 +134,4 @@ results/*
 **/parsetab.py
 **/parser.out
 seeds/**/**
+grammars/**
