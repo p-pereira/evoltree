@@ -135,3 +135,4 @@ results/*
 **/parser.out
 seeds/**/**
 grammars/**
+src/utilities/lamarck/**
