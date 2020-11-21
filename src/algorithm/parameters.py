@@ -22,7 +22,7 @@ params = {
         'EXPERIMENT_NAME': "Test",
         # Set default number of runs to be done.
         # ONLY USED WITH EXPERIMENT MANAGER.
-        'RUNS': 1,
+        'RUNS': 3,
 
         # Class of problem
         'FITNESS_FUNCTION': "supervised_learning.classification, minimise_nodes", #"supervised_learning.classification",#
@@ -45,6 +45,7 @@ params = {
         'ERROR_METRIC': "auc_metric2",
 
         # Optimise constants in the supervised_learning fitness function.
+        # TODO: this must be changed in future, bro
         'OPTIMIZE_CONSTANTS': False,
 
         # Specify target for target problems
@@ -54,7 +55,7 @@ params = {
         'MAX_TREE_DEPTH': 50,  # SET TO 90 DUE TO PYTHON EVAL() STACK LIMIT.
                                # INCREASE AT YOUR OWN RISK.
         'MAX_TREE_NODES': None,
-        'CODON_SIZE': 300,#300,
+        'CODON_SIZE': 300,
         'MAX_GENOME_LENGTH': None,
         'MAX_WRAPS': 0,
 
@@ -132,7 +133,7 @@ params = {
         # Multi-core parallel processing of phenotype evaluations.
         'MULTICORE': True,
         # Set the number of cpus to be used for multiprocessing
-        'CORES': 6,#cpu_count(),
+        'CORES': cpu_count()-1,
 
         # STATE SAVING/LOADING
         # Save the state of the evolutionary run every generation. You can
@@ -152,7 +153,7 @@ params = {
         'SEED_INDIVIDUALS': [],
         # Specify a target seed folder in the 'seeds' directory that contains a
         # population of individuals with which to seed a run.
-        'TARGET_SEED_FOLDER': "MGEDT_TEST",
+        'TARGET_SEED_FOLDER': "",
         # Set a target phenotype string for reverse mapping into a GE
         # individual
         'REVERSE_MAPPING_TARGET': None,
@@ -195,7 +196,7 @@ params = {
 
         # Folder name to store the results
         # if None, timestamp is used
-        'FOLDER_NAME': "MGEDT",
+        'FOLDER_NAME': "",
         
         # If LAMARCKIAN approach is used or not
         # True or False
@@ -204,7 +205,7 @@ params = {
         # Lamarck special mapper operator (created automatically if '' or 'auto')
         'LAMARCK_MAPPER' : 'auto',
         
-        # Save initial population to feed in Lamarck approach: only for testing purposes
+        # Save initial and final populations: only for testing purposes
         # True or False
         'SAVE_POP': True
 }
@@ -289,6 +290,14 @@ def set_params(command_line_args, create_files=True):
     # Join original params dictionary with command line specified arguments.
     # NOTE that command line arguments overwrite all previously set parameters.
     params.update(cmd_args)
+    
+    if params['EXPERIMENT_NAME'] == '':
+        params['EXPERIMENT_NAME'] = "MGEDT"
+    if params['FOLDER_NAME'] == '':
+        import time
+        from random import random
+        params['FOLDER_NAME'] = "{0}_{1}".format(time.strftime("%Y%m%d%H%M%S"),
+                                                 int(random()*100))
 
     if params['LOAD_STATE']:
         # Load run from state.
