@@ -346,8 +346,7 @@ def parse_cmd_args(arguments):
                              'False.')
     parser.add_argument('--multicore',
                         dest='MULTICORE',
-                        action='store_true',
-                        default=None,
+                        action='store_false',
                         help='Turns on multicore evaluation.')
     parser.add_argument('--cores',
                         dest='CORES',
@@ -376,10 +375,10 @@ def parse_cmd_args(arguments):
     parser.add_argument('--experiment_name',
                         dest='EXPERIMENT_NAME',
                         type=str,
+                        default="MGEDT",
                         help='Optional parameter to save results in '
-                             'results/[EXPERIMENT_NAME] folder. If not '
-                             'specified then results are saved in default '
-                             'results folder.')
+                             'results/[EXPERIMENT_NAME]/[FOLDER_NAME] folder. If not '
+                             'specified then "MGEDT" is used.')
     parser.add_argument('--runs',
                         dest='RUNS',
                         type=int,
@@ -401,6 +400,7 @@ def parse_cmd_args(arguments):
     parser.add_argument('--random_seed',
                         dest='RANDOM_SEED',
                         type=int,
+                        default=1234,
                         help='Sets the random seed to be used with both the '
                              'standard Python RNG and the NumPy RNG. '
                              'requires int value.')
@@ -423,13 +423,11 @@ def parse_cmd_args(arguments):
                              'command line.')
     parser.add_argument('--save_all',
                         dest='SAVE_ALL',
-                        action='store_true',
-                        default=None,
+                        action='store_false',
                         help='Saves the best phenotypes at each generation.')
     parser.add_argument('--save_plots',
                         dest='SAVE_PLOTS',
-                        action='store_true',
-                        default=None,
+                        action='store_false',
                         help='Saves plots for best fitness.')
 
     # REVERSE-MAPPING
@@ -491,6 +489,35 @@ def parse_cmd_args(arguments):
                              ' other nearby agents in the environment. By default'
                              ' 0.5 probability is used. Higher the probability the time'
                              ' to find the solution would be reduced')
+    # NEW PARAMS: 21-11-2020
+    parser.add_argument('--n_sampling',
+                        dest='N_SAMPLING',
+                        type=int,
+                        help=' Specifies how many records from each class will'
+                             ' be used to train the model. "0" means all')
+    parser.add_argument('--lamarck',
+                        dest='LAMARCK',
+                        action='store_false',
+                        help='Enables lamarck mode.')
+    parser.add_argument('--lamarck_mapper',
+                        dest='LAMARCK_MAPPER',
+                        type=str,
+                        default='auto',
+                        help='Sets the lamarck mapper to be used, which mapps '
+                             'a phenotype obtained from tradicional DTs to a GE genome.'
+                             'Requires a path string such as "utilities.lamarck.example"'
+                             'or "auto" to generate automatically.')
+    parser.add_argument('--save_pop',
+                        dest='SAVE_POP',
+                        action='store_false',
+                        help='Stores initial and final populations '
+                             '(Only for testing purposes)')
+    parser.add_argument('--folder_name',
+                        dest='FOLDER_NAME',
+                        type=str,
+                        help='Optional parameter to save results in '
+                             'results/[EXPERIMENT_NAME]/[FOLDER_NAME] folder. If not '
+                             'specified then [datetime_randomNumber] is used.')
 
     # CACHING
     class CachingAction(argparse.Action):
