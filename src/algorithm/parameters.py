@@ -13,7 +13,7 @@ params = {
         'STEP': 'step',
 
         # Evolutionary Parameters
-        'POPULATION_SIZE': 50,
+        'POPULATION_SIZE': 10,
         'GENERATIONS': 5,
         'HILL_CLIMBING_HISTORY': 100000,
         'SCHC_COUNT_METHOD': "count_all",
@@ -130,7 +130,7 @@ params = {
 
         # MULTIPROCESSING
         # Multi-core parallel processing of phenotype evaluations.
-        'MULTICORE': False,
+        'MULTICORE': True,
         # Set the number of cpus to be used for multiprocessing
         'CORES': 6,#cpu_count(),
 
@@ -152,7 +152,7 @@ params = {
         'SEED_INDIVIDUALS': [],
         # Specify a target seed folder in the 'seeds' directory that contains a
         # population of individuals with which to seed a run.
-        'TARGET_SEED_FOLDER': "",#"MGEDT_TEST",
+        'TARGET_SEED_FOLDER': "MGEDT_TEST",
         # Set a target phenotype string for reverse mapping into a GE
         # individual
         'REVERSE_MAPPING_TARGET': None,
@@ -391,7 +391,11 @@ def set_params(command_line_args, create_files=True):
         # Parse grammar file and set grammar class.
         params['BNF_GRAMMAR'] = grammar.Grammar(path.join("..", "grammars",
                                                 params['GRAMMAR_FILE']))
-
+        ### NEW 20-11-2020: Generate Lamarck mapper automatically
+        if params['LAMARCK_MAPPER'] == '' or params['LAMARCK_MAPPER'] == 'auto':
+            from utilities.utils import create_lamarck_mapper
+            params['LAMARCK_MAPPER'] = create_lamarck_mapper(params)
+        
         # Population loading for seeding runs (if specified)
         if params['TARGET_SEED_FOLDER']:
 
@@ -411,9 +415,4 @@ def set_params(command_line_args, create_files=True):
             # Parse seed individual and store in params.
             params['SEED_INDIVIDUALS'] = [GE_LR_parser.main()]
         
-        ### NEW 20-11-2020: Generate Lamarck mapper automatically
-        if params['LAMARCK_MAPPER'] == '' or params['LAMARCK_MAPPER'] == 'auto':
-            #Test
-            from utilities.utils import create_lamarck_mapper
-            params['LAMARCK_MAPPER'] = create_lamarck_mapper(params)
         
