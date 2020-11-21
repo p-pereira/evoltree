@@ -21,7 +21,6 @@ def roundAllNums(rules):
 def remove_leading_zeros(phenotype):
     return re.sub(r'([^\.^\d])0+(\d)', r'\1\2', phenotype)
 # Automatically creates lammarck mapper file
-# TODO: Test
 def create_lamarck_mapper(params):
     # Create mapper folder based on experiment name
     mapper_dir = "utilities/lamarck/{0}".format(params["EXPERIMENT_NAME"])
@@ -32,6 +31,8 @@ def create_lamarck_mapper(params):
         content = mf.read()
     # New mapper file
     ## Create file
+    init_filename = "{0}/__init__.py".format(mapper_dir)
+    _ = open(init_filename, "w+").close()
     mapper_filename = "{0}/mapper.py".format(mapper_dir)
     mapper_file = open(mapper_filename, "w+")
     ## Write base code, common to all mappers
