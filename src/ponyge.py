@@ -33,7 +33,7 @@ def mane():
     get_stats(individuals, end=True)
     
     # Load and plot statistics
-    
+    # TODO: change graphics!
     if params['SAVE_PLOTS']:
         if hasattr(params['FITNESS_FUNCTION'], 'multi_objective'):
             
