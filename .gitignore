@@ -133,4 +133,4 @@ datasets/Promos/**/*
 results/*
 **/parsetab.py
 **/parser.out
-
+seeds/**/**
