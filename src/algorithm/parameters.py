@@ -13,8 +13,8 @@ params = {
         'STEP': 'step',
 
         # Evolutionary Parameters
-        'POPULATION_SIZE': 10,
-        'GENERATIONS': 5,
+        'POPULATION_SIZE': 100,
+        'GENERATIONS': 100,
         'HILL_CLIMBING_HISTORY': 100000,
         'SCHC_COUNT_METHOD': "count_all",
 

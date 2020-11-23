@@ -54,6 +54,55 @@ def mgedt(parametrization="auto"):
         set_params('')
     pop, res = evolve()
 
+from multiprocessing import Pool
+from algorithm.parameters import params
+from fitness.evaluation import evaluate_fitness
+from stats.stats import stats, get_stats
+from utilities.stats import trackers
+from operators.initialisation import initialisation
+from utilities.algorithm.initialise_run import pool_init
+import json
+from os import path
+
+def mgedt_gui():
+    if params['MULTICORE']:
+        # initialize pool once, if mutlicore is enabled
+        params['POOL'] = Pool(processes=params['CORES'], initializer=pool_init,
+                              initargs=(params,))  # , maxtasksperchild=1)
+
+    # Initialise population
+    individuals = initialisation(params['POPULATION_SIZE'])
+    
+    # Evaluate initial population
+    individuals = evaluate_fitness(individuals)
+    
+    if params['SAVE_POP']:
+        filename1 = path.join(params['FILE_PATH'], 'Begin-initialPop.txt')
+        with open(filename1, 'w+', encoding="utf-8") as f:
+            for item in individuals:
+                f.write("%s\n" % item)
+            f.close()
+    
+    # Generate statistics for run so far
+    get_stats(individuals)
+    
+    total_gens = params['GENERATIONS']+1
+    # Traditional GE
+    for generation in range(1, total_gens):
+        # GUI
+        #vid_dict = {}
+        #vid_dict[0] = min((generation * 100) / total_gens, 100)
+        #yield "data:" + str(x) + "\n\n"
+        #ret_string = "data:" + json.dumps(vid_dict) + "\n\n"
+        #print(ret_string)
+        #yield ret_string
+        stats['gen'] = generation
+        # New generation
+        individuals = params['STEP'](individuals)
+        
+    
+    get_stats(individuals, end=True)
+    
 
 if __name__ == "__main__":
     set_params(sys.argv[1:])
