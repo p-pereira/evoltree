@@ -497,7 +497,7 @@ def parse_cmd_args(arguments):
                              ' be used to train the model. "0" means all')
     parser.add_argument('--lamarck',
                         dest='LAMARCK',
-                        action='store_true',
+                        action='store_false',
                         help='Enables lamarck mode.')
     parser.add_argument('--lamarck_mapper',
                         dest='LAMARCK_MAPPER',
@@ -518,6 +518,12 @@ def parse_cmd_args(arguments):
                         help='Optional parameter to save results in '
                              'results/[EXPERIMENT_NAME]/[FOLDER_NAME] folder. If not '
                              'specified then [datetime_randomNumber] is used.')
+    parser.add_argument('--lamarck_probability',
+                        dest='LAMARCK_PROBABILITY',
+                        action=FloatAction,
+                        default=0.5,
+                        help='Sets the lamarck probability, requires float, '
+                             'e.g. 0.9.')
 
     # CACHING
     class CachingAction(argparse.Action):

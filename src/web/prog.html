@@ -48,16 +48,17 @@
                 labels: [0],
                 datasets: [
                     {
-                        'data': [50],
-                        'label': 'Best AUC',
-                        'borderColor' : "#3e95cd",
-                        'fill' : false
+                        data: [],
+                        label: 'Best AUC',
+                        borderColor : "#3e95cd",
+                        fill : false
                     },
                     {
-                        'data' : [50],
-                        'label' : 'Pareto-front Mean AUC',
-                        'borderColor' : "#c45850",
-                        'fill' : false}]
+                        data : [],
+                        label : 'Pareto-front Mean AUC',
+                        borderColor : "#c45850",
+                        fill :false
+                    }]
             },
             options: {
                 maintainAspectRatio: true,
@@ -66,6 +67,16 @@
                     xAxes: [{
                         ticks: {
                             display: false
+                        },
+                        scaleLabel : {
+                            display : true,
+                            labelString : 'Generation'
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel : {
+                            display : true,
+                            labelString : 'AUC'
                         }
                     }]
                 },
@@ -86,6 +97,23 @@
                 title: {
                     display: true,
                     text: 'Pareto Front Evolution'
+                },
+                scales: {
+                    xAxes: [{
+                        ticks: {
+                            display: true
+                        },
+                        scaleLabel : {
+                            display : true,
+                            labelString : '-AUC'
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel : {
+                            display : true,
+                            labelString : 'Complexity (log)'
+                        }
+                    }]
                 }
             }
         };

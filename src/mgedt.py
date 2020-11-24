@@ -6,7 +6,6 @@ Created on Sat Nov 21 17:26:33 2020
 """
 
 from utilities.algorithm.general import check_python_version
-import matplotlib.pyplot as plt
 import pandas as pd
 from os import path
 
@@ -54,17 +53,15 @@ def mgedt(parametrization="auto"):
         set_params('')
     pop, res = evolve()
 
-from multiprocessing import Pool
-from algorithm.parameters import params
-from fitness.evaluation import evaluate_fitness
-from stats.stats import stats, get_stats
-from utilities.stats import trackers
-from operators.initialisation import initialisation
-from utilities.algorithm.initialise_run import pool_init
-import json
-from os import path
-
 def mgedt_gui():
+    from multiprocessing import Pool
+    from algorithm.parameters import params
+    from fitness.evaluation import evaluate_fitness
+    from stats.stats import stats, get_stats
+    from operators.initialisation import initialisation
+    from utilities.algorithm.initialise_run import pool_init
+    from os import path
+    
     if params['MULTICORE']:
         # initialize pool once, if mutlicore is enabled
         params['POOL'] = Pool(processes=params['CORES'], initializer=pool_init,
@@ -89,15 +86,7 @@ def mgedt_gui():
     total_gens = params['GENERATIONS']+1
     # Traditional GE
     for generation in range(1, total_gens):
-        # GUI
-        #vid_dict = {}
-        #vid_dict[0] = min((generation * 100) / total_gens, 100)
-        #yield "data:" + str(x) + "\n\n"
-        #ret_string = "data:" + json.dumps(vid_dict) + "\n\n"
-        #print(ret_string)
-        #yield ret_string
         stats['gen'] = generation
-        # New generation
         individuals = params['STEP'](individuals)
         
     

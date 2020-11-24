@@ -13,7 +13,7 @@ params = {
         'STEP': 'step',
 
         # Evolutionary Parameters
-        'POPULATION_SIZE': 100,
+        'POPULATION_SIZE': 25,
         'GENERATIONS': 100,
         'HILL_CLIMBING_HISTORY': 100000,
         'SCHC_COUNT_METHOD': "count_all",
@@ -201,6 +201,9 @@ params = {
         # If LAMARCKIAN approach is used or not
         # True or False
         'LAMARCK': True,
+        ### NEW 23-11-2020: probability of applying Lamarck
+        # Set lamarck probability.
+        'LAMARCK_PROBABILITY': 0.5,
         ### NEW 13-11-2020: parameter used to create the mapper automatically
         # Lamarck special mapper operator (created automatically if '' or 'auto')
         'LAMARCK_MAPPER' : 'auto',
@@ -210,6 +213,7 @@ params = {
         'SAVE_POP': True
 }
 
+default_params = params
 
 def load_params(file_name):
     """

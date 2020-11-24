@@ -8,7 +8,18 @@
 <h2>Vehicle info Dashboard</h2>
 <p align="center"><a href=start ><button class=grey style="height:75px;width:150px">vmd timestamp</button></a></p>
    
+<script>
+	var source = new EventSource("/default_params");
+	console.log("Opening the SSE connection");
+    source.onmessage = function(event) {
+        params = JSON.parse(event.data);
+        console.log(params);
+        source.close()
+        console.log("Closing the SSE connection");
+    }
 
+
+</script>
 </div>
 </body>
 </html>
