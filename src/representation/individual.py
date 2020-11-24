@@ -138,104 +138,24 @@ class Individual(object):
         :param ind: an individual to be changed.
         :returns: The changed individual.
         """
-        from sklearn import tree
-        ind = self.deep_copy()
-        phenotype = ind.phenotype
-        # Check number of nodes (np.where)
-        nrNodes = phenotype.count("np.where")
-        # Expressions with root node only, are replaced by a traditional dt
-        if nrNodes == 1:
-            x, y, x_test, y_test = \
-            get_data(params['DATASET_TRAIN'], params['DATASET_TEST'])
-            dt = tree.DecisionTreeClassifier()
-            dt = dt.fit(x, y)
-            # get the tree rules
-            try: ### NEW 16-11-2020
-                rules = tree_to_code(dt, x.columns.tolist() + ['target'])
-            except: # decision tree is too small, generates error
-                return self
-            ind.phenotype = rules
-            ind.evaluate()
-            if hasattr(params['FITNESS_FUNCTION'], 'multi_objective'):
-                if ind.fitness[0] < self.fitness[0] or math.isnan(self.fitness[0]):
-                    i = import_module(params['LAMARCK_MAPPER'])
-                    
-                    genome = i.get_genome_from_dt_idf(ind.phenotype)
-                    ind.genome = genome
-                    mapped = map_tree_from_genome(genome)
-                    ind.tree = mapped[2]
-                    ind.nodes = mapped[3]
-                    ind.evaluate()
-                    #print("Improved!")
-                    return ind
-                else:
-                    return self
-            else:
-                if ind.fitness > self.fitness or math.isnan(self.fitness):
-                    i = import_module(params['LAMARCK_MAPPER'])
-                    
-                    genome = i.get_genome_from_dt_idf(ind.phenotype)
-                    ind.genome = genome
-                    mapped = map_tree_from_genome(genome)
-                    ind.tree = mapped[2]
-                    ind.nodes = mapped[3]
-                    #print("Improved!")
-                    return ind
-                else:
-                    return self
-        else:
-            # select a random node (can't be the first)
-            randNode = random.randint(0, nrNodes-1) # -1 due to the index starting at 0
-            # get all nodes' positions
-            allNodes = [node.start() for node in re.finditer('np.where', phenotype)]
-            # get node position
-            nodePosition = allNodes[randNode]    
-            # get the expression
-            #   get opened and closed brackets' positions
-            openBrPos = [m.start() for m in re.finditer('\(', phenotype[nodePosition:])]
-            closeBrPos = [m.start() for m in re.finditer('\)', phenotype[nodePosition:])]
-            allBrPos = sorted(openBrPos + closeBrPos)
-            # get the position where the expression to be replaced ends
-            openBr = 0
-            closeBr = 0
-            position = 1
-            for i in range(0,len(allBrPos)):
-                pos = allBrPos[i]
-                if pos in openBrPos:
-                    openBr = openBr + 1
-                elif pos in closeBrPos:
-                    closeBr = closeBr + 1
-                if openBr == closeBr:
-                    position = pos
-                    break
-            # expression to be replaced:
-            replaceExp = phenotype[nodePosition:(position+nodePosition+1)]
-            #   subtree leafs, to identify records that fall there
-            toReplace = re.findall("\([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?\)", replaceExp)
-            for val in toReplace:
-                replaceExp = replaceExp.replace(val, '100')
-           # new expression with this values
-            newExp = phenotype[0:nodePosition] + replaceExp + phenotype[(position+nodePosition+1):]
-            # get data
-            x, y, x_test, y_test = \
-            get_data(params['DATASET_TRAIN'], params['DATASET_TEST'])
-            # index of records that fall on the changed expression
-            index = np.where(eval(newExp) == 100)[0]
-            if len(index) > 0:
-                x = x.iloc[index,:]
-                y = y.iloc[index]
-                # train a traditional decision tree
-                dt = tree.DecisionTreeClassifier(max_depth=10)
+        if random.random() < params["LAMARCK_PROBABILITY"]:
+            from sklearn import tree
+            ind = self.deep_copy()
+            phenotype = ind.phenotype
+            # Check number of nodes (np.where)
+            nrNodes = phenotype.count("np.where")
+            # Expressions with root node only, are replaced by a traditional dt
+            if nrNodes == 1:
+                x, y, x_test, y_test = \
+                get_data(params['DATASET_TRAIN'], params['DATASET_TEST'])
+                dt = tree.DecisionTreeClassifier()
                 dt = dt.fit(x, y)
                 # get the tree rules
                 try: ### NEW 16-11-2020
                     rules = tree_to_code(dt, x.columns.tolist() + ['target'])
                 except: # decision tree is too small, generates error
                     return self
-                # add the rules to the old phenotype
-                newPhenotype = phenotype[0:nodePosition] + rules + phenotype[(position+nodePosition+1):]
-                
-                ind.phenotype = newPhenotype
+                ind.phenotype = rules
                 ind.evaluate()
                 if hasattr(params['FITNESS_FUNCTION'], 'multi_objective'):
                     if ind.fitness[0] < self.fitness[0] or math.isnan(self.fitness[0]):
@@ -265,4 +185,88 @@ class Individual(object):
                     else:
                         return self
             else:
-                return self
+                # select a random node (can't be the first)
+                randNode = random.randint(0, nrNodes-1) # -1 due to the index starting at 0
+                # get all nodes' positions
+                allNodes = [node.start() for node in re.finditer('np.where', phenotype)]
+                # get node position
+                nodePosition = allNodes[randNode]    
+                # get the expression
+                #   get opened and closed brackets' positions
+                openBrPos = [m.start() for m in re.finditer('\(', phenotype[nodePosition:])]
+                closeBrPos = [m.start() for m in re.finditer('\)', phenotype[nodePosition:])]
+                allBrPos = sorted(openBrPos + closeBrPos)
+                # get the position where the expression to be replaced ends
+                openBr = 0
+                closeBr = 0
+                position = 1
+                for i in range(0,len(allBrPos)):
+                    pos = allBrPos[i]
+                    if pos in openBrPos:
+                        openBr = openBr + 1
+                    elif pos in closeBrPos:
+                        closeBr = closeBr + 1
+                    if openBr == closeBr:
+                        position = pos
+                        break
+                # expression to be replaced:
+                replaceExp = phenotype[nodePosition:(position+nodePosition+1)]
+                #   subtree leafs, to identify records that fall there
+                toReplace = re.findall("\([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?\)", replaceExp)
+                for val in toReplace:
+                    replaceExp = replaceExp.replace(val, '100')
+               # new expression with this values
+                newExp = phenotype[0:nodePosition] + replaceExp + phenotype[(position+nodePosition+1):]
+                # get data
+                x, y, x_test, y_test = \
+                get_data(params['DATASET_TRAIN'], params['DATASET_TEST'])
+                # index of records that fall on the changed expression
+                index = np.where(eval(newExp) == 100)[0]
+                if len(index) > 0:
+                    x = x.iloc[index,:]
+                    y = y.iloc[index]
+                    # train a traditional decision tree
+                    dt = tree.DecisionTreeClassifier(max_depth=10)
+                    dt = dt.fit(x, y)
+                    # get the tree rules
+                    try: ### NEW 16-11-2020
+                        rules = tree_to_code(dt, x.columns.tolist() + ['target'])
+                    except: # decision tree is too small, generates error
+                        return self
+                    # add the rules to the old phenotype
+                    newPhenotype = phenotype[0:nodePosition] + rules + phenotype[(position+nodePosition+1):]
+                    
+                    ind.phenotype = newPhenotype
+                    ind.evaluate()
+                    if hasattr(params['FITNESS_FUNCTION'], 'multi_objective'):
+                        if ind.fitness[0] < self.fitness[0] or math.isnan(self.fitness[0]):
+                            i = import_module(params['LAMARCK_MAPPER'])
+                            
+                            genome = i.get_genome_from_dt_idf(ind.phenotype)
+                            ind.genome = genome
+                            mapped = map_tree_from_genome(genome)
+                            ind.tree = mapped[2]
+                            ind.nodes = mapped[3]
+                            ind.evaluate()
+                            #print("Improved!")
+                            return ind
+                        else:
+                            return self
+                    else:
+                        if ind.fitness > self.fitness or math.isnan(self.fitness):
+                            i = import_module(params['LAMARCK_MAPPER'])
+                            
+                            genome = i.get_genome_from_dt_idf(ind.phenotype)
+                            ind.genome = genome
+                            mapped = map_tree_from_genome(genome)
+                            ind.tree = mapped[2]
+                            ind.nodes = mapped[3]
+                            #print("Improved!")
+                            return ind
+                        else:
+                            return self
+                else:
+                    return self
+        
+        else:
+            return self
