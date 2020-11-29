@@ -2,7 +2,6 @@ from os import path
 
 import numpy as np
 import pandas as pd
-import shelve
 
 from algorithm.parameters import params
 
@@ -97,10 +96,11 @@ def get_data(train, test):
     :param test: The desired testing dataset.
     :return: The parsed data contained in the dataset files.
     """
-    
+    ### NEW 29-11-2020: dataset is loaded once only!
+    """
     # Get the path to the training dataset.
     train_set = path.join("..", "datasets", train)
-        
+     
     if test:
         # Get the path to the testing dataset.
         test_set = path.join("..", "datasets", test)
@@ -108,9 +108,12 @@ def get_data(train, test):
     else:
         # There is no testing dataset used.
         test_set = None
+    """
     
     # Read in the training and testing datasets from the specified files.
-    training_in, training_out, test_in, \
-    test_out = get_Xy_train_test_separate(train_set, test_set, skip_header=1)
+    training_in, training_out, test_in, test_out = \
+        (params["X_train"], params["y_train"], 
+         params["X_test"], params["y_test"])
+    #get_Xy_train_test_separate(train_set, test_set, skip_header=1)
     
     return training_in, training_out, test_in, test_out
