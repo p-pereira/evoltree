@@ -497,7 +497,7 @@ def parse_cmd_args(arguments):
                              ' be used to train the model. "0" means all')
     parser.add_argument('--lamarck',
                         dest='LAMARCK',
-                        action='store_false',
+                        action='store_true',
                         help='Enables lamarck mode.')
     parser.add_argument('--lamarck_mapper',
                         dest='LAMARCK_MAPPER',
