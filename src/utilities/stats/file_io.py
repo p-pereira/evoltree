@@ -195,7 +195,10 @@ def save_params_to_file():
 
         # Create whitespace buffer for pretty printing/saving.
         spaces = [" " for _ in range(col_width - len(param))]
-        savefile.write(str(param) + ": " + "".join(spaces) +
-                       str(params[param]) + "\n")
+        ### NEW 29-11-2020: ignore extensive parameters
+        if param not in ['X_train', 'y_train', 'X_test', 'y_test',
+                         'BNF_GRAMMAR']:
+            savefile.write(str(param) + ": " + "".join(spaces) +
+                           str(params[param]) + "\n")
 
     savefile.close()
