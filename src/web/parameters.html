@@ -1,0 +1,146 @@
+<!-- Template from: https://colorlib.com/wp/template/contact-form-v5/ -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MGEDT - Parameters</title>
+    <link rel="icon" type="image/png" href="/static/images/icons/favicon.ico"/>
+    <link rel="stylesheet" type="text/css" href="/static/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/fonts/iconic/css/material-design-iconic-font.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/vendor/select2/select2.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/util.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+</head>
+<body>
+    <br>
+    <div class="container-contact100">
+        <div class="wrap-contact100">
+            <form class="contact100-form validate-form" action="/parameters" method="POST" role="form">
+                <span class="contact100-form-title">
+                    MGEDT Parameters
+                </span>
+                
+                <div class="wrap-input100 bg1" data-validate = "Choose a csv file.">
+                    <span class="label-input100">TRAIN DATASET FILE (.csv, .txt) *</span>
+                    <div class="form-inline">
+                        <div class="input-group-addon">datasets/</div>
+                        <input class="input100 form-control" type="text" name="dataset_train" placeholder="Train dataset file" value="Promos/BEST2/Train-IDF-1.csv" style="width: 80%;">
+                    </div>
+                </div>
+                
+                <div class="wrap-input100 bg1" data-validate = "Choose a csv file.">
+                    <span class="label-input100">TEST DATASET FILE (.csv, .txt) *</span>
+                    <div class="form-inline">
+                        <div class="input-group-addon">datasets/</div>
+                        <input class="input100 form-control" type="text" name="dataset_test" placeholder="Test dataset file" value="Promos/BEST2/Test-IDF-1.csv" style="width: 80%;">
+                    </div>
+                </div>
+                
+                <div class="wrap-input100 bg1 rs1-wrap-input103 validate-input" data-validate = "Choose the target column.">
+                    <span class="label-input100">TARGET COLUMN *</span>
+                    <input class="input100" type="text" name="target" placeholder="Target column" value="target">
+                </div>
+                
+                <div class="wrap-input100 bg1 rs1-wrap-input103">
+                    <span class="label-input100">DATASET DELIMITER *</span>
+                    <input class="input100" type="text" name="dataset_delimiter" placeholder="Dataset delimiter" value=";">
+                </div>
+                
+                <div class="wrap-input100 bg1 rs1-wrap-input103">
+                    <span class="label-input100">EXPERIMENT NAME *</span>
+                    <input class="input100" type="text" name="experiment_name" placeholder="Foldername" value="MGEDT">
+                </div>
+                
+                <div class="wrap-input100 bg1 rs1-wrap-input103 validate-input" data-validate = "Enter a value">
+                    <span class="label-input100">GENERATIONS *</span>
+                    <input class="input100" type="number" name="generations" placeholder="No. of iterations" value=100 min=1>
+                </div>
+                
+                <div class="wrap-input100 bg1 rs1-wrap-input103 validate-input" data-validate = "Enter a value">
+                    <span class="label-input100">POPULATION SIZE*</span>
+                    <input class="input100" type="number" name="population_size" placeholder="No. of individuals" value=100 min=1>
+                </div>
+                
+                <div class="wrap-input100 input100-select bg1 rs1-wrap-input103">
+                    <span class="label-input100">ERROR METRIC *</span>
+                    <div>
+                        <select class="js-select2" name="error_metric" >
+                            <option selected="selected">AUC</option>
+                            <option>F1_score</option>
+                        </select>
+                        <div class="dropDownSelect2"></div>
+                    </div>
+                </div>
+                
+                <div class="wrap-input100 input100-select bg1 rs1-wrap-input103">
+                    <span class="label-input100">LAMARCK *</span>
+                    <div>
+                        <select class="js-select2" name="lamarck" >
+                            <option selected="selected">True</option>
+                            <option>False</option>
+                        </select>
+                        <div class="dropDownSelect2"></div>
+                    </div>
+                </div>
+                
+                <div class="wrap-input100 input100-select bg1 rs1-wrap-input103">
+                    <span class="label-input100">MULTICORE *</span>
+                    <div>
+                        <select class="js-select2" name="multicore" >
+                            <option selected="selected">True</option>
+                            <option>False</option>
+                        </select>
+                        <div class="dropDownSelect2"></div>
+                    </div>
+                </div>
+                
+                <div class="wrap-input100 bg1 rs1-wrap-input103 validate-input" data-validate = "Enter a value">
+                    <span class="label-input100">NUMBER OF CORES *</span>
+                    <input class="input100" type="number" name="cores" placeholder="No. of cores" value=4 min=1>
+                </div>
+                
+                <div class="container-contact100-form-btn">
+                    <button class="btn contact100-form-btn" type="submit">
+                        <span> 
+                            SAVE PARAMETERS
+                            <i class="fa fa-long-arrow-right m-l-7" aria-hidden="true"></i>
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+        
+    
+    <!--===============================================================================================-->
+    <script src="/static/vendor/jquery/jquery-3.2.1.min.js"></script>
+    <!--===============================================================================================-->
+    <!--===============================================================================================-->
+    <!--===============================================================================================-->
+    <script src="/static/vendor/select2/select2.min.js"></script>
+    <script>
+        $(".js-select2").each(function(){
+            $(this).select2({
+                minimumResultsForSearch: 20,
+                dropdownParent: $(this).next('.dropDownSelect2')
+            });
+
+
+            $(".js-select2").each(function(){
+                $(this).on('select2:close', function (e){
+                    if($(this).val() == "Please chooses") {
+                        $('.js-show-service').slideUp();
+                    }
+                    else {
+                        $('.js-show-service').slideUp();
+                        $('.js-show-service').slideDown();
+                    }
+                });
+            });
+        })
+    </script>
+    <!--===============================================================================================-->
+    <script src="/static/js/main.js"></script>
+
+</body>
+</html>
