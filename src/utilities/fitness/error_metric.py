@@ -67,9 +67,9 @@ def hinge(y, yhat):
 # Set maximise attribute for hinge error metric.
 hinge.maximise = False
 
-
+""" old F1Score
 def f1_score(y, yhat):
-    """
+    \"""
     The F_1 score is a metric for classification which tries to balance
     precision and recall, ie both true positives and true negatives.
     For F_1 score higher is better.
@@ -77,7 +77,7 @@ def f1_score(y, yhat):
     :param y: The expected input (i.e. from dataset).
     :param yhat: The given input (i.e. from phenotype).
     :return: The f1 score.
-    """
+    \"""
     # if phen is a constant, eg 0.001 (doesn't refer to x), then yhat
     # will be a constant. that will break f1_score. so convert to a
     # constant array.
@@ -95,8 +95,9 @@ def f1_score(y, yhat):
         return sklearn_f1_score(y, yhat, average="macro")
 # Set maximise attribute for f1_score error metric.
 f1_score.maximise = True
+"""
 
-def f1_score2(y, yhat):
+def F1_score(y, yhat):
     """
     The F_1 score is a metric for classification which tries to balance
     precision and recall, ie both true positives and true negatives.
@@ -109,7 +110,7 @@ def f1_score2(y, yhat):
     f1s = sklearn_f1_score(y, yhat, average="macro")
     return -100 * f1s
 # Set maximise attribute for f1_score error metric.
-f1_score2.maximise = False
+F1_score.maximise = False
 
 def Hamming_error(y, yhat):
     """
@@ -120,36 +121,7 @@ def Hamming_error(y, yhat):
     return np.sum(y != yhat)
 Hamming_error.maximise = False
 
-def auc_metric(y, yhat):
-    #print(yhat)
-    #print(y)
-    """
-    Calculate the Area Under the Curve (AUC).
-
-    :param y: The expected input (i.e. from dataset).
-    :param yhat: The given input (i.e. from phenotype).
-    :return: The mean absolute error.
-    """
-    ### NEW ###
-    # Replaces NaNs or infinite values
-    yhat = np.nan_to_num(yhat)
-    #if type(yhat) == np.float64:
-    #    yhat = np.repeat(yhat, len(y))
-    try:
-        auc = roc_auc_score(y, yhat)*100
-        return(auc)
-    except Exception as e:
-        #print(e)
-        auc = 0
-        return(auc)
-
-    #print(auc)
-    #return(auc)
-# Set maximise attribute for auc error metric.
-auc_metric.maximise = True
-#auc_metric.default_fitness = 0
-
-def auc_metric2(y, yhat):
+def AUC(y, yhat):
     #print(yhat)
     #print(y)
     """
@@ -165,10 +137,10 @@ def auc_metric2(y, yhat):
     #if type(yhat) == np.float64:
     #    yhat = np.repeat(yhat, len(y))
     
-    auc = roc_auc_score(y, yhat)*100
-    return(-auc)
+    auc_val = roc_auc_score(y, yhat)*100
+    return(-auc_val)
 
     #print(auc)
     #return(auc)
 # Set maximise attribute for auc error metric.
-auc_metric2.maximise = False
+AUC.maximise = False
