@@ -137,3 +137,4 @@ seeds/**/**
 grammars/**
 src/utilities/lamarck/**
 /src/web/web/**
+/src/web/template_/**
