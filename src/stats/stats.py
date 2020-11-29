@@ -11,7 +11,7 @@ from utilities.stats.save_plots import save_plot_from_data, \
     save_pareto_fitness_plot
 from utilities.stats.file_io import save_stats_to_file, save_stats_headers, \
     save_best_ind_to_file, save_first_front_to_file
-from os import path, getcwd, makedirs
+from os import path
 
 
 """Algorithm statistics"""
@@ -125,12 +125,12 @@ def get_soo_stats(individuals, end):
     # Print statistics
     if params['VERBOSE'] and not end:
         print_generation_stats()
-
-    elif not params['SILENT']:
-        # Print simple display output.
-        perc = stats['gen'] / (params['GENERATIONS']+1) * 100
-        stdout.write("Evolution: %d%% complete\r" % perc)
-        stdout.flush()
+    ### NEW 29-11-2020: these prints are made by me: PPereira :)
+    #elif not params['SILENT']:
+    #    # Print simple display output.
+    #    perc = stats['gen'] / (params['GENERATIONS']+1) * 100
+    #    stdout.write("Evolution: %d%% complete\r" % perc)
+    #    stdout.flush()
 
     # Generate test fitness on regression problems
     if hasattr(params['FITNESS_FUNCTION'], "training_test") and end:
@@ -251,12 +251,12 @@ def get_moo_stats(individuals, end):
     if params['VERBOSE'] and not end:
         print_generation_stats()
         print_first_front_stats()
-
-    elif not params['SILENT']:
-        # Print simple display output.
-        perc = stats['gen'] / (params['GENERATIONS'] + 1) * 100
-        stdout.write("Evolution: %d%% complete\r" % perc)
-        stdout.flush()
+    ### NEW 29-11-2020: these prints are made by me: PPereira :)
+    #elif not params['SILENT']:
+    #    # Print simple display output.
+    #    perc = stats['gen'] / (params['GENERATIONS'] + 1) * 100
+    #    stdout.write("Evolution: %d%% complete\r" % perc)
+    #    stdout.flush()
 
     # Generate test fitness on regression problems
     if hasattr(params['FITNESS_FUNCTION'], "training_test") and end:
