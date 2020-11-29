@@ -22,7 +22,7 @@ params = {
         'EXPERIMENT_NAME': "Test",
         # Set default number of runs to be done.
         # ONLY USED WITH EXPERIMENT MANAGER.
-        'RUNS': 3,
+        'RUNS': 1,
 
         # Class of problem
         'FITNESS_FUNCTION': "supervised_learning.classification, minimise_nodes", #"supervised_learning.classification",#
@@ -42,7 +42,7 @@ params = {
         'PERMUTATION_RAMPS': 5,
 
         # Select error metric
-        'ERROR_METRIC': "auc_metric2",
+        'ERROR_METRIC': "AUC",
 
         # Optimise constants in the supervised_learning fitness function.
         # TODO: this must be changed in future, bro
@@ -210,10 +210,14 @@ params = {
         
         # Save initial and final populations: only for testing purposes
         # True or False
-        'SAVE_POP': True
+        'SAVE_POP': True,
+        
+        ### NEW 29-11-2020: dataset can be passed as argument
+        'X_train' : None,
+        'y_train' : None,
+        'X_test' : None,
+        'y_test' : None
 }
-
-default_params = params
 
 def load_params(file_name):
     """
@@ -294,7 +298,28 @@ def set_params(command_line_args, create_files=True):
     # Join original params dictionary with command line specified arguments.
     # NOTE that command line arguments overwrite all previously set parameters.
     params.update(cmd_args)
-    
+    ### NEW 29-11-2020: dataset is loaded once only!
+    if params["X_train"] is None or params["y_test"] is None:
+        if params["DATASET_TRAIN"] == "" or params["TARGET"] == "":
+            s = "algorithm.parameters.set_params\nError: " \
+            "dataset or target was not provided!" \
+            "Specify dataset path and target using 'DATASET_TRAIN' and 'TARGET' parameters, respectively."\
+            "Alternatively, pass the data directly to 'X_train' and 'y_train' parameters."
+            raise Exception(s)
+        else:
+            from utilities.fitness.get_data import get_Xy_train_test_separate as get_d
+            train_set = path.join("..", "datasets", params["DATASET_TRAIN"])
+            if params["DATASET_TEST"] != "":
+                # Get the path to the testing dataset.
+                test_set = path.join("..", "datasets", params["DATASET_TEST"])
+            else:
+                # There is no testing dataset used.
+                test_set = None
+            (params["X_train"], params["y_train"],
+             params["X_test"], params["y_test"]) = get_d(train_set, 
+                                                         test_set, 
+                                                         skip_header=1)
+            
     if params['EXPERIMENT_NAME'] == '':
         params['EXPERIMENT_NAME'] = "MGEDT"
     if params['FOLDER_NAME'] == '':
@@ -318,21 +343,22 @@ def set_params(command_line_args, create_files=True):
         setattr(trackers, "state_individuals", individuals)
 
     else:
-        if params['REPLACEMENT'].split(".")[-1] == "steady_state":
-            # Set steady state step and replacement.
-            params['STEP'] = "steady_state_step"
-            params['GENERATION_SIZE'] = 2
-
-        else:
-            # Elite size is set to either 1 or 1% of the population size,
-            # whichever is bigger if no elite size is previously set.
-            if params['ELITE_SIZE'] is None:
-                params['ELITE_SIZE'] = return_one_percent(1, params[
-                    'POPULATION_SIZE'])
-
-            # Set the size of a generation
-            params['GENERATION_SIZE'] = params['POPULATION_SIZE'] - \
-                                        params['ELITE_SIZE']
+        if isinstance(params['REPLACEMENT'], str):
+            if params['REPLACEMENT'].split(".")[-1] == "steady_state":
+                # Set steady state step and replacement.
+                params['STEP'] = "steady_state_step"
+                params['GENERATION_SIZE'] = 2
+    
+            else:
+                # Elite size is set to either 1 or 1% of the population size,
+                # whichever is bigger if no elite size is previously set.
+                if params['ELITE_SIZE'] is None:
+                    params['ELITE_SIZE'] = return_one_percent(1, params[
+                        'POPULATION_SIZE'])
+    
+                # Set the size of a generation
+                params['GENERATION_SIZE'] = params['POPULATION_SIZE'] - \
+                                            params['ELITE_SIZE']
 
         # Initialise run lists and folders before we set imports.r
         initialise_run_params(create_files)
@@ -344,12 +370,15 @@ def set_params(command_line_args, create_files=True):
         # Clean the stats dict to remove unused stats.
         clean_stats.clean_stats()
 
-        # Set GENOME_OPERATIONS automatically for faster linear operations.
-        if (params['CROSSOVER'].representation == "subtree" or
-            params['MUTATION'].representation == "subtree"):
-            params['GENOME_OPERATIONS'] = False
-        else:
-            params['GENOME_OPERATIONS'] = True
+        try:
+            # Set GENOME_OPERATIONS automatically for faster linear operations.
+            if (params['CROSSOVER'].representation == "subtree" or
+                params['MUTATION'].representation == "subtree"):
+                params['GENOME_OPERATIONS'] = False
+            else:
+                params['GENOME_OPERATIONS'] = True
+        except:
+            pass
 
         # Ensure correct operators are used if multiple fitness functions used.
         if hasattr(params['FITNESS_FUNCTION'], 'multi_objective'):
@@ -386,14 +415,26 @@ def set_params(command_line_args, create_files=True):
             content = bnf.read() + "\n"
             bnf.close()
             # Get data headers
-            data_file = open(path.join('..', 'datasets', 
-                                       params['DATASET_TRAIN']), 'r')
-            headers = data_file.readline()[:-1] # ignore last character: '\n'.
-            data_file.close()
-            headers = headers.replace(";" + params['TARGET'], "")
-            headers = headers.replace(";", "'\" | \"'")
-            # Build grammar file based on base
-            idx = "<idx>\t\t\t::= \"'" + headers + "'\""
+            if params["X_train"] is None:
+                data_file = open(path.join('..', 'datasets', 
+                                           params['DATASET_TRAIN']), 'r')
+                headers = data_file.readline()[:-1] # ignore last character: '\n'.
+                data_file.close()
+                headers = headers.replace(";" + params['TARGET'], "")
+                headers = headers.replace(";", "'\" | \"'")
+                # Build grammar file based on base
+                idx = "<idx>\t\t\t::= \"'" + headers + "'\""
+            else:
+                columns = params["X_train"].columns
+                headers=""
+                for n, col in enumerate(columns):
+                    if n==0:
+                        headers += "\"'{0}'\"".format(col)
+                    else:
+                        headers += " | \"'{0}'\"".format(col)
+                # Build grammar file based on base
+                idx = "<idx>\t\t\t::= " + headers
+            
             new_filepath = path.join("..", "grammars", gramm_filename)
             new_f = open(new_filepath, 'w')
             new_f.write(content)
