@@ -92,5 +92,6 @@ def mane():
     
 
 if __name__ == "__main__":
-    set_params(sys.argv[1:])  # exclude the ponyge.py arg itself
-    mane()
+    print(sys.argv)
+    #set_params(sys.argv[1:])  # exclude the ponyge.py arg itself
+    #mane()
