@@ -25,7 +25,8 @@ simplefilter(action='ignore', category=FutureWarning)
 def mane():
     #import GE
     """ Run program """
-    
+    set_params('')
+    #"""
     # Run evolution
     individuals = params['SEARCH_LOOP']()
 
@@ -89,9 +90,9 @@ def mane():
     #best = individuals[0] #max(individuals)
     #indTest = round(params['FITNESS_FUNCTION'](best, dist='test', savePred=True),2)
     #print(indTest)
-    
+    #"""
+    return params
 
 if __name__ == "__main__":
-    print(sys.argv)
-    #set_params(sys.argv[1:])  # exclude the ponyge.py arg itself
-    #mane()
+    set_params(sys.argv[1:])  # exclude the ponyge.py arg itself
+    mane()
