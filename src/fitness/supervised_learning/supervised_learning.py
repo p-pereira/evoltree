@@ -80,6 +80,8 @@ class supervised_learning(base_ff):
 
         
         if params['OPTIMIZE_CONSTANTS']:
+            from utilities.utils import remove_leading_zeros
+            ind.phenotype = remove_leading_zeros(ind.phenotype)
             # if we are training, then optimize the constants by
             # gradient descent and save the resulting phenotype
             # string as ind.phenotype_with_c0123 (eg x[0] +
