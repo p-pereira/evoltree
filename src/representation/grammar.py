@@ -237,12 +237,14 @@ class Grammar(object):
                     self.rules[rule.group('rulename')] = {
                         "choices": tmp_productions,
                         "no_choices": len(tmp_productions)}
-
+                    # NEW 6-12-2020: remove warning
+                    """
                     if len(tmp_productions) == 1:
                         # Unit productions.
                         print("Warning: Grammar contains unit production "
                               "for production rule", rule.group('rulename'))
                         print("         Unit productions consume GE codons.")
+                    """
                 else:
                     # Conflicting rules with the same name.
                     raise ValueError("lhs should be unique",
