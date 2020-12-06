@@ -13,8 +13,8 @@ params = {
         'STEP': 'step',
 
         # Evolutionary Parameters
-        'POPULATION_SIZE': 25,
-        'GENERATIONS': 100,
+        'POPULATION_SIZE': 50,
+        'GENERATIONS': 10,
         'HILL_CLIMBING_HISTORY': 100000,
         'SCHC_COUNT_METHOD': "count_all",
 
@@ -25,7 +25,7 @@ params = {
         'RUNS': 1,
 
         # Class of problem
-        'FITNESS_FUNCTION': "supervised_learning.classification, minimise_nodes", #"supervised_learning.classification",#
+        'FITNESS_FUNCTION': "supervised_learning.supervised_learning, minimise_nodes", #"supervised_learning.classification",#
 
         # Select problem dataset
         'DATASET_TRAIN': "Promos/TEST2/Train-IDF-1.csv",
@@ -45,7 +45,7 @@ params = {
         'ERROR_METRIC': "AUC",
 
         # Optimise constants in the supervised_learning fitness function.
-        # TODO: this must be changed in future, bro
+        # TODO - NEW 06-12-2020: it's not completely working!
         'OPTIMIZE_CONSTANTS': False,
 
         # Specify target for target problems
@@ -119,7 +119,7 @@ params = {
         # command line.
         'VERBOSE': False,
         # Use this to prevent anything being printed to the command line.
-        'SILENT': False,
+        'SILENT': True,
 
         # SAVING
         # Save the phenotype of the best individual from each generation. Can
@@ -131,7 +131,7 @@ params = {
 
         # MULTIPROCESSING
         # Multi-core parallel processing of phenotype evaluations.
-        'MULTICORE': True,
+        'MULTICORE': False,
         # Set the number of cpus to be used for multiprocessing
         'CORES': cpu_count()-1,
 
@@ -153,7 +153,7 @@ params = {
         'SEED_INDIVIDUALS': [],
         # Specify a target seed folder in the 'seeds' directory that contains a
         # population of individuals with which to seed a run.
-        'TARGET_SEED_FOLDER': "",
+        'TARGET_SEED_FOLDER': "MGEDT",
         # Set a target phenotype string for reverse mapping into a GE
         # individual
         'REVERSE_MAPPING_TARGET': None,
@@ -200,7 +200,7 @@ params = {
         
         # If LAMARCKIAN approach is used or not
         # True or False
-        'LAMARCK': True,
+        'LAMARCK': False,
         ### NEW 23-11-2020: probability of applying Lamarck
         # Set lamarck probability.
         'LAMARCK_PROBABILITY': 0.5,
@@ -324,9 +324,7 @@ def set_params(command_line_args, create_files=True):
         params['EXPERIMENT_NAME'] = "MGEDT"
     if params['FOLDER_NAME'] == '':
         import time
-        from random import random
-        params['FOLDER_NAME'] = "{0}_{1}".format(time.strftime("%Y%m%d%H%M%S"),
-                                                 int(random()*100))
+        params['FOLDER_NAME'] = "{0}".format(time.strftime("%Y%m%d%H%M%S"))
 
     if params['LOAD_STATE']:
         # Load run from state.
