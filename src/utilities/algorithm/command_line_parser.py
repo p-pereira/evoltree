@@ -346,7 +346,7 @@ def parse_cmd_args(arguments):
                              'False.')
     parser.add_argument('--multicore',
                         dest='MULTICORE',
-                        action='store_false',
+                        action='store_true',
                         help='Turns on multicore evaluation.')
     parser.add_argument('--cores',
                         dest='CORES',
