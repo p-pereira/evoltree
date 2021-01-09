@@ -13,8 +13,8 @@ params = {
         'STEP': 'step',
 
         # Evolutionary Parameters
-        'POPULATION_SIZE': 50,
-        'GENERATIONS': 10,
+        'POPULATION_SIZE': 100,
+        'GENERATIONS': 100,
         'HILL_CLIMBING_HISTORY': 100000,
         'SCHC_COUNT_METHOD': "count_all",
 
@@ -52,7 +52,7 @@ params = {
         'TARGET': "target",
 
         # Set max sizes of individuals
-        'MAX_TREE_DEPTH': 50,  # SET TO 90 DUE TO PYTHON EVAL() STACK LIMIT.
+        'MAX_TREE_DEPTH': 90,  # SET TO 90 DUE TO PYTHON EVAL() STACK LIMIT.
                                # INCREASE AT YOUR OWN RISK.
         'MAX_TREE_NODES': None,
         'CODON_SIZE': 300,
@@ -107,7 +107,7 @@ params = {
         # Set replacement operator.
         'REPLACEMENT': "operators.replacement.nsga2_replacement",#"operators.replacement.generational",#
         # Set elite size.
-        'ELITE_SIZE': 0,#30,
+        'ELITE_SIZE': 30,
 
         # DEBUGGING
         # Use this to turn on debugging mode. This mode doesn't write any files
@@ -131,7 +131,7 @@ params = {
 
         # MULTIPROCESSING
         # Multi-core parallel processing of phenotype evaluations.
-        'MULTICORE': False,
+        'MULTICORE': True,
         # Set the number of cpus to be used for multiprocessing
         'CORES': cpu_count()-1,
 
@@ -196,7 +196,7 @@ params = {
 
         # Folder name to store the results
         # if None, timestamp is used
-        'FOLDER_NAME': "",
+        'FOLDER_NAME': "Tests3",
         
         # If LAMARCKIAN approach is used or not
         # True or False
@@ -216,7 +216,8 @@ params = {
         'X_train' : None,
         'y_train' : None,
         'X_test' : None,
-        'y_test' : None
+        'y_test' : None,
+        
 }
 
 def load_params(file_name):
@@ -298,6 +299,7 @@ def set_params(command_line_args, create_files=True):
     # Join original params dictionary with command line specified arguments.
     # NOTE that command line arguments overwrite all previously set parameters.
     params.update(cmd_args)
+    
     ### NEW 29-11-2020: dataset is loaded once only!
     if params["X_train"] is None or params["y_test"] is None:
         if params["DATASET_TRAIN"] == "" or params["TARGET"] == "":
@@ -319,7 +321,7 @@ def set_params(command_line_args, create_files=True):
              params["X_test"], params["y_test"]) = get_d(train_set, 
                                                          test_set, 
                                                          skip_header=1)
-            
+    
     if params['EXPERIMENT_NAME'] == '':
         params['EXPERIMENT_NAME'] = "MGEDT"
     if params['FOLDER_NAME'] == '':
