@@ -76,13 +76,13 @@ def evaluate_fitness(individuals):
                 results = eval_or_append(ind, results, pool)
 
     if params['MULTICORE']:
-        for result in results:
+        for n, result in enumerate(results):
             # Execute all jobs in the pool.
             ind = result.get()
 
             # Set the fitness of the evaluated individual by placing the
             # evaluated individual back into the population.
-            individuals[ind.name] = ind
+            individuals[n] = ind
 
             # Add the evaluated individual to the cache.
             cache[ind.phenotype] = ind.fitness
