@@ -78,7 +78,7 @@ class supervised_learning(base_ff):
         else:
             raise ValueError("Unknown dist: " + dist)
 
-        
+        """
         if params['OPTIMIZE_CONSTANTS']:
             from utilities.utils import remove_leading_zeros
             ind.phenotype = remove_leading_zeros(ind.phenotype)
@@ -89,48 +89,55 @@ class supervised_learning(base_ff):
             # ind.opt_consts (eg (0.5, 0.7). Later, when testing,
             # use the saved string and constants to evaluate.
             if dist == "training":
-                return optimize_constants(x, y, ind)
-
+            #    #return optimize_constants(x, y, ind)
+                fitness, ind =  optimize_constants(x, y, ind)
+                return fitness, ind
             else:
-                # this string has been created during training
-                phen = ind.phenotype_consec_consts
-                c = ind.opt_consts
+                try:
+                    # this string has been created during training
+                    phen = ind.phenotype_consec_consts
+                    c = ind.opt_consts
+                except:
+                    phen = ind.phenotype
                 # phen will refer to x (ie test_in), and possibly to c
                 yhat = eval(phen)
                 assert np.isrealobj(yhat)
 
                 # let's always call the error function with the
                 # true values first, the estimate second
-                return params['ERROR_METRIC'](y, yhat)
+                return params['ERROR_METRIC'](y, yhat), None
 
-        else:
-            # phenotype won't refer to C
-            try:
-                start = time.time()
-                yhat = eval(ind.phenotype)
-                end = time.time()
-            except SyntaxError: # invalid solutions due to leading zeros
-                #print("Fixed leading zeros!")
-                from utilities.utils import remove_leading_zeros
-                ind.phenotype = remove_leading_zeros(ind.phenotype)
-                from importlib import import_module
-                i = import_module(params["LAMARCK_MAPPER"])
-                ind.genotype = i.get_genome_from_dt_idf(ind.phenotype)
-                start = time.time()
-                yhat = eval(ind.phenotype)
-                end = time.time()
-            #print(savePred)
-            if savePred:
-                d = pd.DataFrame({'y': y, 'pred':yhat},index=None)
-                d.to_csv(params['FILE_PATH']+'/preds.csv', sep=";",index=False)
-                f = open(params['FILE_PATH']+'/time_preds.txt', 'w')
-                f.write(str((end-start)/len(y)))
-                f.close()
-            #yhat = exec(ind.phenotype)
-            assert np.isrealobj(yhat)
+        else:"""
+        # phenotype won't refer to C
+        try:
+            start = time.time()
+            yhat = ind.predict(x)
+            end = time.time()
+        except SyntaxError: # invalid solutions due to leading zeros
+            #print("Fixed leading zeros!")
+            from utilities.utils import remove_leading_zeros
+            ind.phenotype = remove_leading_zeros(ind.phenotype)
+            from importlib import import_module
+            i = import_module(params["LAMARCK_MAPPER"])
+            ind.genotype = i.get_genome_from_dt_idf(ind.phenotype)
+            start = time.time()
+            yhat = ind.predict(x)
+            end = time.time()
+        #print(savePred)
+        if savePred:
+            from utilities.fitness.error_metric import AUC
+            auc_ = AUC(y, yhat)
+            d = pd.DataFrame({'y': y, 'pred':yhat, 'auc':auc_},index=None)
+            d.to_csv(params['FILE_PATH']+'/preds.csv', sep=";",index=False)
+            f = open(params['FILE_PATH']+'/time_preds.txt', 'w')
+            f.write(str((end-start)/len(y)))
+            f.close()
+            
+        #yhat = exec(ind.phenotype)
+        assert np.isrealobj(yhat)
 
-            # let's always call the error function with the true
-            # values first, the estimate second
-            return params['ERROR_METRIC'](y, yhat)
+        # let's always call the error function with the true
+        # values first, the estimate second
+        return params['ERROR_METRIC'](y, yhat)
             
             

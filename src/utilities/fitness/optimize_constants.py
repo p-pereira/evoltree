@@ -4,7 +4,7 @@ import re
 
 from algorithm.parameters import params
 from utilities.fitness.math_functions import *
-
+from sklearn.metrics import log_loss
 
 def optimize_constants(x, y, ind):
     """
@@ -16,28 +16,29 @@ def optimize_constants(x, y, ind):
     :param ind: A GE individual.
     :return: The value of the error metric at those values
     """
-
+    init_eval = params['ERROR_METRIC'](y, eval(ind.phenotype))
     # Save the old phenotype (has c[0] etc, but may not be consecutive from
     # zero)
-    ind.phenotype_original = ind.phenotype
+    ind2 = ind.deep_copy()
+    ind2.phenotype_original = ind2.phenotype
 
     # Parse the phenotype to make the constants consecutive.
-    s, n_consts, init = make_consts_consecutive(ind.phenotype)
+    s, n_consts, init, bounds = make_consts_consecutive(ind2.phenotype)
     
     # Create new consecutive constant attribute for individual.
-    ind.phenotype_consec_consts = s
+    ind2.phenotype_consec_consts = s
 
     # Eval the phenotype.
     f = eval("lambda x, c: " + s)
 
     # Pre-load the error metric fitness function.
-    loss = params['ERROR_METRIC']
+    loss = log_loss#params['ERROR_METRIC']
 
     if n_consts == 0:
         # ind doesn't refer to c: no need to optimize
         c = []
         fitness = loss(y, f(x, c))
-        ind.opt_consts = c
+        ind2.opt_consts = c
         return fitness
 
     obj = lambda c: loss(y, f(x, c))
@@ -47,17 +48,36 @@ def optimize_constants(x, y, ind):
     # methods to try out. document
     #init = [1.0] * n_consts
     
-    res = scipy.optimize.minimize(obj, init, method="L-BFGS-B")
+    res = scipy.optimize.minimize(obj, init, method="L-BFGS-B", bounds=bounds,
+                                  options={'maxiter':10})
     
     # the result is accessed like a dict
-    ind.opt_consts = [int(x) if (float(x)-int(x) == 0) else float(x) for x in res['x']]  # the optimum values of the constants
+    ind2.opt_consts = [int(x) if (float(x)-int(x) == 0) else float(x) for x in res['x']]  # the optimum values of the constants
 
     # the most useful form of the phenotype: c[0], c[1] etc replaced
     # with actual numbers, so can be eval'd directly
-    ind.phenotype = replace_consts_with_values(s, ind.opt_consts)
-
-    return res['fun']
-
+    ind2.phenotype = replace_consts_with_values(s, ind2.opt_consts)
+    final_eval = params['ERROR_METRIC'](y, eval(ind2.phenotype))
+    
+    #return params['ERROR_METRIC'](y, eval(ind.phenotype))#res['fun']
+    #print('antes: ', init_eval, '\tdepois: ', final_eval)
+    if final_eval < init_eval:
+        from importlib import import_module
+        from algorithm.mapper import map_tree_from_genome
+        i = import_module(params['LAMARCK_MAPPER'])
+        genome = i.get_genome_from_dt_idf(ind2.phenotype)
+        ind2.genome = genome
+        mapped = map_tree_from_genome(genome)
+        ind2.tree = mapped[2]
+        ind2.nodes = mapped[3]
+        ind = ind2.deep_copy()
+        #params['improved'] += 1
+        #print(params['improved'])
+        return final_eval, ind
+    else:
+        #params['notimproved'] += 1
+        #print(params['notimproved'])
+        return init_eval, None
 
 def make_consts_consecutive(s):
     """
@@ -70,7 +90,7 @@ def make_consts_consecutive(s):
     :param s: A given phenotype string.
     :return: The phenotype string but with consecutive constants.
     """
-    
+    from itertools import repeat
     ### NEW 06-12-2020: constants are not in the same format of original ponyge2 implementation.
     # Therefore, we replace constants by 'c[k]', with k in [0, len(constants)-1].
     # Later, 'c[k]' is replaced by new values, got from optimization method.
@@ -88,7 +108,7 @@ def make_consts_consecutive(s):
         # NEW: we replace 1st ocurrence of constant by 'c[k]'
         s = s.replace(j, ci, 1)
         cont+=1
-    
+    bnds1 = list(repeat([0,1], len(const_idxs)))
     p2 = r'\(\d+(?:\.\d+)?\)' # new pattern for probability constants
     # find the consts, extract idxs as ints, unique-ify and sort
     #const_idxs = sorted(map(int, set(re.findall(p, s))))
@@ -98,10 +118,11 @@ def make_consts_consecutive(s):
         #cj = "c[%d]" % j
         # NEW: we replace 1st ocurrence of constant by 'c[k]'
         s = s.replace(j, ci, 1)
-    
+    bnds2 = list(repeat([0,20], len(const_idxs2)))
+    bounds = bnds1 + bnds2
     init_guess = [float(var[1:-1]) if '.' in var else int(var[1:-1]) for var in const_idxs+const_idxs2]
     
-    return s, len(const_idxs)+len(const_idxs2), init_guess
+    return s, len(const_idxs)+len(const_idxs2), init_guess, bounds
 
 
 def replace_consts_with_values(s, c):
