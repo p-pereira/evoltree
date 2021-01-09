@@ -61,3 +61,9 @@ obj = lambda c: loss(y, f(x, c))
 res = scipy.optimize.minimize(obj, init, method="L-BFGS-B")
 res['x'] = [int(x) if (float(x)-int(x) == 0) else float(x) for x in res['x']]
 
+"""
+from mgedt import MGEDT
+mgedt = MGEDT(pop=100, gen=100, lamarck=False)
+mgedt.fit()
+
+"""
