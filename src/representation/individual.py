@@ -124,6 +124,22 @@ class Individual(object):
         case, returns self.
         """
         # Evaluate fitness using specified fitness function.
+        if params['OPTIMIZE_CONSTANTS']:
+            from utilities.fitness.optimize_constants import optimize_constants
+            from utilities.utils import remove_leading_zeros
+            self.phenotype = remove_leading_zeros(self.phenotype)
+            # if we are training, then optimize the constants by
+            # gradient descent and save the resulting phenotype
+            # string as ind.phenotype_with_c0123 (eg x[0] +
+            # c[0] * x[1]**c[1]) and values for constants as
+            # ind.opt_consts (eg (0.5, 0.7). Later, when testing,
+            # use the saved string and constants to evaluate.
+            _, ind =  optimize_constants(params['X_train'], 
+                                         params['y_train'], 
+                                         self)
+            if ind is not None:
+                self = ind.deep_copy()
+        
         self.fitness = params['FITNESS_FUNCTION'](self)
 
         if params['MULTICORE']:
@@ -148,6 +164,15 @@ class Individual(object):
             if nrNodes == 1:
                 x, y, x_test, y_test = \
                 get_data(params['DATASET_TRAIN'], params['DATASET_TEST'])
+                if params['N_SAMPLING'] > 0:
+                    from random import sample
+                    N = params['N_SAMPLING']
+                    pos = np.where(y == 'Sale')[0]
+                    neg = np.where(y == 'NoSale')[0]
+                    randPos = sample(list(pos), N)
+                    randNeg = sample(list(neg), N)
+                    x = x.iloc[(randPos+randNeg),:]
+                    y = y.iloc[(randPos+randNeg)]
                 dt = tree.DecisionTreeClassifier()
                 dt = dt.fit(x, y)
                 # get the tree rules
@@ -220,6 +245,15 @@ class Individual(object):
                 # get data
                 x, y, x_test, y_test = \
                 get_data(params['DATASET_TRAIN'], params['DATASET_TEST'])
+                if params['N_SAMPLING'] > 0:
+                    from random import sample
+                    N = params['N_SAMPLING']
+                    pos = np.where(y == 'Sale')[0]
+                    neg = np.where(y == 'NoSale')[0]
+                    randPos = sample(list(pos), N)
+                    randNeg = sample(list(neg), N)
+                    x = x.iloc[(randPos+randNeg),:]
+                    y = y.iloc[(randPos+randNeg)]
                 # index of records that fall on the changed expression
                 index = np.where(eval(newExp) == 100)[0]
                 if len(index) > 0:
@@ -270,3 +304,7 @@ class Individual(object):
         
         else:
             return self
+    
+    ### NEW 02-01-2021
+    def predict(self, x):
+        return eval(self.phenotype)
