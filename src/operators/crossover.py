@@ -4,7 +4,9 @@ from algorithm.parameters import params
 from representation import individual
 from representation.latent_tree import latent_tree_crossover, latent_tree_repair
 from utilities.representation.check_methods import check_ind
-
+import re
+from importlib import import_module
+from algorithm.mapper import map_tree_from_genome
 
 def crossover(parents):
     """
@@ -65,17 +67,19 @@ def crossover_inds(parent_0, parent_1):
     # Perform crossover on ind_0 and ind_1.
     inds = params['CROSSOVER'](ind_0, ind_1)
 
+    if inds == None:
+        return None
     # Check each individual is ok (i.e. does not violate specified limits).
     checks = [check_ind(ind, "crossover") for ind in inds]
 
     if any(checks):
         # An individual violates a limit.
+        #print("An individual violates a limit.")
         return None
 
     else:
         # Crossover was successful, return crossed-over individuals.
         return inds
-
 
 def variable_onepoint(p_0, p_1):
     """
@@ -113,7 +117,6 @@ def variable_onepoint(p_0, p_1):
 
     return [ind_0, ind_1]
 
-
 def fixed_onepoint(p_0, p_1):
     """
     Given two individuals, create two children using one-point crossover and
@@ -149,7 +152,6 @@ def fixed_onepoint(p_0, p_1):
     
     return [ind_0, ind_1]
 
-
 def fixed_twopoint(p_0, p_1):
     """
     Given two individuals, create two children using two-point crossover and
@@ -184,7 +186,6 @@ def fixed_twopoint(p_0, p_1):
     ind_1 = individual.Individual(c_1, None)
     
     return [ind_0, ind_1]
-
 
 def variable_twopoint(p_0, p_1):
     """
@@ -222,7 +223,6 @@ def variable_twopoint(p_0, p_1):
     ind_1 = individual.Individual(c_1, None)
     
     return [ind_0, ind_1]
-
 
 def subtree(p_0, p_1):
     """
@@ -389,7 +389,6 @@ def subtree(p_0, p_1):
 
     return [ind0, ind1]
 
-
 def get_max_genome_index(ind_0, ind_1):
     """
     Given two individuals, return the maximum index on each genome across
@@ -424,7 +423,6 @@ def get_max_genome_index(ind_0, ind_1):
         max_p_0, max_p_1 = len(ind_0.genome), len(ind_1.genome)
         
     return max_p_0, max_p_1
-
 
 def LTGE_crossover(p_0, p_1):
     """Crossover in the LTGE representation."""
@@ -462,6 +460,85 @@ def LTGE_crossover(p_0, p_1):
    
     return [ind_0, ind_1]
 
+def get_all_nodes(phenotype):
+    """
+    Extracts all decision nodes and leafs from a DT phenotype.
+    :param phenotype: an individual's phenotype in DT format.
+    :returns: All leafs and decision dodes.
+    """
+    inits = [node.start() for node in re.finditer('np.where', phenotype)]
+    ends = []
+    for nodePosition in inits:
+        # get the expression
+        #   get opened and closed brackets' positions
+        openBrPos = [m.start() for m in re.finditer('\(', 
+                                                    phenotype[nodePosition:])]
+        closeBrPos = [m.start() for m in re.finditer('\)', 
+                                                     phenotype[nodePosition:])]
+        allBrPos = sorted(openBrPos + closeBrPos)
+        # get the position where the expression to be replaced ends
+        openBr = 0
+        closeBr = 0
+        position = 1
+        for i in range(0,len(allBrPos)):
+            pos = allBrPos[i]
+            if pos in openBrPos:
+                openBr = openBr + 1
+            elif pos in closeBrPos:
+                closeBr = closeBr + 1
+            if openBr == closeBr:
+                position = pos
+                ends.append(position)
+                break
+    
+    decision_nodes = [phenotype[start:][:end+1] for start, end in zip(inits, 
+                                                                      ends)]
+    leafs = re.findall(r"\(\d+.\d+\)|\(\d+\)", phenotype)
+    
+    return leafs + decision_nodes
+
+def DT_crossover(ind1, ind2):
+    """
+    Applies crossover to individuals. Takes two DTs, randomly chooses a subtree
+    from each and changes it.
+    :param ind1: individual1 to apply crossover operator.
+    :param ind2: individual2 to apply crossover operator.
+    :returns: both changed individuals.
+    """
+    # Get phenotypes from individuals
+    phen1 = ind1.phenotype
+    phen2 = ind2.phenotype
+    # Get all decision nodes and leafs from each individual's phenotype
+    nodes1 = get_all_nodes(phen1)
+    nodes2 = get_all_nodes(phen2)
+    # Randomly choose which node to replace in each phenotype
+    node1 = sample(nodes1, 1)[0]
+    node2 = sample(nodes2, 1)[0]
+    # Replace node in each phenotype
+    phen1 = phen1.replace(node1, node2)
+    phen2 = phen2.replace(node2, node1)
+    # Get new genome from new phenotype for both individuals
+    try : # invalid individuals can be generated
+        i = import_module(params['LAMARCK_MAPPER'])
+        # individual1
+        genome1 = i.get_genome_from_dt_idf(phen1)
+        mapped1 = map_tree_from_genome(genome1)
+        ind1.phenotype = phen1
+        ind1.genome = genome1
+        ind1.tree = mapped1[2]
+        ind1.nodes = mapped1[3]
+        # individual2
+        genome2 = i.get_genome_from_dt_idf(phen2)
+        mapped2 = map_tree_from_genome(genome2)
+        ind2.phenotype = phen2
+        ind2.genome = genome2
+        ind2.tree = mapped2[2]
+        ind2.nodes = mapped2[3]
+        # done!
+        return ind1, ind2
+    except:
+        return None
+   
 
 # Set attributes for all operators to define linear or subtree representations.
 variable_onepoint.representation = "linear"
@@ -470,3 +547,5 @@ variable_twopoint.representation = "linear"
 fixed_twopoint.representation = "linear"
 subtree.representation = "subtree"
 LTGE_crossover.representation = "latent tree"
+
+DT_crossover.representation = "subtree"

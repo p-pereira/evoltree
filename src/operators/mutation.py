@@ -5,7 +5,10 @@ from representation import individual
 from representation.derivation import generate_tree
 from representation.latent_tree import latent_tree_mutate, latent_tree_repair
 from utilities.representation.check_methods import check_ind
-
+import re
+from random import sample, uniform
+from importlib import import_module
+from algorithm.mapper import map_tree_from_genome
 
 def mutation(pop):
     """
@@ -237,9 +240,26 @@ def LTGE_mutation(ind):
     
     return ind
 
+def DT_mutation(ind):
+    phen = ind.phenotype
+    for i in range(params['MUTATION_EVENTS']):
+        leafs = re.findall(r"\(\d+.\d+\)|\(\d+\)", phen)
+        rand_prob = round(uniform(0, 1), 4)
+        rand_node = sample(leafs, 1)[0]
+        phen = phen.replace(rand_node, '({0})'.format(str(rand_prob)), 1)
+    i = import_module(params['LAMARCK_MAPPER'])
+    genome = i.get_genome_from_dt_idf(phen)
+    mapped = map_tree_from_genome(genome)
+    ind.phenotype = phen
+    ind.genome = genome
+    ind.tree = mapped[2]
+    ind.nodes = mapped[3]
+    return ind
 
 # Set attributes for all operators to define linear or subtree representations.
 int_flip_per_codon.representation = "linear"
 int_flip_per_ind.representation = "linear"
 subtree.representation = "subtree"
 LTGE_mutation.representation = "latent tree"
+
+DT_mutation.representation = "subtree"
