@@ -17,8 +17,6 @@ class MGEDT(object):
         from algorithm.parameters import params, set_params
         from multiprocessing import Pool
         from utilities.algorithm.initialise_run import pool_init
-        from operators.initialisation import initialisation
-        from fitness.evaluation import evaluate_fitness
         
         if len(param_list) == 0:
             if UI:
@@ -74,20 +72,24 @@ class MGEDT(object):
             params['POOL'] = Pool(processes=params['CORES'], 
                                   initializer=pool_init,
                                   initargs=(params,))
-        # Initialise population
-        individuals = initialisation(pop)
-        # Evaluate initial population
-        individuals = evaluate_fitness(individuals)
         self.params = params
-        self.population = individuals
+        self.population = []
         self.stats = stats
     
-    def evolve(self):
+    def fit(self):
         from stats.stats import get_stats, stats
         from algorithm.parameters import params
+        from operators.initialisation import initialisation
+        from fitness.evaluation import evaluate_fitness
         from tqdm import tqdm
         
+        if self.population == []:
+            # Initialise population
+            self.population = initialisation(params['POPULATION_SIZE'])
+            # Evaluate initial population
+            self.population = evaluate_fitness(self.population)
         population = self.population
+        
         # Generate statistics for run so far
         get_stats(population)
         
@@ -96,6 +98,7 @@ class MGEDT(object):
         for generation in tqdm(range(1, total_gens)):
             stats['gen'] = generation
             population = params['STEP'](population)
+            population.sort(key=lambda x: x.fitness[0], reverse=False)
         
         if params['TARGET_SEED_FOLDER'] != "":
             self.store_pop(population)
@@ -105,7 +108,7 @@ class MGEDT(object):
         self.stats = stats
         self.population = population
     
-    def reevolve(self, generations):
+    def refit(self, generations):
         from stats.stats import get_stats, stats
         from algorithm.parameters import params
         from tqdm import tqdm
@@ -119,19 +122,21 @@ class MGEDT(object):
         for generation in tqdm(range(params['GENERATIONS']+1, total_gens)):
             stats['gen'] = generation
             population = params['STEP'](population)
+            population.sort(key=lambda x: x.fitness[0], reverse=False)
         
         get_stats(population, end=True)
         self.stats = stats
         self.population = population
     
-    def evolve_new_data(self, generations, X_train, y_train, 
+    def fit_new_data(self, generations, X, y, 
                         X_test=None, y_test=None):
         from stats.stats import get_stats, stats
         from algorithm.parameters import params
         from tqdm import tqdm
+        from math import log10
         
         (params['X_train'], params['y_train'], 
-         params['X_test'], params['y_test']) = X_train, y_train, X_test, y_test
+         params['X_test'], params['y_test']) = X, y, X_test, y_test
         
         population = self.population
         # Generate statistics for run so far
@@ -142,6 +147,15 @@ class MGEDT(object):
         for generation in tqdm(range(params['GENERATIONS']+1, total_gens)):
             stats['gen'] = generation
             population = params['STEP'](population)
+            
+            min_y = log10(min(population, 
+                              key=lambda x: x.fitness[1]).fitness[1])
+            max_y = log10(max(population, 
+                              key=lambda x: x.fitness[1]).fitness[1])
+            population.sort(key=lambda x: self.get_distance(x, 
+                                                            min_y, 
+                                                            max_y), 
+                            reverse=True)
         
         if params['TARGET_SEED_FOLDER'] != "":
             self.store_pop(population)
@@ -171,7 +185,43 @@ class MGEDT(object):
                     f.write("Training fitness:\n")
                     f.write("%s\n" % item.fitness)
                     f.close()
-
+    
+    def predict(self, x, mode="best"):
+        if mode == "all":
+            preds = [ind.predict(x) for ind in self.population]
+        elif mode == "best":
+            best = min(self.population, key=lambda x: x.fitness[0])
+            preds = best.predict(x)
+        elif mode == "simplest":
+            simplest = min(self.population, key=lambda x: x.fitness[1])
+            preds = simplest.predict(x)
+        elif mode == "balanced":
+            from math import log10
+            min_y = log10(min(self.population, 
+                              key=lambda x: x.fitness[1]).fitness[1])
+            max_y = log10(max(self.population, 
+                              key=lambda x: x.fitness[1]).fitness[1])
+            # get individual with greater distance to point (0, 1)
+            balanced = max(self.population,
+                           key=lambda x: self.get_distance(x, 
+                                                           min_y, 
+                                                           max_y))
+            preds = balanced.predict(x)
+        
+        return preds
+    
+    def get_distance(self, ind, min_y, max_y):
+        import math
+        auc = ind.fitness[0] / -100 # auc (positive, from 0 to 1)
+        comp = math.log10(ind.fitness[1]) #complexity
+        # scale complexity to [0, 1]
+        comp = (comp - min_y) / (max_y - min_y)
+        # worst result: (0, 1)
+        x = 0
+        y = 1
+        # get distance:
+        dist = math.hypot(auc-x, comp-y)
+        return dist
 
 """
 def set_params1(train_data, test_data, target, # data parameters are mandatory
