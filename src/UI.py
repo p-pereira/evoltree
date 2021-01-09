@@ -97,7 +97,7 @@ class MGEDT_UI:
     def start_pop(self, args):
         self._mgedt = MGEDT(UI_params=args.to_dict(), UI=True)
         self.PARAMS_SET = True
-        self.thread = Thread(target = self._mgedt.evolve)
+        self.thread = Thread(target = self._mgedt.fit)
         
 
 @app.route('/')
@@ -125,13 +125,6 @@ def progress():
 def parameters():
     if request.method == 'POST':
         args = request.form
-        print(args)
-        #from algorithm.parameters import set_params
-        #set_params(args)
-        #global PARAMS_SET
-        #PARAMS_SET=True
-        #global PARAMS_USER
-        #PARAMS_USER=args
         mgedt_gui.start_pop(args)
         return redirect("/")
     else:
