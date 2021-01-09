@@ -2,8 +2,7 @@ import warnings
 
 import numpy as np
 from sklearn.metrics import f1_score as sklearn_f1_score
-from sklearn.metrics import roc_auc_score
-
+from sklearn.metrics import roc_auc_score, log_loss
 
 def mae(y, yhat):
     """
@@ -122,14 +121,12 @@ def Hamming_error(y, yhat):
 Hamming_error.maximise = False
 
 def AUC(y, yhat):
-    #print(yhat)
-    #print(y)
     """
     Calculate the Area Under the Curve (AUC).
 
     :param y: The expected input (i.e. from dataset).
     :param yhat: The given input (i.e. from phenotype).
-    :return: The mean absolute error.
+    :return: The AUC.
     """
     ### NEW ###
     # Replaces NaNs or infinite values
@@ -144,3 +141,11 @@ def AUC(y, yhat):
     #return(auc)
 # Set maximise attribute for auc error metric.
 AUC.maximise = False
+
+### NEW 02-01-2021 (TEST)
+def LOG_LOSS(y, yhat):
+    # Replaces NaNs or infinite values
+    yhat = np.nan_to_num(yhat)
+    return log_loss(y, yhat)
+
+LOG_LOSS.maximise = False
