@@ -4,7 +4,7 @@ from operators.mutation import mutation
 from operators.crossover import crossover_inds
 from operators.selection import selection
 from utilities.algorithm.NSGA2 import compute_pareto_metrics
-
+import math
 
 def replacement(new_pop, old_pop):
     """
@@ -153,5 +153,72 @@ def nsga2_replacement(new_pop, old_pop):
     return temp_pop
 
 
+def nsga2_replacement2(new_pop, old_pop):
+    """
+    Replaces the old population with the new population using NSGA-II
+    replacement. Both new and old populations are combined, pareto fronts
+    and crowding distance are calculated, and the replacement population is
+    computed based on crowding distance per pareto front.
+    
+    :param new_pop: The new population (e.g. after selection, variation, &
+                    evaluation).
+    :param old_pop: The previous generation population.
+    :return: The 'POPULATION_SIZE' new population.
+    """
+
+    # Combine both populations (R_t = P_t union Q_t)
+    new_pop.extend(old_pop)
+
+    # Compute the pareto fronts and crowding distance
+    pareto = compute_pareto_metrics(new_pop)
+
+    # Size of the new population
+    pop_size = params['POPULATION_SIZE']
+
+    # New population to replace the last one
+    temp_pop, i = [], 0
+
+    while len(temp_pop) < pop_size:
+        # Populate the replacement population
+        
+        if len(pareto.fronts[i]) <= pop_size - len(temp_pop):
+            temp_pop.extend(pareto.fronts[i])
+        
+        else:
+            from math import log10
+            min_y = log10(min(new_pop, 
+                              key=lambda x: x.fitness[1]).fitness[1])
+            max_y = log10(max(new_pop, 
+                              key=lambda x: x.fitness[1]).fitness[1])
+            # Sort the current pareto front with respect to distance to worst possible point.
+            pareto.fronts[i] = sorted(pareto.fronts[i],
+                                      key=lambda item:
+                                      get_distance(item, min_y, max_y),
+                                      reverse=True)
+           
+            # Get number of individuals to add in temp to achieve the pop_size
+            diff_size = pop_size - len(temp_pop)
+            
+            # Extend the replacement population
+            temp_pop.extend(pareto.fronts[i][:diff_size])
+    
+        # Increment counter.
+        i += 1
+    
+    return temp_pop
+
 # Set attributes for all operators to define multi-objective operators.
 nsga2_replacement.multi_objective = True
+
+nsga2_replacement2.multi_objective = True
+def get_distance(ind, min_y, max_y):
+    auc = ind.fitness[0] / -100 # auc (positive, from 0 to 1)
+    comp = math.log10(ind.fitness[1]) #complexity
+    # scale complexity to [0, 1]
+    comp = (comp - min_y) / (max_y - min_y)
+    # worst result: (0, 1)
+    x = 0
+    y = 1
+    # get distance:
+    dist = math.hypot(auc-x, comp-y)
+    return dist
