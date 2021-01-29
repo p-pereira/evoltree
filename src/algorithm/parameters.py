@@ -13,8 +13,8 @@ params = {
         'STEP': 'step',
 
         # Evolutionary Parameters
-        'POPULATION_SIZE': 100,
-        'GENERATIONS': 100,
+        'POPULATION_SIZE': 10,
+        'GENERATIONS': 10,
         'HILL_CLIMBING_HISTORY': 100000,
         'SCHC_COUNT_METHOD': "count_all",
 
@@ -196,7 +196,7 @@ params = {
 
         # Folder name to store the results
         # if None, timestamp is used
-        'FOLDER_NAME': "Tests3",
+        'FOLDER_NAME': "Tests",
         
         # If LAMARCKIAN approach is used or not
         # True or False
