@@ -14,9 +14,6 @@ class MGEDT(object):
     def __init__(self, pop=10, gen=5, lamarck=True, multicore=True, UI=False,
                  UI_params=None, param_list=[], **extra_params):
         from stats.stats import stats
-        from algorithm.parameters import params, set_params
-        from multiprocessing import Pool
-        from utilities.algorithm.initialise_run import pool_init
         
         if len(param_list) == 0:
             if UI:
@@ -25,14 +22,14 @@ class MGEDT(object):
                         param_list.append("--"+key)
                     elif val=="False" or val=="":
                         continue
-                    elif key == "X_train":
-                        params[key] = val
-                    elif key == "y_train":
-                        params[key] = val
-                    elif key == "X_test":
-                        params[key] = val
-                    elif key == "y_test":
-                        params[key] = val
+                    #elif key == "X_train":
+                    #    params[key] = val
+                    #elif key == "y_train":
+                    #    params[key] = val
+                    #elif key == "X_test":
+                    #    params[key] = val
+                    #elif key == "y_test":
+                    #    params[key] = val
                     else:
                         param_list.append("--{0}={1}".format(key, val))
             else:
@@ -52,36 +49,47 @@ class MGEDT(object):
                         param_list.append("--"+key)
                     elif val=="False" or val=="":
                         continue
-                    elif key == "X_train":
-                        params[key] = val
-                    elif key == "y_train":
-                        params[key] = val
-                    elif key == "X_test":
-                        params[key] = val
-                    elif key == "y_test":
-                        params[key] = val
+                    #elif key == "X_train":
+                    #    params[key] = val
+                    #elif key == "y_train":
+                    #    params[key] = val
+                    #elif key == "X_test":
+                    #    params[key] = val
+                    #elif key == "y_test":
+                    #    params[key] = val
                     else:
                         param_list.append("--{0}={1}".format(key, val))
         
-        set_params(param_list)
-        
-        if multicore:
-            if "POOL" in params.keys():
-                params["POOL"] = None
-            # initialize pool once, if mutlicore is enabled
-            params['POOL'] = Pool(processes=params['CORES'], 
-                                  initializer=pool_init,
-                                  initargs=(params,))
-        self.params = params
+        self.param_list = param_list
+        self.params = {}
         self.population = []
         self.stats = stats
     
-    def fit(self):
+    def fit(self, X, y, X_val=None, y_val=None):
         from stats.stats import get_stats, stats
-        from algorithm.parameters import params
         from operators.initialisation import initialisation
         from fitness.evaluation import evaluate_fitness
         from tqdm import tqdm
+        from algorithm.parameters import params, set_params
+        from multiprocessing import Pool
+        from utilities.algorithm.initialise_run import pool_init
+        
+        params["X_train"] = X
+        params["y_train"] = y
+        params["X_test"] = X
+        params["y_test"] = y
+        
+        if len(self.params) == 0:
+            set_params(self.param_list)
+        
+            if params["MULTICORE"]:
+                if "POOL" in params.keys():
+                    params["POOL"] = None
+                # initialize pool once, if mutlicore is enabled
+                params['POOL'] = Pool(processes=params['CORES'], 
+                                      initializer=pool_init,
+                                      initargs=(params,))
+        self.params = params
         
         if self.population == []:
             # Initialise population
