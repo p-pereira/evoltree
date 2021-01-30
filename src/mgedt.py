@@ -8,64 +8,20 @@ class MGEDT(object):
     """
     MGEDT object.
     """
-    from warnings import simplefilter
+   # from warnings import simplefilter
     # ignore all future warnings
-    simplefilter(action='ignore', category=FutureWarning)
-    def __init__(self, pop=10, gen=5, lamarck=True, multicore=True, UI=False,
-                 UI_params=None, param_list=[], **extra_params):
+    #simplefilter(action='ignore', category=FutureWarning)
+    def __init__(self):
         from stats.stats import stats
         
-        if len(param_list) == 0:
-            if UI:
-                for (key, val) in UI_params.items():
-                    if val == "True":
-                        param_list.append("--"+key)
-                    elif val=="False" or val=="":
-                        continue
-                    #elif key == "X_train":
-                    #    params[key] = val
-                    #elif key == "y_train":
-                    #    params[key] = val
-                    #elif key == "X_test":
-                    #    params[key] = val
-                    #elif key == "y_test":
-                    #    params[key] = val
-                    else:
-                        param_list.append("--{0}={1}".format(key, val))
-            else:
-                if 'population_size' not in extra_params.keys():
-                    param_list.append('--population_size={0}'.format(str(pop)))
-                
-                if 'generations' not in extra_params.keys():
-                    param_list.append('--generations={0}'.format(str(gen)))
-                
-                if multicore and 'multicore' not in extra_params.keys():
-                    param_list.append("--multicore")
-                if lamarck and 'lamarck' not in extra_params.keys():
-                    param_list.append("--lamarck")
-                
-                for (key, val) in extra_params.items():
-                    if val == "True":
-                        param_list.append("--"+key)
-                    elif val=="False" or val=="":
-                        continue
-                    #elif key == "X_train":
-                    #    params[key] = val
-                    #elif key == "y_train":
-                    #    params[key] = val
-                    #elif key == "X_test":
-                    #    params[key] = val
-                    #elif key == "y_test":
-                    #    params[key] = val
-                    else:
-                        param_list.append("--{0}={1}".format(key, val))
-        
-        self.param_list = param_list
+        self.param_list = []
         self.params = {}
         self.population = []
         self.stats = stats
+        self.fitted = False
     
-    def fit(self, X, y, X_val=None, y_val=None):
+    def fit(self, X, y, X_val=None, y_val=None, pop=100, gen=100, 
+            lamarck=True, multicore=True, **extra_params):
         from stats.stats import get_stats, stats
         from operators.initialisation import initialisation
         from fitness.evaluation import evaluate_fitness
@@ -74,21 +30,22 @@ class MGEDT(object):
         from multiprocessing import Pool
         from utilities.algorithm.initialise_run import pool_init
         
-        params["X_train"] = X
-        params["y_train"] = y
-        params["X_test"] = X
-        params["y_test"] = y
+        #if len(self.params) == 0:
+        self.param_list = self.__set_params__(pop, gen, lamarck, multicore,
+                                              **extra_params)
+        set_params(self.param_list)
         
-        if len(self.params) == 0:
-            set_params(self.param_list)
+        if params["MULTICORE"]:
+            if "POOL" in params.keys():
+                params["POOL"] = None
+            # initialize pool once, if mutlicore is enabled
+            params['POOL'] = Pool(processes=params['CORES'], 
+                                  initializer=pool_init,
+                                  initargs=(params,))
+        self.ml_params = params
+        (params['X_train'], params['y_train'], 
+         params['X_test'], params['y_test']) = X, y, X_val, y_val
         
-            if params["MULTICORE"]:
-                if "POOL" in params.keys():
-                    params["POOL"] = None
-                # initialize pool once, if mutlicore is enabled
-                params['POOL'] = Pool(processes=params['CORES'], 
-                                      initializer=pool_init,
-                                      initargs=(params,))
         self.params = params
         
         if self.population == []:
@@ -101,22 +58,21 @@ class MGEDT(object):
         # Generate statistics for run so far
         get_stats(population)
         
+        mlflow = self.__get_mlflow__(params['EXPERIMENT_NAME'])
         total_gens = params['GENERATIONS']+1
-        # Traditional GE
-        for generation in tqdm(range(1, total_gens)):
-            stats['gen'] = generation
-            population = params['STEP'](population)
-            population.sort(key=lambda x: x.fitness[0], reverse=False)
+        range_generations = tqdm(range(1, total_gens))
         
-        if params['TARGET_SEED_FOLDER'] != "":
-            self.store_pop(population)
-        
+        population = self.__evolve__(params, range_generations,
+                                     mlflow, population)
         get_stats(population, end=True)
         
         self.stats = stats
         self.population = population
+        self.fitted = True
     
-    def refit(self, generations):
+    def refit(self, gen):
+        if not self.fitted:
+            raise Exception("MGEDT needs to be fitted first. Use MGEDT.fit")
         from stats.stats import get_stats, stats
         from algorithm.parameters import params
         from tqdm import tqdm
@@ -125,54 +81,122 @@ class MGEDT(object):
         # Generate statistics for run so far
         get_stats(population)
         
-        total_gens = params['GENERATIONS']+1 + generations
-        # Traditional GE
-        for generation in tqdm(range(params['GENERATIONS']+1, total_gens)):
-            stats['gen'] = generation
-            population = params['STEP'](population)
-            population.sort(key=lambda x: x.fitness[0], reverse=False)
+        mlflow = self.__get_mlflow__(params['EXPERIMENT_NAME'])
+        
+        total_gens = params['GENERATIONS'] + 1 + gen
+        range_generations = tqdm(range(params['GENERATIONS'] + 1, total_gens))
+        population = self.__evolve__(params, range_generations,
+                                     mlflow, population, refit=True)
         
         get_stats(population, end=True)
         self.stats = stats
         self.population = population
     
-    def fit_new_data(self, generations, X, y, 
-                        X_test=None, y_test=None):
+    def fit_new_data(self, X, y, X_val=None, y_val=None, pop=100, gen=100, 
+                     lamarck=True, multicore=True, **extra_params):
+        if not self.fitted:
+            raise Exception("MGEDT needs to be fitted first. Use MGEDT.fit")
         from stats.stats import get_stats, stats
-        from algorithm.parameters import params
+        from algorithm.parameters import params, set_params
         from tqdm import tqdm
-        from math import log10
+        
+        self.param_list = self.__set_params__(pop, gen, lamarck, multicore,
+                                              **extra_params)
+        set_params(self.param_list)
+        
+        self.ml_params = params
         
         (params['X_train'], params['y_train'], 
-         params['X_test'], params['y_test']) = X, y, X_test, y_test
+         params['X_test'], params['y_test']) = X, y, X_val, y_val
+        
+        self.params = params
         
         population = self.population
         # Generate statistics for run so far
         get_stats(population)
         
-        total_gens = params['GENERATIONS']+1 + generations
-        # Traditional GE
-        for generation in tqdm(range(params['GENERATIONS']+1, total_gens)):
-            stats['gen'] = generation
-            population = params['STEP'](population)
-            
-            min_y = log10(min(population, 
-                              key=lambda x: x.fitness[1]).fitness[1])
-            max_y = log10(max(population, 
-                              key=lambda x: x.fitness[1]).fitness[1])
-            population.sort(key=lambda x: self.get_distance(x, 
-                                                            min_y, 
-                                                            max_y), 
-                            reverse=True)
+        mlflow = self.__get_mlflow__(params['EXPERIMENT_NAME'])
         
-        if params['TARGET_SEED_FOLDER'] != "":
-            self.store_pop(population)
+        total_gens = params['GENERATIONS']+1 + gen
+        range_generations = tqdm(range(params['GENERATIONS']+1, total_gens))
+        population = self.__evolve__(params, range_generations,
+                                     mlflow, population)
         
         get_stats(population, end=True)
         self.stats = stats
         self.population = population
-
-    def store_pop(self, population):
+    
+    def predict(self, x, mode="best"):
+        if mode == "all":
+            preds = [ind.predict(x) for ind in self.population]
+        elif mode == "best":
+            best = min(self.population, key=lambda x: x.fitness[0])
+            preds = best.predict(x)
+        elif mode == "simplest":
+            simplest = min(self.population, key=lambda x: x.fitness[1])
+            preds = simplest.predict(x)
+        elif mode == "balanced":
+            from math import log10
+            min_y = log10(min(self.population, 
+                              key=lambda x: x.fitness[1]).fitness[1])
+            max_y = log10(max(self.population, 
+                              key=lambda x: x.fitness[1]).fitness[1])
+            # get individual with greater distance to point (0, 1)
+            balanced = max(self.population,
+                           key=lambda x: self.__get_distance__(x, 
+                                                               min_y, 
+                                                               max_y))
+            preds = balanced.predict(x)
+        
+        return preds
+    
+    def __evolve__(self, params, range_generations, 
+                   mlflow, population, refit=False):
+        from stats.stats import stats
+        import numpy as np
+        from utilities.fitness.error_metric import AUC
+        
+        with mlflow.start_run():
+            mlflow.log_param("REFIT", refit)
+            for key, val in self.ml_params.items():
+                if key in ['X_train', 'y_train', 'X_test', 'y_test', 'POOL',
+                           'BNF_GRAMMAR', 'SEED_INDIVIDUALS']:
+                    continue
+                else:
+                    mlflow.log_param(key, val)
+            # Traditional GE
+            for generation in range_generations:
+                stats['gen'] = generation
+                population = params['STEP'](population)
+                #population.sort(key=lambda x: x.fitness[0], reverse=False)
+                all_auc = [ind.fitness[0] for ind in population]
+                all_nodes = [ind.fitness[1] for ind in population]
+                mlflow.log_metrics(metrics={"1st ind AUC" : -min(all_auc),
+                                            "1st ind NODES" : max(all_nodes),
+                                            "last ind AUC" : -max(all_auc),
+                                            "last ind NODES" : min(all_nodes),
+                                            "mean AUC" : -np.mean(all_auc),
+                                            "mean nodes" : np.mean(all_nodes)},
+                                   step=generation)
+            val_aucs = [AUC(params['y_test'], 
+                            ind.predict(params['X_test']))\
+                        for ind in population]
+            mlflow.log_metric("best val AUC", -min(val_aucs))
+        return population
+    
+    def __get_mlflow__(self, experiment_name):
+        import mlflow
+        from mlflow.tracking import MlflowClient
+        
+        client = MlflowClient()
+        try:
+            _ = mlflow.create_experiment(experiment_name)
+        except:
+            _ = client.get_experiment_by_name(experiment_name)
+        mlflow.set_experiment(experiment_name)
+        return mlflow
+    
+    def __store_pop__(self, population):
         import os
         from algorithm.parameters import params
         
@@ -194,31 +218,7 @@ class MGEDT(object):
                     f.write("%s\n" % item.fitness)
                     f.close()
     
-    def predict(self, x, mode="best"):
-        if mode == "all":
-            preds = [ind.predict(x) for ind in self.population]
-        elif mode == "best":
-            best = min(self.population, key=lambda x: x.fitness[0])
-            preds = best.predict(x)
-        elif mode == "simplest":
-            simplest = min(self.population, key=lambda x: x.fitness[1])
-            preds = simplest.predict(x)
-        elif mode == "balanced":
-            from math import log10
-            min_y = log10(min(self.population, 
-                              key=lambda x: x.fitness[1]).fitness[1])
-            max_y = log10(max(self.population, 
-                              key=lambda x: x.fitness[1]).fitness[1])
-            # get individual with greater distance to point (0, 1)
-            balanced = max(self.population,
-                           key=lambda x: self.get_distance(x, 
-                                                           min_y, 
-                                                           max_y))
-            preds = balanced.predict(x)
-        
-        return preds
-    
-    def get_distance(self, ind, min_y, max_y):
+    def __get_distance__(self, ind, min_y, max_y):
         import math
         auc = ind.fitness[0] / -100 # auc (positive, from 0 to 1)
         comp = math.log10(ind.fitness[1]) #complexity
@@ -230,101 +230,55 @@ class MGEDT(object):
         # get distance:
         dist = math.hypot(auc-x, comp-y)
         return dist
-
-"""
-def set_params1(train_data, test_data, target, # data parameters are mandatory
-          delimiter=";", pop=12, gen=100, sampling=1000, 
-          lamarck=True, multicore=True, **extra_params):
-    param_list = ['--population_size={0}'.format(str(pop)),
-                  '--generations={0}'.format(str(gen)),
-                  '--dataset_train={0}'.format(train_data),
-                  '--dataset_test={0}'.format(test_data),
-                  '--dataset_delimiter={0}'.format(delimiter),
-                  '--target={0}'.format(target)]
-    if multicore:
-        param_list.append("--multicore")
-    if lamarck:
-        param_list.append("--lamarck")
-    for (key, val) in extra_params.items():
-        if val == "True":
-            param_list.append("--"+key)
-        elif val=="False" or val=="":
-            continue
-        else:
-            param_list.append("--{0}={1}".format(key, val))
-    #set_params(param_list)
     
-    return param_list
-
-def evolve():
-    from os import path
-    import pandas as pd
-    #import GE
-    ""\" Run program ""\"
-    from stats.stats import get_stats
-    from algorithm.parameters import params
-    
-    # Run evolution
-    individuals = params['SEARCH_LOOP']()
-
-    # Print final review
-    get_stats(individuals, end=True)
-    
-    # Get stats
-    fileName = path.join(params['FILE_PATH'], 'stats.tsv')
-    results = pd.read_csv(fileName, delimiter='\t')
-    
-    return individuals, results
-
-def mgedt(parametrization="auto"):
-    from algorithm.parameters import set_params
-    if parametrization == "auto":
-        set_params('')
-    pop, res = evolve()
-
-def mgedt_gui():
-    from multiprocessing import Pool
-    from algorithm.parameters import params
-    from fitness.evaluation import evaluate_fitness
-    from stats.stats import stats, get_stats
-    from operators.initialisation import initialisation
-    from utilities.algorithm.initialise_run import pool_init
-    from os import path
-    
-    if params['MULTICORE']:
-        # initialize pool once, if mutlicore is enabled
-        params['POOL'] = Pool(processes=params['CORES'], initializer=pool_init,
-                              initargs=(params,))  # , maxtasksperchild=1)
-
-    # Initialise population
-    individuals = initialisation(params['POPULATION_SIZE'])
-    
-    # Evaluate initial population
-    individuals = evaluate_fitness(individuals)
-    
-    if params['SAVE_POP']:
-        filename1 = path.join(params['FILE_PATH'], 'Begin-initialPop.txt')
-        with open(filename1, 'w+', encoding="utf-8") as f:
-            for item in individuals:
-                f.write("%s\n" % item)
-            f.close()
-    
-    # Generate statistics for run so far
-    get_stats(individuals)
-    
-    total_gens = params['GENERATIONS']+1
-    # Traditional GE
-    for generation in range(1, total_gens):
-        stats['gen'] = generation
-        individuals = params['STEP'](individuals)
-        
-    
-    get_stats(individuals, end=True)
-    
-"""
+    def __set_params__(self, pop=100, gen=100, lamarck=True, multicore=True, 
+                       UI=False, UI_params=None, param_list=[], 
+                       **extra_params):
+        if len(param_list) == 0:
+            if UI:
+                for (key, val) in UI_params.items():
+                    if val == "True":
+                        param_list.append("--"+key)
+                    elif val=="False" or val=="":
+                        continue
+                    else:
+                        param_list.append("--{0}={1}".format(key, val))
+            else:
+                if 'population_size' not in extra_params.keys():
+                    param_list.append('--population_size={0}'.format(str(pop)))
+                
+                if 'generations' not in extra_params.keys():
+                    param_list.append('--generations={0}'.format(str(gen)))
+                
+                if multicore and 'multicore' not in extra_params.keys():
+                    param_list.append("--multicore")
+                if lamarck and 'lamarck' not in extra_params.keys():
+                    param_list.append("--lamarck")
+                
+                for (key, val) in extra_params.items():
+                    if val == "True":
+                        param_list.append("--"+key)
+                    elif val=="False" or val=="":
+                        continue
+                    else:
+                        param_list.append("--{0}={1}".format(key, val))
+        return param_list
 
 if __name__ == "__main__":
-    import sys
-    mgedt = MGEDT(param_list=sys.argv[1:])  # exclude the ponyge.py arg itself
-    mgedt.evolve()
-    mgedt.reevolve(10)
+    # IMPLEMENTATION EXAMPLE
+    import pandas as pd
+    from sklearn.model_selection import train_test_split
+    d = pd.read_csv("../datasets/Promos/TEST2/Train-IDF-1.csv", sep=";")
+    
+    dtrain, dtest = train_test_split(d, test_size=0.3, stratify=d['target'])
+    dtrain, dval = train_test_split(dtrain, test_size=0.3, stratify=dtrain['target'])
+    X = dtrain.drop('target', axis=1)
+    y = dtrain['target']
+    X_val = dval.drop('target', axis=1)
+    y_val = dval['target']
+    X_test = dtest.drop('target', axis=1)
+    y_test = dtest['target']
+    mgedt = MGEDT(pop=20)
+    mgedt.fit(X, y, X_val, y_val)
+    mgedt.predict(X_test)
+    
