@@ -19,7 +19,7 @@ params = {
         'SCHC_COUNT_METHOD': "count_all",
 
         # Set optional experiment name
-        'EXPERIMENT_NAME': "Test",
+        'EXPERIMENT_NAME': "MGEDT",
         # Set default number of runs to be done.
         # ONLY USED WITH EXPERIMENT MANAGER.
         'RUNS': 1,
@@ -131,7 +131,7 @@ params = {
 
         # MULTIPROCESSING
         # Multi-core parallel processing of phenotype evaluations.
-        'MULTICORE': True,
+        'MULTICORE': False,
         # Set the number of cpus to be used for multiprocessing
         'CORES': cpu_count()-1,
 
@@ -196,7 +196,7 @@ params = {
 
         # Folder name to store the results
         # if None, timestamp is used
-        'FOLDER_NAME': "Tests",
+        'FOLDER_NAME': "",
         
         # If LAMARCKIAN approach is used or not
         # True or False
