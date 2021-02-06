@@ -218,8 +218,8 @@ def PI_grow(size):
     if size < 2:
         # If the population size is too small, can't use PI Grow
         # initialisation.
-        print("Error: population size too small for PI Grow initialisation.")
-        print("Returning randomly built trees.")
+        #print("Error: population size too small for PI Grow initialisation.")
+        #print("Returning randomly built trees.")
         return [individual.Individual(sample_genome(), None)
                 for _ in range(size)]
 

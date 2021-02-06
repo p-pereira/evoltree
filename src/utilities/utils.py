@@ -38,13 +38,16 @@ def create_lamarck_mapper(params):
     ## Write base code, common to all mappers
     mapper_file.write(content)
     ## Get data headers
-    data_file = open(path.join('..', 'datasets', 
-                               params['DATASET_TRAIN']), 'r')
-    headers = data_file.readline()[:-1] # ignore last character: '\n'.
-    data_file.close()
-    headers = headers.replace(params["DATASET_DELIMITER"] + params['TARGET'],
-                              "")
-    headers_list = headers.split(params["DATASET_DELIMITER"])
+    if params['DATASET_TRAIN'] != "":
+        data_file = open(path.join('..', 'datasets', 
+                                   params['DATASET_TRAIN']), 'r')
+        headers = data_file.readline()[:-1] # ignore last character: '\n'.
+        data_file.close()
+        headers = headers.replace(params["DATASET_DELIMITER"] + params['TARGET'],
+                                  "")
+        headers_list = headers.split(params["DATASET_DELIMITER"])
+    else:
+        headers_list = list(params['X_train'].columns)
     ## Get last function number
     f_num = content.split("def p_")[-1].split('(')[0]
     ## Build functions and idx (attributes)

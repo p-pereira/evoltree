@@ -13,8 +13,8 @@ params = {
         'STEP': 'step',
 
         # Evolutionary Parameters
-        'POPULATION_SIZE': 10,
-        'GENERATIONS': 10,
+        'POPULATION_SIZE': 100,
+        'GENERATIONS': 100,
         'HILL_CLIMBING_HISTORY': 100000,
         'SCHC_COUNT_METHOD': "count_all",
 
@@ -28,8 +28,8 @@ params = {
         'FITNESS_FUNCTION': "supervised_learning.supervised_learning, minimise_nodes", #"supervised_learning.classification",#
 
         # Select problem dataset
-        'DATASET_TRAIN': "Promos/TEST2/Train-IDF-1.csv",
-        'DATASET_TEST': "Promos/TEST2/Test-IDF-1.csv",
+        'DATASET_TRAIN': "",#"Promos/TEST2/Train-IDF-1.csv",
+        'DATASET_TEST': "",#"Promos/TEST2/Test-IDF-1.csv",
         'DATASET_DELIMITER': ";",
 
         # Set grammar file
@@ -52,7 +52,7 @@ params = {
         'TARGET': "target",
 
         # Set max sizes of individuals
-        'MAX_TREE_DEPTH': 90,  # SET TO 90 DUE TO PYTHON EVAL() STACK LIMIT.
+        'MAX_TREE_DEPTH': 50,  # SET TO 90 DUE TO PYTHON EVAL() STACK LIMIT.
                                # INCREASE AT YOUR OWN RISK.
         'MAX_TREE_NODES': None,
         'CODON_SIZE': 300,
@@ -133,7 +133,7 @@ params = {
         # Multi-core parallel processing of phenotype evaluations.
         'MULTICORE': False,
         # Set the number of cpus to be used for multiprocessing
-        'CORES': cpu_count()-1,
+        'CORES': cpu_count(),
 
         # STATE SAVING/LOADING
         # Save the state of the evolutionary run every generation. You can
@@ -153,7 +153,7 @@ params = {
         'SEED_INDIVIDUALS': [],
         # Specify a target seed folder in the 'seeds' directory that contains a
         # population of individuals with which to seed a run.
-        'TARGET_SEED_FOLDER': "MGEDT",
+        'TARGET_SEED_FOLDER': "",
         # Set a target phenotype string for reverse mapping into a GE
         # individual
         'REVERSE_MAPPING_TARGET': None,
@@ -203,7 +203,7 @@ params = {
         'LAMARCK': False,
         ### NEW 23-11-2020: probability of applying Lamarck
         # Set lamarck probability.
-        'LAMARCK_PROBABILITY': 0.5,
+        'LAMARCK_PROBABILITY': 1,
         ### NEW 13-11-2020: parameter used to create the mapper automatically
         # Lamarck special mapper operator (created automatically if '' or 'auto')
         'LAMARCK_MAPPER' : 'auto',
@@ -327,6 +327,7 @@ def set_params(command_line_args, create_files=True):
     if params['FOLDER_NAME'] == '':
         import time
         params['FOLDER_NAME'] = "{0}".format(time.strftime("%Y%m%d%H%M%S"))
+        
 
     if params['LOAD_STATE']:
         # Load run from state.
@@ -446,7 +447,8 @@ def set_params(command_line_args, create_files=True):
         params['BNF_GRAMMAR'] = grammar.Grammar(path.join("..", "grammars",
                                                 params['GRAMMAR_FILE']))
         ### NEW 20-11-2020: Generate Lamarck mapper automatically
-        if params['LAMARCK_MAPPER'] == '' or params['LAMARCK_MAPPER'] == 'auto':
+        if (params['LAMARCK_MAPPER'] == '' or 
+            params['LAMARCK_MAPPER'] == 'auto'):
             from utilities.utils import create_lamarck_mapper
             params['LAMARCK_MAPPER'] = create_lamarck_mapper(params)
         

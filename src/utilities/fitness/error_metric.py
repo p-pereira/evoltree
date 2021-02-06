@@ -131,9 +131,8 @@ def AUC(y, yhat):
     ### NEW ###
     # Replaces NaNs or infinite values
     yhat = np.nan_to_num(yhat)
-    #if type(yhat) == np.float64:
-    #    yhat = np.repeat(yhat, len(y))
-    
+    if type(yhat) != np.ndarray:
+        yhat = np.repeat(yhat, len(y))
     auc_val = roc_auc_score(y, yhat)*100
     return(-auc_val)
 
