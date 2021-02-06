@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 
 #### NEW 11-11-2020
-datasets/Promos/**/*
+datasets/**/**/*
 results/*
 **/parsetab.py
 **/parser.out
