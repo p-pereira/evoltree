@@ -3,7 +3,7 @@ from os import path
 import numpy as np
 import pandas as pd
 
-from algorithm.parameters import params
+from src.algorithm.parameters import params
 
 
 def get_Xy_train_test_separate(train_filename, test_filename, skip_header=0):
@@ -99,11 +99,11 @@ def get_data(train, test):
     ### NEW 29-11-2020: dataset is loaded once only!
     """
     # Get the path to the training dataset.
-    train_set = path.join("..", "datasets", train)
+    train_set = path.join("datasets", train)
      
     if test:
         # Get the path to the testing dataset.
-        test_set = path.join("..", "datasets", test)
+        test_set = path.join("datasets", test)
     
     else:
         # There is no testing dataset used.

@@ -1,19 +1,19 @@
 from sys import path
 path.append("../src")
 
-from utilities.algorithm.general import check_python_version
+from src.utilities.algorithm.general import check_python_version
 
 check_python_version()
 
 import sys
 
-from algorithm.parameters import params, set_params
-from operators.subtree_parse import get_NT_from_str, get_num_from_str, \
+from src.algorithm.parameters import params, set_params
+from src.operators.subtree_parse import get_NT_from_str, get_num_from_str, \
     generate_key_and_check, check_snippets_for_solution
-from representation.tree import Tree
+from src.representation.tree import Tree
 from utilities.representation.check_methods import generate_codon, \
     check_ind_from_parser
-from utilities.stats import trackers
+from src.utilities.stats import trackers
 
 
 def parse_terminals(target):

@@ -1,5 +1,5 @@
-from fitness.base_ff_classes.base_ff import base_ff
-from utilities.fitness.math_functions import binary_phen_to_float
+from src.fitness.base_ff_classes.base_ff import base_ff
+from src.utilities.fitness.math_functions import binary_phen_to_float
 
 
 class binary_phenotype_to_float(base_ff):

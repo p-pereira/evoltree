@@ -1,11 +1,11 @@
 import numpy as np
 np.seterr(all="raise")
 
-from algorithm.parameters import params
-from utilities.fitness.get_data import get_data
-from utilities.fitness.optimize_constants import optimize_constants
+from src.algorithm.parameters import params
+from src.utilities.fitness.get_data import get_data
+from src.utilities.fitness.optimize_constants import optimize_constants
 from random import sample
-from fitness.base_ff_classes.base_ff import base_ff
+from src.fitness.base_ff_classes.base_ff import base_ff
 import numpy as np
 import pandas as pd
 import time
@@ -115,7 +115,7 @@ class supervised_learning(base_ff):
             end = time.time()
         except SyntaxError: # invalid solutions due to leading zeros
             #print("Fixed leading zeros!")
-            from utilities.utils import remove_leading_zeros
+            from src.utilities.utils import remove_leading_zeros
             ind.phenotype = remove_leading_zeros(ind.phenotype)
             from importlib import import_module
             i = import_module(params["LAMARCK_MAPPER"])
@@ -125,7 +125,7 @@ class supervised_learning(base_ff):
             end = time.time()
         #print(savePred)
         if savePred:
-            from utilities.fitness.error_metric import AUC
+            from src.utilities.fitness.error_metric import AUC
             auc_ = AUC(y, yhat)
             d = pd.DataFrame({'y': y, 'pred':yhat, 'auc':auc_},index=None)
             d.to_csv(params['FILE_PATH']+'/preds.csv', sep=";",index=False)

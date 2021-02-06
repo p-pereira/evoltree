@@ -1,11 +1,10 @@
-from fitness.supervised_learning.supervised_learning import supervised_learning
-
-from algorithm.parameters import params
-from utilities.fitness.error_metric import Hamming_error
-
 import itertools
 import random
 import numpy as np
+
+from src.fitness.supervised_learning.supervised_learning import supervised_learning
+from src.algorithm.parameters import params
+from src.utilities.fitness.error_metric import Hamming_error
 
 class boolean_problem(supervised_learning):
     """Fitness function for Boolean problems. We specialise the

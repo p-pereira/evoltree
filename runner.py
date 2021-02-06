@@ -23,7 +23,7 @@ if __name__ == "__main__":
     RES = []
     
     for mode in MODES:
-        DATA_DIR = "../datasets/Promos/{}".format(mode)
+        DATA_DIR = "datasets/Promos/{}".format(mode)
         
         tr_files = [f for f in os.listdir(DATA_DIR) 
                     if re.match(r'Train+.*\.csv', f)]
@@ -108,10 +108,10 @@ if __name__ == "__main__":
             e = time()
             tr_t3 = e - s
             s = time()
-            pred3 = DT.predict_proba(X_test)
+            pred3 = DT.predict_proba(X_test)[:,1]
             e = time()
             ts_t3 = (e - s) / X_test.shape[0]
-            auc3 = roc_auc_score(y_test, pred3[:,1])*100
+            auc3 = roc_auc_score(y_test, pred3)*100
             ROC3 = pd.DataFrame(roc_curve(y_test, pred3, pos_label='Sale')).T
             ROC3.columns = ["FPR", "TPR", "TH"]
             
@@ -120,10 +120,10 @@ if __name__ == "__main__":
             e = time()
             tr_t4 = e - s
             s = time()
-            pred4 = RF.predict_proba(X_test)
+            pred4 = RF.predict_proba(X_test)[:,1]
             e = time()
             ts_t4 = (e - s) / X_test.shape[0]
-            auc4 = roc_auc_score(y_test, pred4[:,1])*100
+            auc4 = roc_auc_score(y_test, pred4)*100
             ROC4 = pd.DataFrame(roc_curve(y_test, pred4, pos_label='Sale')).T
             ROC4.columns = ["FPR", "TPR", "TH"]
             
@@ -149,7 +149,7 @@ if __name__ == "__main__":
             plt.subplots_adjust(top = 0.99, bottom = 0.08, right = 0.99, left = 0.1,
                             hspace = 0, wspace = 0.01)
             ax.set_facecolor('white')
-            plt.savefig("../results/PROMOS/AUC_{0}_{1}.pdf".format(mode, n))
+            plt.savefig("results/PROMOS/AUC_{0}_{1}.pdf".format(mode, n))
             plt.show()
             
             evals1 = mgedt.evaluate_all(X_test, y_test)
@@ -180,7 +180,7 @@ if __name__ == "__main__":
             plt.subplots_adjust(top = 0.99, bottom = 0.08, right = 0.99, left = 0.1,
                             hspace = 0, wspace = 0.01)
             ax.set_facecolor('white')
-            plt.savefig("../results/PROMOS/Pareto_{0}_{1}.pdf".format(mode, n))
+            plt.savefig("results/PROMOS/Pareto_{0}_{1}.pdf".format(mode, n))
             plt.show()
             
             RES.append(['MGEDT', mode, n, auc1, tr_t1, ts_t1])

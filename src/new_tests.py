@@ -5,17 +5,17 @@ Created on Fri Jan  8 22:15:06 2021
 @author: pedro
 """
 
-from algorithm.parameters import set_params, params
-from operators.initialisation import initialisation
-from fitness.evaluation import evaluate_fitness
-from operators.crossover import crossover
-from operators.mutation import mutation
-from operators.replacement import replacement
-from operators.selection import selection
+from src.algorithm.parameters import set_params, params
+from src.operators.initialisation import initialisation
+from src.fitness.evaluation import evaluate_fitness
+from src.operators.crossover import crossover
+from src.operators.mutation import mutation
+from src.operators.replacement import replacement
+from src.operators.selection import selection
 import re
 from random import sample, uniform
 from importlib import import_module
-from algorithm.mapper import map_tree_from_genome
+from src.algorithm.mapper import map_tree_from_genome
 from time import time
 
 def aux_evals(pop):

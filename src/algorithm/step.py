@@ -1,12 +1,11 @@
-from fitness.evaluation import evaluate_fitness
-from operators.crossover import crossover
-from operators.mutation import mutation
-from operators.replacement import replacement, steady_state
-from operators.selection import selection
-from stats.stats import get_stats
-from operators.lamarck import lamarck_pop
-from algorithm.parameters import params
-import sys
+from src.fitness.evaluation import evaluate_fitness
+from src.operators.crossover import crossover
+from src.operators.mutation import mutation
+from src.operators.replacement import replacement, steady_state
+from src.operators.selection import selection
+from src.stats.stats import get_stats
+from src.operators.lamarck import lamarck_pop
+from src.algorithm.parameters import params
 
 def step(individuals):
     """

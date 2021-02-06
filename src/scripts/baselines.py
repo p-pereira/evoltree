@@ -5,7 +5,7 @@ from collections import Counter
 import numpy as np
 from sklearn.linear_model import LinearRegression, ElasticNet
 
-from utilities.fitness.get_data import get_data
+from src.utilities.fitness.get_data import get_data
 
 
 def pprint(a, format_string='{0:.2f}'):

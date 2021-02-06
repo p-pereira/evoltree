@@ -3,7 +3,7 @@ import pandas as pd
 from os import path, pathsep
 import numpy as np
 
-from utilities.stats.trackers import first_pareto_list
+from src.utilities.stats.trackers import first_pareto_list
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -17,7 +17,7 @@ def save_pareto_fitness_plot():
     :return: Nothing
     """
 
-    from algorithm.parameters import params
+    from src.algorithm.parameters import params
 
     # Initialise up figure instance.
     fig = plt.figure()
@@ -74,7 +74,7 @@ def save_plot_from_data(data, name):
     :return: Nothing.
     """
 
-    from algorithm.parameters import params
+    from src.algorithm.parameters import params
 
     # Initialise up figure instance.
     fig = plt.figure()
@@ -142,7 +142,7 @@ def save_box_plot(data, names, title):
     :return: Nothing
     """
 
-    from algorithm.parameters import params
+    from src.algorithm.parameters import params
 
     import matplotlib.pyplot as plt
     plt.rc('font', family='Times New Roman')

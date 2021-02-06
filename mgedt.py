@@ -7,10 +7,9 @@ Created on Sat Nov 21 17:26:33 2020
 class MGEDT(object):
     """
     MGEDT object.
+    
     """
-   # from warnings import simplefilter
-    # ignore all future warnings
-    #simplefilter(action='ignore', category=FutureWarning)
+   
     def __init__(self):
         self.params = {}
         self.population = []
@@ -19,13 +18,13 @@ class MGEDT(object):
     
     def fit(self, X, y, X_val=None, y_val=None, pop=100, gen=100, 
             lamarck=True, multicore=True, **extra_params):
-        from algorithm.parameters import params, set_params
-        from stats.stats import get_stats, stats
-        from operators.initialisation import initialisation
-        from fitness.evaluation import evaluate_fitness
+        from src.algorithm.parameters import params, set_params
+        from src.stats.stats import get_stats, stats
+        from src.operators.initialisation import initialisation
+        from src.fitness.evaluation import evaluate_fitness
         from tqdm import tqdm
         from multiprocessing import Pool
-        from utilities.algorithm.initialise_run import pool_init
+        from src.utilities.algorithm.initialise_run import pool_init
         
         new_params = {'X_train': X, 'y_train': y,
                       'X_test': X_val, 'y_test': y_val,
@@ -70,8 +69,8 @@ class MGEDT(object):
     def refit(self, gen):
         if not self.fitted:
             raise Exception("MGEDT needs to be fitted first. Use MGEDT.fit")
-        from algorithm.parameters import params
-        from stats.stats import get_stats, stats
+        from src.algorithm.parameters import params
+        from src.stats.stats import get_stats, stats
         from tqdm import tqdm
         
         population = self.population
@@ -95,8 +94,8 @@ class MGEDT(object):
                      lamarck=True, multicore=True, **extra_params):
         if not self.fitted:
             raise Exception("MGEDT needs to be fitted first. Use MGEDT.fit")
-        from algorithm.parameters import params, set_params
-        from stats.stats import get_stats, stats
+        from src.algorithm.parameters import params, set_params
+        from src.stats.stats import get_stats, stats
         from tqdm import tqdm
         new_params = {'X_train': X, 'y_train': y,
                       'X_test': X_val, 'y_test': y_val,
@@ -147,7 +146,7 @@ class MGEDT(object):
     
     def evaluate_all(self, X_test, y_test):
         import pandas as pd
-        from utilities.fitness.error_metric import AUC
+        from src.utilities.fitness.error_metric import AUC
         aucs = [-1*AUC(y_test, ind.predict(X_test)) for ind in self.population]
         nodes = [ind.fitness[1] for ind in self.population]
         ev = pd.DataFrame([aucs, nodes]).T
@@ -166,7 +165,7 @@ class MGEDT(object):
     
 def store_pop(population):
     import os
-    from algorithm.parameters import params
+    from src.algorithm.parameters import params
     if not os.path.exists("../seeds/" + params['TARGET_SEED_FOLDER']):
         os.makedirs("../seeds/" + params['TARGET_SEED_FOLDER'], 
                     exist_ok=True)
@@ -233,9 +232,9 @@ def get_mlflow(experiment_name):
     return mlflow
 
 def evolve(params, range_generations, mlflow, population, refit=False):
-    from stats.stats import stats
     import numpy as np
-    from utilities.fitness.error_metric import AUC
+    from src.stats.stats import stats
+    from src.utilities.fitness.error_metric import AUC
     
     with mlflow.start_run():
         mlflow.log_param("REFIT", refit)
@@ -250,7 +249,6 @@ def evolve(params, range_generations, mlflow, population, refit=False):
             stats['gen'] = generation
             
             population = params['STEP'](population)
-            #population.sort(key=lambda x: x.fitness[0], reverse=False)
             all_auc = [ind.fitness[0] for ind in population]
             all_nodes = [ind.fitness[1] for ind in population]
             mlflow.log_metrics(metrics={"1st ind AUC" : -min(all_auc),
@@ -268,8 +266,9 @@ def evolve(params, range_generations, mlflow, population, refit=False):
 
 def get_nodes_from_tree(tree, feature_names, params):
     from importlib import import_module
-    from algorithm.mapper import map_tree_from_genome
     from sklearn.tree import _tree
+    from src.algorithm.mapper import map_tree_from_genome
+    
     tree_ = tree.tree_
     feature_name = [
         feature_names[i] if i != _tree.TREE_UNDEFINED else "undefined!"

@@ -6,7 +6,7 @@
 from sys import path
 path.append("../src")
 
-from utilities.algorithm.general import check_python_version
+from src.utilities.algorithm.general import check_python_version
 
 check_python_version()
 
@@ -14,8 +14,8 @@ from multiprocessing import Pool
 from subprocess import call
 import sys
 
-from algorithm.parameters import params, set_params
-from scripts.stats_parser import parse_stats_from_runs
+from src.algorithm.parameters import params, set_params
+from src.scripts.stats_parser import parse_stats_from_runs
 
 
 def execute_run(seed):

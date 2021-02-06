@@ -2,8 +2,8 @@ from os import path, getcwd, makedirs
 from shutil import rmtree
 from copy import copy
 
-from algorithm.parameters import params
-from utilities.stats import trackers
+from src.algorithm.parameters import params
+from src.utilities.stats import trackers
 import pandas as pd
 
 def save_stats_to_file(stats, end=False):
@@ -146,7 +146,7 @@ def generate_folders_and_files():
 
     if params['EXPERIMENT_NAME']:
         # Experiment manager is being used.
-        path_1 = path.join(getcwd(), "..", "results")
+        path_1 = path.join(getcwd(), "results")
 
         if not path.isdir(path_1):
             # Create results folder.
@@ -157,7 +157,7 @@ def generate_folders_and_files():
 
     else:
         # Set file path to results folder.
-        params['FILE_PATH'] = path.join(getcwd(), "..", "results")
+        params['FILE_PATH'] = path.join(getcwd(), "results")
 
     # Generate save folders
     if not path.isdir(params['FILE_PATH']):

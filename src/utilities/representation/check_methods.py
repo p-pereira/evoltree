@@ -1,5 +1,5 @@
-from algorithm.parameters import params
-from representation import individual
+from src.algorithm.parameters import params
+from src.representation import individual
 import numpy as np
 
 

@@ -1,7 +1,7 @@
-from fitness.supervised_learning.regression import regression
+from src.fitness.supervised_learning.regression import regression
 
-from algorithm.parameters import params
-from utilities.fitness.error_metric import rmse
+from src.algorithm.parameters import params
+from src.utilities.fitness.error_metric import rmse
 
 import itertools
 import random

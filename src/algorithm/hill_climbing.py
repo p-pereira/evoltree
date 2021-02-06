@@ -1,7 +1,7 @@
-from algorithm.parameters import params
-from fitness.evaluation import evaluate_fitness
-from stats.stats import stats, get_stats
-from utilities.stats import trackers
+from src.algorithm.parameters import params
+from src.fitness.evaluation import evaluate_fitness
+from src.stats.stats import stats, get_stats
+from src.utilities.stats import trackers
 
 
 """Hill-climbing is just about the simplest metaheuristic there

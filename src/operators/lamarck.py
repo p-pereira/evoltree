@@ -4,8 +4,8 @@ Created on Fri Jul 12 11:29:16 2019
 
 @author: pedro
 """
-from algorithm.parameters import params
-from utilities.stats.trackers import runtime_error_cache
+from src.algorithm.parameters import params
+from src.utilities.stats.trackers import runtime_error_cache
 
 def lamarck(ind, results, pool):
     """

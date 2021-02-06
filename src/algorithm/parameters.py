@@ -203,7 +203,7 @@ params = {
         'LAMARCK': False,
         ### NEW 23-11-2020: probability of applying Lamarck
         # Set lamarck probability.
-        'LAMARCK_PROBABILITY': 1,
+        'LAMARCK_PROBABILITY': 0.5,
         ### NEW 13-11-2020: parameter used to create the mapper automatically
         # Lamarck special mapper operator (created automatically if '' or 'auto')
         'LAMARCK_MAPPER' : 'auto',
@@ -274,12 +274,12 @@ def set_params(command_line_args, create_files=True):
     :return: Nothing.
     """
 
-    from utilities.algorithm.initialise_run import initialise_run_params
-    from utilities.algorithm.initialise_run import set_param_imports
-    from utilities.fitness.math_functions import return_one_percent
-    from utilities.algorithm.command_line_parser import parse_cmd_args
-    from utilities.stats import trackers, clean_stats
-    from representation import grammar
+    from src.utilities.algorithm.initialise_run import initialise_run_params
+    from src.utilities.algorithm.initialise_run import set_param_imports
+    from src.utilities.fitness.math_functions import return_one_percent
+    from src.utilities.algorithm.command_line_parser import parse_cmd_args
+    from src.utilities.stats import trackers, clean_stats
+    from src.representation import grammar
 
     cmd_args, unknown = parse_cmd_args(command_line_args)
 
@@ -294,7 +294,7 @@ def set_params(command_line_args, create_files=True):
     # LOAD PARAMETERS FILE
     # NOTE that the parameters file overwrites all previously set parameters.
     if 'PARAMETERS' in cmd_args:
-        load_params(path.join("..", "parameters", cmd_args['PARAMETERS']))
+        load_params(path.join("parameters", cmd_args['PARAMETERS']))
 
     # Join original params dictionary with command line specified arguments.
     # NOTE that command line arguments overwrite all previously set parameters.
@@ -309,11 +309,11 @@ def set_params(command_line_args, create_files=True):
             "Alternatively, pass the data directly to 'X_train' and 'y_train' parameters."
             raise Exception(s)
         else:
-            from utilities.fitness.get_data import get_Xy_train_test_separate as get_d
-            train_set = path.join("..", "datasets", params["DATASET_TRAIN"])
+            from src.utilities.fitness.get_data import get_Xy_train_test_separate as get_d
+            train_set = path.join("datasets", params["DATASET_TRAIN"])
             if params["DATASET_TEST"] != "":
                 # Get the path to the testing dataset.
-                test_set = path.join("..", "datasets", params["DATASET_TEST"])
+                test_set = path.join("datasets", params["DATASET_TEST"])
             else:
                 # There is no testing dataset used.
                 test_set = None
@@ -331,13 +331,13 @@ def set_params(command_line_args, create_files=True):
 
     if params['LOAD_STATE']:
         # Load run from state.
-        from utilities.algorithm.state import load_state
+        from src.utilities.algorithm.state import load_state
 
         # Load in state information.
         individuals = load_state(params['LOAD_STATE'])
 
         # Set correct search loop.
-        from algorithm.search_loop import search_loop_from_state
+        from src.algorithm.search_loop import search_loop_from_state
         params['SEARCH_LOOP'] = search_loop_from_state
 
         # Set population.
@@ -408,16 +408,16 @@ def set_params(command_line_args, create_files=True):
                                        params['FOLDER_NAME'],
                                        "grammar.bnf")
             import os
-            os.makedirs(path.join("..", "grammars", params['EXPERIMENT_NAME'], 
+            os.makedirs(path.join("grammars", params['EXPERIMENT_NAME'], 
                                   params['FOLDER_NAME']), exist_ok=True)
             # Get base grammar
-            default_filepath = path.join("..", "grammars", "base.bnf")
+            default_filepath = path.join("grammars", "base.bnf")
             bnf = open(default_filepath, 'r')
             content = bnf.read() + "\n"
             bnf.close()
             # Get data headers
             if params["X_train"] is None:
-                data_file = open(path.join('..', 'datasets', 
+                data_file = open(path.join('datasets', 
                                            params['DATASET_TRAIN']), 'r')
                 headers = data_file.readline()[:-1] # ignore last character: '\n'.
                 data_file.close()
@@ -436,7 +436,7 @@ def set_params(command_line_args, create_files=True):
                 # Build grammar file based on base
                 idx = "<idx>\t\t\t::= " + headers
             
-            new_filepath = path.join("..", "grammars", gramm_filename)
+            new_filepath = path.join("grammars", gramm_filename)
             new_f = open(new_filepath, 'w')
             new_f.write(content)
             new_f.write(idx)
@@ -444,19 +444,19 @@ def set_params(command_line_args, create_files=True):
             params['GRAMMAR_FILE'] = gramm_filename
         
         # Parse grammar file and set grammar class.
-        params['BNF_GRAMMAR'] = grammar.Grammar(path.join("..", "grammars",
+        params['BNF_GRAMMAR'] = grammar.Grammar(path.join("grammars",
                                                 params['GRAMMAR_FILE']))
         ### NEW 20-11-2020: Generate Lamarck mapper automatically
         if (params['LAMARCK_MAPPER'] == '' or 
             params['LAMARCK_MAPPER'] == 'auto'):
-            from utilities.utils import create_lamarck_mapper
+            from src.utilities.utils import create_lamarck_mapper
             params['LAMARCK_MAPPER'] = create_lamarck_mapper(params)
         
         # Population loading for seeding runs (if specified)
         if params['TARGET_SEED_FOLDER']:
 
             # Import population loading function.
-            from operators.initialisation import load_population
+            from src.operators.initialisation import load_population
 
             # A target folder containing seed individuals has been given.
             params['SEED_INDIVIDUALS'] = load_population(
@@ -466,7 +466,7 @@ def set_params(command_line_args, create_files=True):
             # A single seed phenotype has been given. Parse and run.
 
             # Import GE LR Parser.
-            from scripts import GE_LR_parser
+            from src.scripts import GE_LR_parser
 
             # Parse seed individual and store in params.
             params['SEED_INDIVIDUALS'] = [GE_LR_parser.main()]

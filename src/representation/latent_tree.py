@@ -28,8 +28,8 @@ derivation trees.
 """
 
 
-from algorithm.parameters import params
-from representation.derivation import legal_productions
+from src.algorithm.parameters import params
+from src.representation.derivation import legal_productions
 import random
 
 

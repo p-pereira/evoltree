@@ -1,14 +1,14 @@
 from sys import path
 path.append("../src")
 
-from utilities.algorithm.general import check_python_version
+from src.utilities.algorithm.general import check_python_version
 
 check_python_version()
 
-from algorithm.parameters import params
-import utilities.algorithm.command_line_parser as parser
-from representation.grammar import Grammar
-from utilities.fitness.math_functions import sci_notation
+from src.algorithm.parameters import params
+import src.utilities.algorithm.command_line_parser as parser
+from src.representation.grammar import Grammar
+from src.utilities.fitness.math_functions import sci_notation
 
 import sys
 import os
@@ -32,7 +32,7 @@ def main(command_line_args):
     params.update(cmd_args)
 
     # Parse grammar file and set grammar class.
-    grammar = Grammar(os.path.join("..", "grammars", params['GRAMMAR_FILE']))
+    grammar = Grammar(os.path.join("grammars", params['GRAMMAR_FILE']))
 
     print("\nSpecified grammar:", params['GRAMMAR_FILE'])
     

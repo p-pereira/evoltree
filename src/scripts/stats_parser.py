@@ -1,7 +1,7 @@
 from sys import path
 path.append("../src")
 
-from utilities.algorithm.general import check_python_version
+from src.utilities.algorithm.general import check_python_version
 
 check_python_version()
 
@@ -118,7 +118,7 @@ def parse_stats_from_runs(experiment_name):
 
     # Since results files are not kept in source directory, need to escape
     # one folder.
-    file_path = path.join(getcwd(), "..", "results")
+    file_path = path.join(getcwd(), "results")
     
     # Check for use of experiment manager.
     if experiment_name:

@@ -6,9 +6,9 @@ Created on Fri Feb  7 14:11:57 2020
 
 load an individual or entire population and apply to new data
 """
-from operators.initialisation import load_population
-from algorithm.parameters import set_params, params
-from representation.individual import Individual
+from src.operators.initialisation import load_population
+from src.algorithm.parameters import set_params, params
+from src.representation.individual import Individual
 from importlib import import_module
 import time
 from os import getcwd, path
@@ -37,7 +37,7 @@ def loadBestInd(folder="Promos",otherDir=getcwd()):
     """
     # Set path for seeds folder
     if otherDir == getcwd():
-        path_1 = path.join(otherDir, "..", "seeds")
+        path_1 = path.join(otherDir, "seeds")
     else:
         path_1 = otherDir
 

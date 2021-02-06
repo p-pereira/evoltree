@@ -5,10 +5,10 @@ Created on Sun Dec  6 13:10:22 2020
 @author: pedro
 """
 
-from algorithm.parameters import set_params, params
-from operators.initialisation import initialisation
-from utilities.fitness.get_data import get_data
-from utilities.fitness.math_functions import *
+from src.algorithm.parameters import set_params, params
+from src.operators.initialisation import initialisation
+from src.utilities.fitness.get_data import get_data
+from src.utilities.fitness.math_functions import *
 import scipy
 import re
 

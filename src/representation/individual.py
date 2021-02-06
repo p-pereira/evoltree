@@ -1,14 +1,14 @@
 import numpy as np
 import random
 import re
-
-from algorithm.mapper import map_tree_from_genome
-from operators.lamarck import tree_to_code
-from algorithm.mapper import mapper
-from algorithm.parameters import params
-from utilities.fitness.get_data import get_data
 import math
 from importlib import import_module
+
+from src.algorithm.mapper import map_tree_from_genome
+from src.operators.lamarck import tree_to_code
+from src.algorithm.mapper import mapper
+from src.algorithm.parameters import params
+from src.utilities.fitness.get_data import get_data
 
 class Individual(object):
     """

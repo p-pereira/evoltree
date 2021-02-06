@@ -23,10 +23,10 @@ def remove_leading_zeros(phenotype):
 # Automatically creates lammarck mapper file
 def create_lamarck_mapper(params):
     # Create mapper folder based on experiment name
-    mapper_dir = "utilities/lamarck/{0}".format(params["EXPERIMENT_NAME"])
+    mapper_dir = "./src/utilities/lamarck/{0}".format(params["EXPERIMENT_NAME"])
     makedirs(mapper_dir, exist_ok=True)
     # Read mapper base file (common to all mappers)
-    mapper_base_file = "utilities/lamarck/mapper_base"
+    mapper_base_file = "./src/utilities/lamarck/mapper_base"
     with open(mapper_base_file, 'r') as mf:
         content = mf.read()
     # New mapper file
@@ -39,7 +39,7 @@ def create_lamarck_mapper(params):
     mapper_file.write(content)
     ## Get data headers
     if params['DATASET_TRAIN'] != "":
-        data_file = open(path.join('..', 'datasets', 
+        data_file = open(path.join('datasets', 
                                    params['DATASET_TRAIN']), 'r')
         headers = data_file.readline()[:-1] # ignore last character: '\n'.
         data_file.close()
@@ -74,5 +74,5 @@ def create_lamarck_mapper(params):
     mapper_file.close()
     
     # Return mapper
-    mapper = "utilities.lamarck.{0}.mapper".format(params["EXPERIMENT_NAME"])
+    mapper = "src.utilities.lamarck.{0}.mapper".format(params["EXPERIMENT_NAME"])
     return mapper

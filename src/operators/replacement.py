@@ -1,9 +1,9 @@
-from fitness.evaluation import evaluate_fitness
-from algorithm.parameters import params
-from operators.mutation import mutation
-from operators.crossover import crossover_inds
-from operators.selection import selection
-from utilities.algorithm.NSGA2 import compute_pareto_metrics
+from src.fitness.evaluation import evaluate_fitness
+from src.algorithm.parameters import params
+from src.operators.mutation import mutation
+from src.operators.crossover import crossover_inds
+from src.operators.selection import selection
+from src.utilities.algorithm.NSGA2 import compute_pareto_metrics
 import math
 
 def replacement(new_pop, old_pop):

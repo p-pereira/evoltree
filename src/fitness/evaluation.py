@@ -1,8 +1,8 @@
 import numpy as np
 
-from algorithm.parameters import params
-from stats.stats import stats
-from utilities.stats.trackers import cache, runtime_error_cache
+from src.algorithm.parameters import params
+from src.stats.stats import stats
+from src.utilities.stats.trackers import cache, runtime_error_cache
 
 
 def evaluate_fitness(individuals):

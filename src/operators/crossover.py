@@ -1,12 +1,12 @@
 from random import randint, random, sample, choice
-
-from algorithm.parameters import params
-from representation import individual
-from representation.latent_tree import latent_tree_crossover, latent_tree_repair
-from utilities.representation.check_methods import check_ind
 import re
 from importlib import import_module
-from algorithm.mapper import map_tree_from_genome
+
+from src.algorithm.parameters import params
+from src.representation import individual
+from src.representation.latent_tree import latent_tree_crossover, latent_tree_repair
+from src.utilities.representation.check_methods import check_ind
+from src.algorithm.mapper import map_tree_from_genome
 
 def crossover(parents):
     """

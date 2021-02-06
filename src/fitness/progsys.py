@@ -1,5 +1,5 @@
-from algorithm.parameters import params
-from fitness.base_ff_classes.base_ff import base_ff
+from src.algorithm.parameters import params
+from src.fitness.base_ff_classes.base_ff import base_ff
 
 from os import path
 import subprocess
@@ -137,10 +137,10 @@ class progsys(base_ff):
         """ Return the training and test data for the current experiment.
         A new get_data method is required to load from a sub folder and to
         read the embed file"""
-        train_set = path.join("..", "datasets", "progsys", train)
-        test_set = path.join("..", "datasets", "progsys", test)
+        train_set = path.join("datasets", "progsys", train)
+        test_set = path.join("datasets", "progsys", test)
 
-        embed_file = path.join("..", "grammars", "progsys",
+        embed_file = path.join("grammars", "progsys",
                                (grammar[8:-4] + "-Embed.txt"))
         with open(embed_file, 'r') as embed:
             embed_code = embed.read()

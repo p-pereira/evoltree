@@ -1,10 +1,10 @@
-from operators.initialisation import initialisation
-from fitness.evaluation import evaluate_fitness
-from stats.stats import stats, get_stats
-from operators.crossover import crossover
-from operators.mutation import mutation
-from operators.replacement import replacement, steady_state
-from operators.selection import selection
+from src.operators.initialisation import initialisation
+from src.fitness.evaluation import evaluate_fitness
+from src.stats.stats import stats, get_stats
+from src.operators.crossover import crossover
+from src.operators.mutation import mutation
+from src.operators.replacement import replacement, steady_state
+from src.operators.selection import selection
 
 class Agent():
     """

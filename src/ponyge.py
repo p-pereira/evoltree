@@ -7,7 +7,7 @@
 # Hereby licensed under the GNU GPL v3.
 """ Python GE implementation """
 
-from utilities.algorithm.general import check_python_version
+from src.utilities.algorithm.general import check_python_version
 import matplotlib.pyplot as plt
 import pandas as pd
 from os import path
@@ -15,7 +15,7 @@ from os import path
 check_python_version()
 
 from stats.stats import get_stats
-from algorithm.parameters import params, set_params
+from src.algorithm.parameters import params, set_params
 import sys
 
 from warnings import simplefilter

@@ -1,8 +1,8 @@
 from random import choice, randrange, randint
 
-from algorithm.parameters import params
-from utilities.representation.check_methods import ret_true, get_nodes_and_depth
-from representation.tree import Tree
+from src.algorithm.parameters import params
+from src.utilities.representation.check_methods import ret_true, get_nodes_and_depth
+from src.representation.tree import Tree
 
 
 def generate_tree(tree, genome, output, method, nodes, depth, max_depth,

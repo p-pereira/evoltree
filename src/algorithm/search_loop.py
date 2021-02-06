@@ -1,12 +1,14 @@
 from multiprocessing import Pool
-from algorithm.parameters import params
-from fitness.evaluation import evaluate_fitness
-from stats.stats import stats, get_stats
-from utilities.stats import trackers
-from operators.initialisation import initialisation
-from utilities.algorithm.initialise_run import pool_init
 import os
 from os import path
+
+from src.algorithm.parameters import params
+from src.fitness.evaluation import evaluate_fitness
+from src.stats.stats import stats, get_stats
+from src.utilities.stats import trackers
+from src.operators.initialisation import initialisation
+from src.utilities.algorithm.initialise_run import pool_init
+
 
 def search_loop():
     """
@@ -57,12 +59,12 @@ def search_loop():
             f.close()
         
     if params['TARGET_SEED_FOLDER'] != "":
-        if not os.path.exists("../seeds/" + params['TARGET_SEED_FOLDER']):
-            os.makedirs("../seeds/" + params['TARGET_SEED_FOLDER'], 
+        if not os.path.exists("seeds/" + params['TARGET_SEED_FOLDER']):
+            os.makedirs("seeds/" + params['TARGET_SEED_FOLDER'], 
                         exist_ok=True)
         for cont, item in enumerate(individuals):
             if item.phenotype != None:
-                with open(("../seeds/" + params['TARGET_SEED_FOLDER'] 
+                with open(("seeds/" + params['TARGET_SEED_FOLDER'] 
                            + "/" + str(cont) + ".txt"), 'w+', 
                           encoding="utf-8") as f:
                     f.write("Phenotype:\n")

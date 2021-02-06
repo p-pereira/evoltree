@@ -2,10 +2,10 @@ import re
 from copy import copy
 from itertools import zip_longest
 
-from algorithm.parameters import params
-from representation import individual, tree
-from utilities.representation.check_methods import get_output, generate_codon
-from utilities.stats import trackers
+from src.algorithm.parameters import params
+from src.representation import individual, tree
+from src.utilities.representation.check_methods import get_output, generate_codon
+from src.utilities.stats import trackers
 
 
 def combine_snippets():

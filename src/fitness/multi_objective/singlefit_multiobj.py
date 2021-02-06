@@ -3,10 +3,9 @@
 @author: Jonathan Byrne
 @17/01/18 11:09
 """
-
-from fitness.base_ff_classes.base_ff import base_ff
 import numpy as np
 
+from src.fitness.base_ff_classes.base_ff import base_ff
 
 class singlefit_multiobj(base_ff):
     """

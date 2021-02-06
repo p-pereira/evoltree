@@ -1,5 +1,5 @@
-from algorithm.parameters import params
-from fitness.base_ff_classes.base_ff import base_ff
+from src.algorithm.parameters import params
+from src.fitness.base_ff_classes.base_ff import base_ff
 
 import editdistance  # https://pypi.python.org/pypi/editdistance
 import lzstring  # https://pypi.python.org/pypi/lzstring/

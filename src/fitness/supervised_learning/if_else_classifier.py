@@ -1,10 +1,9 @@
-from fitness.supervised_learning.supervised_learning import supervised_learning
+from src.fitness.supervised_learning.supervised_learning import supervised_learning
 
-from algorithm.parameters import params
-from utilities.fitness.error_metric import Hamming_error
+from src.algorithm.parameters import params
+from src.utilities.fitness.error_metric import Hamming_error
 
 import itertools
-import random
 import numpy as np
 
 class if_else_classifier(supervised_learning):

@@ -1,8 +1,8 @@
 from collections import defaultdict
 from numpy import isnan
 
-from algorithm.parameters import params
-from utilities.fitness.math_functions import percentile
+from src.algorithm.parameters import params
+from src.utilities.fitness.math_functions import percentile
 
 
 def compute_pareto_metrics(population):

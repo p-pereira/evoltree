@@ -1,11 +1,11 @@
 import re
 from multiprocessing import Process, Queue
 
-import fitness.regex.testing.RegexTestGenerator as TestGen
-from fitness.regex.testing.RegexTimer import time_regex_test_case
-from algorithm.parameters import params
-from fitness.base_ff_classes.base_ff import base_ff
-from stats.stats import stats
+import src.fitness.regex.testing.RegexTestGenerator as TestGen
+from src.fitness.regex.testing.RegexTimer import time_regex_test_case
+from src.algorithm.parameters import params
+from src.fitness.base_ff_classes.base_ff import base_ff
+from src.stats.stats import stats
 
 # Author: Brendan Cody-Kenny - codykenny at gmail
 

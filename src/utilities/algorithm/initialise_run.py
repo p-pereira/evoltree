@@ -5,9 +5,9 @@ from random import seed
 from socket import gethostname
 from time import time
 
-from algorithm.parameters import params
-from utilities.stats import trackers
-from utilities.stats.file_io import generate_folders_and_files
+from src.algorithm.parameters import params
+from src.utilities.stats import trackers
+from src.utilities.stats.file_io import generate_folders_and_files
 
 
 def initialise_run_params(create_files):
@@ -219,7 +219,7 @@ def get_fit_func_imports():
             params[op][i] = return_attr_from_module(module_path, attr)
 
         # Import base multi-objective fitness function class.
-        from fitness.base_ff_classes.moo_ff import moo_ff
+        from src.fitness.base_ff_classes.moo_ff import moo_ff
 
         # Set main fitness function as base multi-objective fitness
         # function class.
@@ -254,6 +254,7 @@ def return_attr_from_module(module_name, attr_name):
     :param attr_name: The name of the attribute.
     :return: The imported attribute from the module.
     """
+    module_name = "src." + module_name
 
     try:
         # Import module.

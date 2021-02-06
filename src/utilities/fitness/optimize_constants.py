@@ -2,8 +2,8 @@ import scipy
 
 import re
 
-from algorithm.parameters import params
-from utilities.fitness.math_functions import *
+from src.algorithm.parameters import params
+from src.utilities.fitness.math_functions import *
 from sklearn.metrics import log_loss
 
 def optimize_constants(x, y, ind):

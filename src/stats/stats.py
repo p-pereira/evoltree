@@ -3,13 +3,13 @@ from sys import stdout
 from time import time
 import numpy as np
 
-from algorithm.parameters import params
-from utilities.algorithm.NSGA2 import compute_pareto_metrics
-from utilities.algorithm.state import create_state
-from utilities.stats import trackers
-from utilities.stats.save_plots import save_plot_from_data, \
+from src.algorithm.parameters import params
+from src.utilities.algorithm.NSGA2 import compute_pareto_metrics
+from src.utilities.algorithm.state import create_state
+from src.utilities.stats import trackers
+from src.utilities.stats.save_plots import save_plot_from_data, \
     save_pareto_fitness_plot
-from utilities.stats.file_io import save_stats_to_file, save_stats_headers, \
+from src.utilities.stats.file_io import save_stats_to_file, save_stats_headers, \
     save_best_ind_to_file, save_first_front_to_file
 from os import path
 

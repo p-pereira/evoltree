@@ -1,15 +1,16 @@
 from math import floor
 from os import path, getcwd, listdir, makedirs
 from random import shuffle, randint
-
-from algorithm.parameters import params
-from representation import individual
-from representation.derivation import generate_tree, pi_grow
-from representation.individual import Individual
-from representation.tree import Tree
-from representation.latent_tree import latent_tree_random_ind
-from utilities.representation.python_filter import python_filter
 from importlib import import_module
+
+from src.algorithm.parameters import params
+from src.representation import individual
+from src.representation.derivation import generate_tree, pi_grow
+from src.representation.individual import Individual
+from src.representation.tree import Tree
+from src.representation.latent_tree import latent_tree_random_ind
+from src.utilities.representation.python_filter import python_filter
+
 
 def initialisation(size):
     """
@@ -357,7 +358,7 @@ def load_population(target,otherDir=getcwd()):
 
     # Set path for seeds folder
     if otherDir == getcwd():
-        path_1 = path.join(otherDir, "..", "seeds")
+        path_1 = path.join(otherDir, "seeds")
     else:
         path_1 = otherDir
 

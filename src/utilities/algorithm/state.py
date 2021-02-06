@@ -14,9 +14,9 @@ def create_state(individuals):
     :return: The complete state of a run.
     """
     
-    from algorithm.parameters import params
-    from stats.stats import stats
-    from utilities.stats import trackers
+    from src.algorithm.parameters import params
+    from src.stats.stats import stats
+    from src.utilities.stats import trackers
     from time import time
 
     # Get time.
@@ -102,10 +102,10 @@ def set_state(state):
     :return: A population of individuals.
     """
 
-    from algorithm.parameters import params
-    from utilities.algorithm.initialise_run import set_param_imports
-    from stats.stats import stats
-    from utilities.stats import trackers
+    from src.algorithm.parameters import params
+    from src.utilities.algorithm.initialise_run import set_param_imports
+    from src.stats.stats import stats
+    from src.utilities.stats import trackers
     from time import time
 
     # Set random state.

@@ -1,9 +1,9 @@
 from collections import deque
 import numpy as np
 
-from algorithm.parameters import params
-from representation.tree import Tree
-from utilities.representation.python_filter import python_filter
+from src.algorithm.parameters import params
+from src.representation.tree import Tree
+from src.utilities.representation.python_filter import python_filter
 
 def mapper(genome, tree):
     """

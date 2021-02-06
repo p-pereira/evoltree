@@ -1,4 +1,4 @@
-from fitness.base_ff_classes.base_ff import base_ff
+from src.fitness.base_ff_classes.base_ff import base_ff
 
 
 class minimise_nodes(base_ff):

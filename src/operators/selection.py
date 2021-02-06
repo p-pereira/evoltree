@@ -1,8 +1,8 @@
 from random import sample
 import os
 from os import path
-from algorithm.parameters import params
-from utilities.algorithm.NSGA2 import compute_pareto_metrics, \
+from src.algorithm.parameters import params
+from src.utilities.algorithm.NSGA2 import compute_pareto_metrics, \
     crowded_comparison_operator
 
 
