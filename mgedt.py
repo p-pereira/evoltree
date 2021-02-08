@@ -166,12 +166,12 @@ class MGEDT(object):
 def store_pop(population):
     import os
     from src.algorithm.parameters import params
-    if not os.path.exists("../seeds/" + params['TARGET_SEED_FOLDER']):
-        os.makedirs("../seeds/" + params['TARGET_SEED_FOLDER'], 
+    if not os.path.exists("./seeds/" + params['TARGET_SEED_FOLDER']):
+        os.makedirs("./seeds/" + params['TARGET_SEED_FOLDER'], 
                     exist_ok=True)
     for cont, item in enumerate(population):
         if item.phenotype != None:
-            with open(("../seeds/" + params['TARGET_SEED_FOLDER'] 
+            with open(("./seeds/" + params['TARGET_SEED_FOLDER'] 
                        + "/" + str(cont) + ".txt"), 'w+', 
                       encoding="utf-8") as f:
                 f.write("Phenotype:\n")

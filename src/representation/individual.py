@@ -164,15 +164,7 @@ class Individual(object):
             if nrNodes == 0:
                 x, y, x_test, y_test = \
                 get_data(params['DATASET_TRAIN'], params['DATASET_TEST'])
-                if params['N_SAMPLING'] > 0:
-                    from random import sample
-                    N = params['N_SAMPLING']
-                    pos = np.where(y == 'Sale')[0]
-                    neg = np.where(y == 'NoSale')[0]
-                    randPos = sample(list(pos), N)
-                    randNeg = sample(list(neg), N)
-                    x = x.iloc[(randPos+randNeg),:]
-                    y = y.iloc[(randPos+randNeg)]
+                
                 dt = tree.DecisionTreeClassifier()
                 dt = dt.fit(x, y)
                 # get the tree rules
@@ -243,8 +235,8 @@ class Individual(object):
                # new expression with this values
                 newExp = phenotype[0:nodePosition] + replaceExp + phenotype[(position+nodePosition+1):]
                 # get data
-                x, y, x_test, y_test = \
-                get_data(params['DATASET_TRAIN'], params['DATASET_TEST'])
+                x, y, _, _ = get_data(params['DATASET_TRAIN'], 
+                                      params['DATASET_TEST'])
                 if params['N_SAMPLING'] > 0:
                     from random import sample
                     N = params['N_SAMPLING']

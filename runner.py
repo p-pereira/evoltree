@@ -20,7 +20,11 @@ if __name__ == "__main__":
     from sklearn.ensemble import RandomForestClassifier
     from math import log10
     MODES = ['BEST2', 'TEST2']
+    os.makedirs("results/PROMOS/", exist_ok=True)
     RES = []
+    res_pd = pd.DataFrame({}, columns = ['Model', 'Mode', 'RW iter', 'AUC',
+                                         'Train time', 'Pred time'])
+    res_pd.to_csv("results/PROMOS/results.csv", sep=";", index=False)
     
     for mode in MODES:
         DATA_DIR = "datasets/Promos/{}".format(mode)
@@ -37,7 +41,8 @@ if __name__ == "__main__":
             dtr = pd.read_csv("{0}/{1}".format(DATA_DIR, tr_filename), sep=";")
             dtest = pd.read_csv("{0}/{1}".format(DATA_DIR, ts_filename), sep=";")
             
-            dtrain, dval = train_test_split(dtr, test_size=0.1, stratify=dtr['target'])
+            dtrain, dval = train_test_split(dtr, test_size=0.05, 
+                                            stratify=dtr['target'])
             X = dtrain.drop('target', axis=1)
             y = dtrain['target']
             X_val = dval.drop('target', axis=1)
@@ -76,7 +81,7 @@ if __name__ == "__main__":
             #"""
             s = time()
             if not mgedtl.fitted:
-                mgedtl.fit(X, y, X_val, y_val, pop=100, gen=100, lamarck=True, 
+                mgedtl.fit(X, y, X_val, y_val, pop=100, gen=50, lamarck=True, 
                           experiment_name="PROMOS",
                           folder_name="MGEDTL_{0}_{1}".format(mode, n), 
                           target_seed_folder="MGEDTL_PROMOS_{0}".format(mode))
@@ -158,7 +163,7 @@ if __name__ == "__main__":
             evals2[1] = [log10(node) for node in evals2[1]]
             evals3 = [auc3, mgedt.__get_tree_complexity__(DT, X_test.columns)]
             evals3[1] = log10(evals3[1])
-            evals4 = [auc4, mgedt.__get_tree_complexity__(RF, X_test.columns)]
+            evals4 = [auc4, mgedt.__get_randForest_complexity__(RF, X_test.columns)]
             evals4[1] = log10(evals4[1])
             
             fig, ax = plt.subplots(1,1, figsize=(5.5,5))
@@ -188,38 +193,11 @@ if __name__ == "__main__":
             RES.append(['DT', mode, n, auc3, tr_t3, ts_t3])
             RES.append(['RF', mode, n, auc4, tr_t4, ts_t4])
             #"""
-            break
     
-    res_pd = pd.DataFrame(RES)
-    res_pd.columns = ['Model', 'Mode', 'RW iter', 'AUC', 
-                      'Train time', 'Pred time']
-    res_pd.to_csv("../results/PROMOS/results.csv")
+            res_pd = pd.DataFrame(RES)
+            res_pd.columns = ['Model', 'Mode', 'RW iter', 'AUC', 
+                              'Train time', 'Pred time']
+            res_pd.to_csv("results/PROMOS/results.csv", mode='a', 
+                          header=False, sep=";", index=False)
     
-    """
-    mgedt.refit(gen=2)
-    mgedt.predict(X_test)
-    pred = mgedt.predict(X_test)
-    
-    auc = roc_auc_score(y_test, pred)*100
-    print(auc)
-    
-    ROC = pd.DataFrame(roc_curve(y_test, pred, pos_label='Sale')).T
-    ROC.columns = ["FPR", "TPR", "TH"]
-    
-    matplotlib.use('module://ipykernel.pylab.backend_inline', force=True)
-    plt.plot(ROC['FPR'], ROC['TPR'], color='darkorange')
-    plt.show()
-    #"""
-    """
-    dtr = pd.read_csv("../datasets/Promos/BEST2/Train-IDF-2.csv", sep=";")
-    dtest = pd.read_csv("../datasets/Promos/BEST2/Test-IDF-2.csv", sep=";")
-    
-    dtrain, dval = train_test_split(dtr, test_size=0.1, stratify=dtr['target'])
-    X = dtrain.drop('target', axis=1)
-    y = dtrain['target']
-    X_val = dval.drop('target', axis=1)
-    y_val = dval['target']
-    X_test = dtest.drop('target', axis=1)
-    y_test = dtest['target']
-    #"""
     
