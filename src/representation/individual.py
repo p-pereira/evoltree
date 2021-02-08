@@ -161,7 +161,7 @@ class Individual(object):
             # Check number of nodes (np.where)
             nrNodes = phenotype.count("np.where")
             # Expressions with root node only, are replaced by a traditional dt
-            if nrNodes == 0:
+            if nrNodes == 1:
                 x, y, x_test, y_test = \
                 get_data(params['DATASET_TRAIN'], params['DATASET_TEST'])
                 
