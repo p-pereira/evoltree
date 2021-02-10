@@ -21,7 +21,7 @@ if __name__ == "__main__":
     from math import log10
     MODES = ['BEST2', 'TEST2']
     os.makedirs("results/PROMOS/", exist_ok=True)
-    RES = []
+    
     res_pd = pd.DataFrame({}, columns = ['Model', 'Mode', 'RW iter', 'AUC',
                                          'Train time', 'Pred time'])
     res_pd.to_csv("results/PROMOS/results.csv", sep=";", index=False)
@@ -38,6 +38,7 @@ if __name__ == "__main__":
         DT = DecisionTreeClassifier()
         RF = RandomForestClassifier(n_jobs=-1)
         for n, (tr_filename, ts_filename) in enumerate(zip(tr_files, ts_files)):
+            RES = []
             dtr = pd.read_csv("{0}/{1}".format(DATA_DIR, tr_filename), sep=";")
             dtest = pd.read_csv("{0}/{1}".format(DATA_DIR, ts_filename), sep=";")
             
