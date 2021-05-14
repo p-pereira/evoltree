@@ -1,5 +1,5 @@
 from copy import copy
-from sys import stdout
+import logging
 from time import time
 import numpy as np
 
@@ -242,7 +242,7 @@ def get_moo_stats(individuals, end):
                 s = "stats.stats.get_moo_stats\n" \
                     "Warning: Plotting of more than 2 simultaneous " \
                     "objectives is not yet enabled in PonyGE2."
-                print(s)
+                logging.warning(s)
 
             else:
                 save_pareto_fitness_plot()
@@ -358,10 +358,10 @@ def print_generation_stats():
     :return: Nothing.
     """
 
-    print("______\n")
+    logging.info("______\n")
     for stat in sorted(stats.keys()):
-        print(" ", stat, ": \t", stats[stat])
-    print("\n")
+        logging.info(" " + stat + ": \t", stats[stat])
+    logging.info("\n")
 
 
 def print_first_front_stats():
@@ -371,9 +371,9 @@ def print_first_front_stats():
     :return: Nothing.
     """
 
-    print("  first front fitnesses :")
+    logging.info("  first front fitnesses :")
     for ind in trackers.best_ever:
-        print("\t  ", ind.fitness)
+        logging.info("\t  " + str(ind.fitness))
 
 
 def print_final_stats():
@@ -384,14 +384,14 @@ def print_final_stats():
     """
 
     if hasattr(params['FITNESS_FUNCTION'], "training_test"):
-        print("\n\nBest:\n  Training fitness:\t",
-              trackers.best_ever.training_fitness)
-        print("  Test fitness:\t\t", trackers.best_ever.test_fitness)
+        logging.info("\n\nBest:\n  Training fitness:\t" +
+                     str(trackers.best_ever.training_fitness))
+        logging.info("  Test fitness:\t\t" + str(trackers.best_ever.test_fitness))
     else:
-        print("\n\nBest:\n  Fitness:\t", trackers.best_ever.fitness)
+        logging.info("\n\nBest:\n  Fitness:\t" + str(trackers.best_ever.fitness))
 
-    print("  Phenotype:", trackers.best_ever.phenotype)
-    print("  Genome:", trackers.best_ever.genome)
+    logging.info("  Phenotype: " + str(trackers.best_ever.phenotype))
+    logging.info("  Genome: " + str(trackers.best_ever.genome))
     print_generation_stats()
 
 
@@ -403,7 +403,7 @@ def print_final_moo_stats():
     :return: Nothing.
     """
 
-    print("\n\nFirst Front:")
+    logging.info("\n\nFirst Front:")
     for ind in trackers.best_ever:
-        print(" ", ind)
+        logging.info(" " + ind)
     print_generation_stats()

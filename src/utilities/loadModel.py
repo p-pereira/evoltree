@@ -12,6 +12,7 @@ from src.representation.individual import Individual
 from importlib import import_module
 import time
 from os import getcwd, path
+import logging
 
 set_params('')
 
@@ -155,5 +156,5 @@ def getPredictions(phenotype, x, verbose=False):
     #print(type(predictions))
     tpred = (t1 / len(predictions))*1000 # ms
     if verbose:
-        print('Time per prediction (ms): ', tpred) #time per prediction
+        logging.info('Time per prediction (ms): ' + str(tpred)) #time per prediction
     return predictions, tpred

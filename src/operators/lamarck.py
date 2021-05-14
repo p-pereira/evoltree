@@ -101,9 +101,7 @@ def tree_to_file(tree, feature_names):
         for i in tree_.feature
     ]
     f = open((params['FILE_PATH'] + "\TEST-dt-rules.txt"), "w", encoding='utf-8')
-    #f.write("def tree({}):".format(", ".join(feature_names)))
-    #print("def tree({}):".format(", ".join(feature_names)))
-
+    
     def recurse(node, depth):
         #indent = "  " * depth
         
@@ -111,18 +109,13 @@ def tree_to_file(tree, feature_names):
             name = feature_name[node]
             threshold = tree_.threshold[node]
             f.write("np.where(x['{}'] <= {}, ".format(name, round(threshold, 6)))
-            #f.write("\n{}if {} <= {}:".format(indent, name, threshold))
-            #print("{}if {} <= {}:".format(indent, name, threshold))
             recurse(tree_.children_left[node], depth + 1)
-            #f.write("\n{}else:  # if {} > {}".format(indent, name, threshold))
             f.write(", ")
-            #print("{}else:  # if {} > {}".format(indent, name, threshold))
             recurse(tree_.children_right[node], depth + 1)
             f.write(")")
         else:
-            #f.write("\n{}return {}".format(indent, tree_.value[node]))
             prob = round(1 - tree_.value[node][0][0] / (tree_.value[node][0][0] + tree_.value[node][0][1]), 3)
             f.write("({})".format(prob))
-            #print("{}return {}".format(indent, tree_.value[node]))
+            
     recurse(0, 1)
     f.close()

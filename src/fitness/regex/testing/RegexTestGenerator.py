@@ -1,4 +1,5 @@
 import re
+import logging
 
 from src.fitness.regex.testing.RegexTimer import time_regex_test_case
 from src.fitness.regex.testing.RegexTest import RegexTest
@@ -175,7 +176,7 @@ def generate_test_suite(regex_string):
     # if we don't have any known test strings, see if the regex matches it.
     test_cases += generate_tests_if_string_match(compiled_regex, regex_string)
 
-    print("Number of test cases in suite:", len(test_cases))
+    logging.info("Number of test cases in suite:", len(test_cases))
 
     return test_cases
 

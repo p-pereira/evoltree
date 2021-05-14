@@ -6,6 +6,7 @@ from src.utilities.algorithm.general import check_python_version
 check_python_version()
 
 import sys
+import logging
 
 from src.algorithm.parameters import params, set_params
 from src.operators.subtree_parse import get_NT_from_str, get_num_from_str, \
@@ -25,7 +26,7 @@ def parse_terminals(target):
     """
 
     if params['VERBOSE']:
-        print("Target:\n", target)
+        logging.warning("Target:\n", target)
 
     # Pre-load all terminals and non-terminal rules from the grammar.
     terms, rules = params['BNF_GRAMMAR'].terminals, params['BNF_GRAMMAR'].rules
@@ -353,4 +354,4 @@ if __name__ == '__main__':
     set_params(sys.argv[1:], create_files=False)
 
     # Print parsed GE genome.
-    print("\nGenome:\n", params['SEED_INDIVIDUALS'][0].genome)
+    logging.info("\nGenome:\n" + params['SEED_INDIVIDUALS'][0].genome)

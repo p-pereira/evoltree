@@ -5,7 +5,7 @@ from os import path
 import subprocess
 import json
 import sys
-
+import logging
 
 class progsys(base_ff):
     """Fitness function for program synthesis problems. Grammars and datasets
@@ -33,9 +33,9 @@ class progsys(base_ff):
                           params['GRAMMAR_FILE'])
         self.eval = self.create_eval_process()
         if params['MULTICORE']:
-            print("Warming: Multicore is not supported with progsys "
-                  "as fitness function.\n"
-                  "Fitness function only allows sequential evaluation.")
+            logging.warning("Multicore is not supported with progsys "
+                            "as fitness function.\n"
+                            "Fitness function only allows sequential evaluation.")
 
     def evaluate(self, ind, **kwargs):
     

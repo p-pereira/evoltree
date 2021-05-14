@@ -184,7 +184,6 @@ class Individual(object):
                         ind.tree = mapped[2]
                         ind.nodes = mapped[3]
                         ind.evaluate()
-                        #print("Improved!")
                         return ind
                     else:
                         return self
@@ -197,7 +196,6 @@ class Individual(object):
                         mapped = map_tree_from_genome(genome)
                         ind.tree = mapped[2]
                         ind.nodes = mapped[3]
-                        #print("Improved!")
                         return ind
                     else:
                         return self
@@ -274,7 +272,6 @@ class Individual(object):
                             ind.tree = mapped[2]
                             ind.nodes = mapped[3]
                             ind.evaluate()
-                            #print("Improved!")
                             return ind
                         else:
                             return self
@@ -287,7 +284,6 @@ class Individual(object):
                             mapped = map_tree_from_genome(genome)
                             ind.tree = mapped[2]
                             ind.nodes = mapped[3]
-                            #print("Improved!")
                             return ind
                         else:
                             return self

@@ -1,6 +1,7 @@
 from math import floor
 from re import match, finditer, DOTALL, MULTILINE
 from sys import maxsize
+import logging
 
 from src.algorithm.parameters import params
 
@@ -238,13 +239,14 @@ class Grammar(object):
                         "choices": tmp_productions,
                         "no_choices": len(tmp_productions)}
                     # NEW 6-12-2020: remove warning
-                    """
+                    # NEW 14-05-2021: use logging to warn
+                    
                     if len(tmp_productions) == 1:
                         # Unit productions.
-                        print("Warning: Grammar contains unit production "
-                              "for production rule", rule.group('rulename'))
-                        print("         Unit productions consume GE codons.")
-                    """
+                        logging.warning("Warning: Grammar contains unit production "
+                              "for production rule " + rule.group('rulename') +
+                              "\n Unit productions consume GE codons.")
+                    
                 else:
                     # Conflicting rules with the same name.
                     raise ValueError("lhs should be unique",

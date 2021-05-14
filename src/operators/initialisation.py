@@ -2,6 +2,7 @@ from math import floor
 from os import path, getcwd, listdir, makedirs
 from random import shuffle, randint
 from importlib import import_module
+import logging
 
 from src.algorithm.parameters import params
 from src.representation import individual
@@ -130,8 +131,8 @@ def rhh(size):
 
     if size < 2:
         # If the population size is too small, can't use RHH initialisation.
-        print("Error: population size too small for RHH initialisation.")
-        print("Returning randomly built trees.")
+        logging.warning("Population size too small for RHH initialisation.")
+        logging.warning("Returning randomly built trees.")
         return [individual.Individual(sample_genome(), None)
                 for _ in range(size)]
 
@@ -148,9 +149,9 @@ def rhh(size):
             # Population size is odd, need an even population for RHH
             # initialisation.
             size += 1
-            print("Warning: Specified population size is odd, "
-                  "RHH initialisation requires an even population size. "
-                  "Incrementing population size by 1.")
+            logging.warning("Specified population size is odd, "
+                            "RHH initialisation requires an even population size. "
+                            "Incrementing population size by 1.")
 
         if size/2 < len(depths):
             # The population size is too small to fully cover all ramping
@@ -219,8 +220,8 @@ def PI_grow(size):
     if size < 2:
         # If the population size is too small, can't use PI Grow
         # initialisation.
-        #print("Error: population size too small for PI Grow initialisation.")
-        #print("Returning randomly built trees.")
+        logging.warning("Error: population size too small for PI Grow initialisation.")
+        logging.warning("Returning randomly built trees.")
         return [individual.Individual(sample_genome(), None)
                 for _ in range(size)]
 

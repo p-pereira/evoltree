@@ -1,6 +1,7 @@
 from random import randint, random, sample, choice
 import re
 from importlib import import_module
+import logging
 
 from src.algorithm.parameters import params
 from src.representation import individual
@@ -74,7 +75,7 @@ def crossover_inds(parent_0, parent_1):
 
     if any(checks):
         # An individual violates a limit.
-        #print("An individual violates a limit.")
+        logging.info("An individual violates a limit.")
         return None
 
     else:

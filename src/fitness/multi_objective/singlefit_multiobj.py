@@ -35,12 +35,6 @@ class singlefit_multiobj(base_ff):
         fitness = 0
         settings = {}
 
-        # try:
-        #     exec(phenotype, settings)
-        # except Exception as e:
-        #     fitness = self.default_fitness
-        #     print("Error", e)
-
         # Using dummy fitness values for the moment.
         x = np.random.pareto(4, 2)
         fitness = [x[0], x[1]]

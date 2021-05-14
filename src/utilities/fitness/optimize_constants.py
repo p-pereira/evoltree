@@ -60,7 +60,7 @@ def optimize_constants(x, y, ind):
     final_eval = params['ERROR_METRIC'](y, eval(ind2.phenotype))
     
     #return params['ERROR_METRIC'](y, eval(ind.phenotype))#res['fun']
-    #print('antes: ', init_eval, '\tdepois: ', final_eval)
+    
     if final_eval < init_eval:
         from importlib import import_module
         from algorithm.mapper import map_tree_from_genome
@@ -71,12 +71,8 @@ def optimize_constants(x, y, ind):
         ind2.tree = mapped[2]
         ind2.nodes = mapped[3]
         ind = ind2.deep_copy()
-        #params['improved'] += 1
-        #print(params['improved'])
         return final_eval, ind
     else:
-        #params['notimproved'] += 1
-        #print(params['notimproved'])
         return init_eval, None
 
 def make_consts_consecutive(s):

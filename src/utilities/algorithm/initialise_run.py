@@ -4,6 +4,7 @@ from os import getpid
 from random import seed
 from socket import gethostname
 from time import time
+import logging
 
 from src.algorithm.parameters import params
 from src.utilities.stats import trackers
@@ -36,12 +37,12 @@ def initialise_run_params(create_files):
                                      str(start.microsecond),
                                      str(getpid()),
                                      str(params['RANDOM_SEED'])])
-    #if not params['SILENT']:
-        #print("\nStart:\t", start, "\n")
+    if not params['SILENT']:
+        logging.info("\nStart:\t" + str(start) + "\n")
 
     # Generate save folders and files
     if params['DEBUG']:
-        print("Seed:\t", params['RANDOM_SEED'], "\n")
+        logging.info("Seed:\t" + params['RANDOM_SEED'] + "\n")
     elif create_files:
         generate_folders_and_files()
 

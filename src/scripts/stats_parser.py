@@ -12,6 +12,7 @@ import matplotlib
 import numpy as np
 np.seterr(all="raise")
 import pandas as pd
+import logging
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -38,10 +39,10 @@ def help_message():
     # This simply justifies the print statement such that it is visually
     # pleasing to look at.
     for line in lines_1:
-        print(line)
+        logging.info(line)
     col_width = max(len(line[0]) for line in lines_2)
     for line in sorted(lines_2):
-        print(" ".join(words.ljust(col_width) for words in line))
+        logging.info(" ".join(words.ljust(col_width) for words in line))
 
 
 def parse_opts(command_line_args):
@@ -65,7 +66,7 @@ def parse_opts(command_line_args):
             "Error: in order to parse stats you need to specify the location" \
             " of the target stats files.\n" \
             "       Run python stats_parser.py --help for more info."
-        print(str(err))
+        logging.error(str(err))
         raise Exception(s)
 
     if not opts:
@@ -152,7 +153,7 @@ def parse_stats_from_runs(experiment_name):
     for stat in [stat for stat in stats if stat not in no_parse_list and
                  not stat.startswith("Unnamed")]:
         # Iterate over all stats.
-        print("Parsing", stat)
+        logging.info("Parsing", stat)
         summary_stats = []
 
         # Iterate over all runs
@@ -203,7 +204,7 @@ def parse_stats_from_runs(experiment_name):
                                                                 ".csv")))
         
         except FloatingPointError:
-            print("scripts.stats_parser.parse_stats_from_runs\n"
+            logging.warning("scripts.stats_parser.parse_stats_from_runs\n"
                   "Warning: FloatingPointError encountered while parsing %s "
                   "stats." % (stat))
             

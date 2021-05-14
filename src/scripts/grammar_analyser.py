@@ -12,7 +12,7 @@ from src.utilities.fitness.math_functions import sci_notation
 
 import sys
 import os
-
+import logging
 
 def main(command_line_args):
     """
@@ -34,12 +34,12 @@ def main(command_line_args):
     # Parse grammar file and set grammar class.
     grammar = Grammar(os.path.join("grammars", params['GRAMMAR_FILE']))
 
-    print("\nSpecified grammar:", params['GRAMMAR_FILE'])
+    logging.info("\nSpecified grammar:" + params['GRAMMAR_FILE'])
     
     # Initialise zero maximum branching factor for grammar
     max_b_factor = 0
     
-    print("\nBranching factor for each non-terminal:")
+    logging.info("\nBranching factor for each non-terminal:")
     
     for NT in sorted(grammar.non_terminals.keys()):
         
@@ -47,33 +47,33 @@ def main(command_line_args):
         b_factor = grammar.non_terminals[NT]['b_factor']
         
         # Print info.
-        print("", NT, "   \t:", b_factor)
+        logging.info("" + NT + "   \t:", b_factor)
         
         # Set maximum branching factor.
         if b_factor > max_b_factor:
             max_b_factor = b_factor
         
-    print("\nMaximum branching factor of the grammar:", max_b_factor)
+    logging.info("\nMaximum branching factor of the grammar:" + max_b_factor)
 
     # Initialise counter for the total number of solutions.
     total_solutions = 0
 
-    print("\nNumber of unique possible solutions for a range of depths:\n")
+    logging.info("\nNumber of unique possible solutions for a range of depths:\n")
 
     for depth in grammar.permutations:
 
         # Get number of solutions possible at current depth
         solutions = grammar.permutations[depth]
 
-        print(" Depth: %d \t Number of unique solutions: %s" %
-              (depth, sci_notation(solutions)))
+        logging.info(" Depth: %d \t Number of unique solutions: %s" %
+                      (depth, sci_notation(solutions)))
 
         # Increment total number of solutions.
         total_solutions += solutions
     
-    print("\nTotal number of unique possible solutions that can be generated"
-          "up to and including a depth of %d: %s" %
-          (depth, sci_notation(total_solutions)))
+    logging.info("\nTotal number of unique possible solutions that can be generated"
+                 "up to and including a depth of %d: %s" %
+                 (depth, sci_notation(total_solutions)))
         
 
 if __name__ == "__main__":

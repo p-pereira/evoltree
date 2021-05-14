@@ -52,8 +52,7 @@ class supervised_learning(base_ff):
         evaluation is to be performed.
         :return: The fitness of the evaluated individual.
         """
-        #print(ind)
-
+        
         dist = kwargs.get('dist', 'training')
 
         if dist == "training":
@@ -114,7 +113,6 @@ class supervised_learning(base_ff):
             yhat = ind.predict(x)
             end = time.time()
         except SyntaxError: # invalid solutions due to leading zeros
-            #print("Fixed leading zeros!")
             from src.utilities.utils import remove_leading_zeros
             ind.phenotype = remove_leading_zeros(ind.phenotype)
             from importlib import import_module
@@ -123,7 +121,6 @@ class supervised_learning(base_ff):
             start = time.time()
             yhat = ind.predict(x)
             end = time.time()
-        #print(savePred)
         if savePred:
             from src.utilities.fitness.error_metric import AUC
             auc_ = AUC(y, yhat)
@@ -133,7 +130,6 @@ class supervised_learning(base_ff):
             f.write(str((end-start)/len(y)))
             f.close()
             
-        #yhat = exec(ind.phenotype)
         assert np.isrealobj(yhat)
 
         # let's always call the error function with the true

@@ -13,6 +13,7 @@ check_python_version()
 from multiprocessing import Pool
 from subprocess import call
 import sys
+import logging
 
 from src.algorithm.parameters import params, set_params
 from src.scripts.stats_parser import parse_stats_from_runs
@@ -70,9 +71,9 @@ def check_params():
         raise Exception(s)
 
     if params['RUNS'] == 1:
-        print("Warning: Only 1 run has been specified for this set of runs.")
-        print("         The number of runs can be specified with the command-"
-              "line parameter `--runs`.")
+        logging.warning("Only 1 run has been specified for this set of runs."
+                        "The number of runs can be specified with the command-"
+                        "line parameter `--runs`.")
 
 
 def main():

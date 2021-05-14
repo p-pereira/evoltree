@@ -1,5 +1,6 @@
 import re
 from multiprocessing import Process, Queue
+import logging
 
 import src.fitness.regex.testing.RegexTestGenerator as TestGen
 from src.fitness.regex.testing.RegexTimer import time_regex_test_case
@@ -139,8 +140,8 @@ class RegexEval(base_ff):
         # If thread is active
         if self.prunner.is_alive():
             # After one second, if prunner is still running, kill it.
-            print("Regex evaluation timeout reached, "
-                  "killing evaluation process")
+            logging.info("Regex evaluation timeout reached, "
+                         "killing evaluation process")
             self.prunner.terminate()
             self.prunner.join()
 

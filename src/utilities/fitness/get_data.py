@@ -1,6 +1,4 @@
-from os import path
-
-import numpy as np
+import logging
 import pandas as pd
 
 from src.algorithm.parameters import params
@@ -45,9 +43,9 @@ def get_Xy_train_test_separate(train_filename, test_filename, skip_header=0):
                     delimiter = ":"
                     break
                 else:
-                    print("utilities.fitness.get_data.get_Xy_train_test_separate\n"
-                          "Warning: Dataset delimiter not found. "
-                          "Defaulting to whitespace delimiter.")
+                    logging.warning("utilities.fitness.get_data.get_Xy_train_test_separate\n"
+                                    "Warning: Dataset delimiter not found. "
+                                    "Defaulting to whitespace delimiter.")
                     delimiter = " "
                     break
         f.close()

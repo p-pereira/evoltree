@@ -4,6 +4,7 @@ from collections import Counter
 
 import numpy as np
 from sklearn.linear_model import LinearRegression, ElasticNet
+import logging
 
 from src.utilities.fitness.get_data import get_data
 
@@ -126,5 +127,5 @@ if __name__ == "__main__":
         model, train_yhat, test_yhat = fit(train_X, train_y, test_X)
         error_train = metric(train_y, train_yhat)
         error_test = metric(test_y, test_yhat)
-        print("%s %s %s train error %.2f test error %.2f" %
-              (metric.__name__, fit.__name__, model, error_train, error_test))
+        logging.info("%s %s %s train error %.2f test error %.2f" %
+                     (metric.__name__, fit.__name__, model, error_train, error_test))
