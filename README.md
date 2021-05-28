@@ -93,8 +93,10 @@ mgedtl = MGEDT()
 # Load dataset
 X, y, X_val, y_val, X_ts, y_ts = mgedt.load_example_data()
 # Fit both versions on train data
-mgedt.fit(X, y, X_val, y_val, pop=100, gen=10, lamarck=False, experiment_name="test") # Normal variant
-mgedtl.fit(X, y, X_val, y_val, pop=100, gen=5, lamarck=True, experiment_name="testLamarck") # Lamarckian variant, doesn't need as much iterations (gen)
+## Normal variant:
+mgedt.fit(X, y, X_val, y_val, pop=100, gen=10, lamarck=False, experiment_name="test")
+## Lamarckian variant, doesn't need as much iterations (gen)
+mgedtl.fit(X, y, X_val, y_val, pop=100, gen=5, lamarck=True, experiment_name="testLamarck")
 # Predict on test data, using the solution with better predictive performance on validation data
 y_pred1 = mgedt.predict(X_ts, mode="best")
 y_pred2 = mgedtl.predict(X_ts, mode="best")
@@ -105,10 +107,8 @@ auc1 = metrics.auc(fpr1, tpr1)
 auc2 = metrics.auc(fpr2, tpr2)
 # Plot results
 fig, ax = plt.subplots(1,1, figsize=(5.5,5))
-plt.plot(fpr2, tpr2, color='royalblue', ls="--", lw=2,
-         label="MGEDTL={}%".format(round(auc2, 2)))
-plt.plot(fpr1, tpr1, color='darkorange', ls="-", lw=2,
-         label="MGEDT={}%".format(round(auc1, 2)))
+plt.plot(fpr2, tpr2, color='royalblue', ls="--", lw=2, label="MGEDTL={}%".format(round(auc2, 2)))
+plt.plot(fpr1, tpr1, color='darkorange', ls="-", lw=2, label="MGEDT={}%".format(round(auc1, 2)))
 plt.plot([0,1], [0,1], color="black", ls='--', label="baseline=50%")
 plt.legend(loc=4)
 plt.xlabel("FPR")
