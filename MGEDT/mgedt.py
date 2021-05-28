@@ -179,6 +179,8 @@ class MGEDT(object):
         if val:
             dtr, dval = train_test_split(dtrain, test_size=0.1, 
                                          stratify=dtrain['target'])
+            dtr = dtr.reset_index(drop=True)
+            dval = dval.reset_index(drop=True)
             return [dtr.drop('target', axis=1), dtr['target'],
                     dval.drop('target', axis=1), dval['target'],
                     dts.drop('target', axis=1), dts['target']]
