@@ -1,8 +1,8 @@
-# **MGEDT**: Multiobjective Grammatical Evolution Decision Trees for classification tasks
+# **MGEDT**: Multi-objective Grammatical Evolution Decision Trees for classification tasks
 
 ## Overview
 
-MGEDT is a novel **Multiobjective Optimization (MO)** approach to evolve **Decision Trees (DT)** using **Grammatical Evolution (GE)**, under two main variants: a pure GE method (**MGEDT**) and a GE with Lamarckian Evolution (**MGEDTL**).
+MGEDT is a novel **Multi-objective Optimization (MO)** approach to evolve **Decision Trees (DT)** using **Grammatical Evolution (GE)**, under two main variants: a pure GE method (**MGEDT**) and a GE with Lamarckian Evolution (**MGEDTL**).
 Both variants evolve variable-length DTs and perform a simultaneous optimization of the predictive performance (measured in terms of AUC) and model complexity (measured in terms of GE tree nodes). To handle big data, the GE methods include a **training sampling** and **parallelism evaluation mechanism**.
 Both variants both use [PonyGE2](https://github.com/PonyGE/PonyGE2) as GE engine, while MGEDTL uses [sklearn DT](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html).
 
@@ -126,9 +126,12 @@ Result:
 
 If you use **MGEDT** for your research, please cite the following paper:
 
+
 Pedro José Pereira, Paulo Cortez, Rui Mendes:
 
-[**Multi-objective Grammatical Evolution of Decision Trees for Mobile Marketing User Conversion Prediction.**](https://doi.org/10.1016/j.eswa.2020.114287) Expert Syst. Appl. 168 (2021)
+[**Multi-objective Grammatical Evolution of Decision Trees for Mobile Marketing User Conversion Prediction.**](https://doi.org/10.1016/j.eswa.2020.114287)
+
+Expert Syst. Appl. 168 (2021)
 
 
 ```
