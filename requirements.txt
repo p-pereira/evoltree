@@ -4,3 +4,4 @@ pandas==1.2.4
 sklearn==0.0
 ply==3.11
 mlflow==1.15.0
+tqdm==4.60.0
