@@ -39,7 +39,7 @@ print(X)
 ```
 
 ```
- idoperator  idcampaign  idbrowser  idverticaltype  idapplication  idpartner  idaffmanager  regioncontinent  country_name  accmanager
+ 		  idoperator  idcampaign  idbrowser  idverticaltype  idapplication  idpartner  idaffmanager  regioncontinent  country_name  accmanager
 0         0.755951    2.875355   0.416159        0.823179       0.101081   2.572643      2.028685         2.689715      4.957863    0.865465
 1         0.755951   11.379666   3.005727        3.662859      11.379666   7.131171      5.018939         3.477055      5.740521    2.173501
 2         0.755951    5.365407   3.005727        0.739897       0.101081   3.174113      1.986985         3.193263      3.378832    0.865465
