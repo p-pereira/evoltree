@@ -29,8 +29,8 @@ params = {
         'FITNESS_FUNCTION': "supervised_learning.supervised_learning, minimise_nodes", #"supervised_learning.classification",#
 
         # Select problem dataset
-        'DATASET_TRAIN': "",#"Promos/TEST2/Train-IDF-1.csv",
-        'DATASET_TEST': "",#"Promos/TEST2/Test-IDF-1.csv",
+        'DATASET_TRAIN': "",
+        'DATASET_TEST': "",
         'DATASET_DELIMITER': ";",
 
         # Set grammar file

@@ -16,7 +16,7 @@ import logging
 
 set_params('')
 
-def loadPop(folder="Promos", otherDir=getcwd()):
+def loadPop(folder="Test", otherDir=getcwd()):
     """
     Given a target folder, read all files in the folder and load/parse
     solutions found in each file.
@@ -27,7 +27,7 @@ def loadPop(folder="Promos", otherDir=getcwd()):
     population = load_population(folder, otherDir)
     return population
 
-def loadBestInd(folder="Promos",otherDir=getcwd()):
+def loadBestInd(folder="Test",otherDir=getcwd()):
     """
     Given a target folder, read the file 0.txt that contains the individual
     with the best fitness value.
