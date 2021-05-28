@@ -1,0 +1,4 @@
+include MGEDT/data/*
+include MGEDT/grammars/*
+include MGEDT/seeds/*
+include MGEDT/utilities/lamarck/mapper_base

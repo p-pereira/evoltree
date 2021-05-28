@@ -15,7 +15,7 @@ with open('requirements.txt') as f:
 
 
 setuptools.setup(name='MGEDT',
-                 version='0.1',
+                 version='0.2.46',
                  description='MGEDT - Multi-objective Grammatical Evolution Decision Trees for classification',
                  author='Pedro José Pereira, Paulo Cortez, Rui Mendes',
                  license='MIT',
@@ -26,4 +26,5 @@ setuptools.setup(name='MGEDT',
                  install_requires=requirements,
                  url="https://github.com/p-pereira/MGEDT",
                  keywords=['Decision Trees', 'Grammatical Evolution', 'Lamarckian Evolution'],
-                 python_requires='>=3.5')
+                 python_requires='>=3.5',
+                 include_package_data=True)

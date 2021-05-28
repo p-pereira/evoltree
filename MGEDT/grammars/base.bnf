@@ -1,0 +1,7 @@
+<result>        ::= np.where(x[<idx>] <comparison> <value>, <node>, <node>)
+<node>          ::= <result> | (<leaf>)
+<leaf>		    ::= 0.<digits> | 1
+<digits>        ::= <digits><digit> | <digit>
+<digit>         ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+<comparison>    ::= "==" | "<" | ">" | "<="
+<value>         ::= <digits>.<digits> | <digits>

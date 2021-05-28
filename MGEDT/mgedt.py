@@ -4,6 +4,8 @@ Created on Sat Nov 21 17:26:33 2020
 
 @author: pedro
 """
+from typing import List
+
 class MGEDT(object):
     """
     MGEDT object.
@@ -18,13 +20,13 @@ class MGEDT(object):
     
     def fit(self, X, y, X_val=None, y_val=None, pop=100, gen=100, 
             lamarck=True, multicore=True, **extra_params):
-        from src.algorithm.parameters import params, set_params
-        from src.stats.stats import get_stats, stats
-        from src.operators.initialisation import initialisation
-        from src.fitness.evaluation import evaluate_fitness
+        from .algorithm.parameters import params, set_params
+        from .stats.stats import get_stats, stats
+        from .operators.initialisation import initialisation
+        from .fitness.evaluation import evaluate_fitness
         from tqdm import tqdm
         from multiprocessing import Pool
-        from src.utilities.algorithm.initialise_run import pool_init
+        from .utilities.algorithm.initialise_run import pool_init
         
         new_params = {'X_train': X, 'y_train': y,
                       'X_test': X_val, 'y_test': y_val,
@@ -69,8 +71,8 @@ class MGEDT(object):
     def refit(self, gen):
         if not self.fitted:
             raise Exception("MGEDT needs to be fitted first. Use MGEDT.fit")
-        from src.algorithm.parameters import params
-        from src.stats.stats import get_stats, stats
+        from .algorithm.parameters import params
+        from .stats.stats import get_stats, stats
         from tqdm import tqdm
         
         population = self.population
@@ -94,8 +96,8 @@ class MGEDT(object):
                      lamarck=True, multicore=True, **extra_params):
         if not self.fitted:
             raise Exception("MGEDT needs to be fitted first. Use MGEDT.fit")
-        from src.algorithm.parameters import params, set_params
-        from src.stats.stats import get_stats, stats
+        from .algorithm.parameters import params, set_params
+        from .stats.stats import get_stats, stats
         from tqdm import tqdm
         new_params = {'X_train': X, 'y_train': y,
                       'X_test': X_val, 'y_test': y_val,
@@ -146,7 +148,7 @@ class MGEDT(object):
     
     def evaluate_all(self, X_test, y_test):
         import pandas as pd
-        from src.utilities.fitness.error_metric import AUC
+        from .utilities.fitness.error_metric import AUC
         aucs = [-1*AUC(y_test, ind.predict(X_test)) for ind in self.population]
         nodes = [ind.fitness[1] for ind in self.population]
         ev = pd.DataFrame([aucs, nodes]).T
@@ -163,16 +165,39 @@ class MGEDT(object):
                  for dt in rf.estimators_]
         return sum(nodes)
     
+    def load_example_data(val=True) -> List:
+        import pandas as pd
+        from os import path
+        from sklearn.model_selection import train_test_split
+        import pkg_resources
+        DATA_PATH = pkg_resources.resource_filename('MGEDT', 'data')
+        dtr_filename = path.join(DATA_PATH, "example1_tr.csv")
+        dts_filename = path.join(DATA_PATH, "example1_ts.csv")
+        dtrain = pd.read_csv(dtr_filename, sep=";")
+        dts = pd.read_csv(dts_filename, sep=";")
+        
+        if val:
+            dtr, dval = train_test_split(dtrain, test_size=0.1, 
+                                         stratify=dtrain['target'])
+            return [dtr.drop('target', axis=1), dtr['target'],
+                    dval.drop('target', axis=1), dval['target'],
+                    dts.drop('target', axis=1), dts['target']]
+        else:
+            return [dtr.drop('target', axis=1), dtr['target'],
+                    dts.drop('target', axis=1), dts['target']]
+    
+    
 def store_pop(population):
-    import os
-    from src.algorithm.parameters import params
-    if not os.path.exists("./seeds/" + params['TARGET_SEED_FOLDER']):
-        os.makedirs("./seeds/" + params['TARGET_SEED_FOLDER'], 
-                    exist_ok=True)
+    from os import path, getcwd, makedirs
+    from .algorithm.parameters import params
+    SEEDS_PATH = path.join('MGEDT', 'seeds')
+    makedirs(path.join(getcwd(), SEEDS_PATH, params['TARGET_SEED_FOLDER']),
+             exist_ok=True)
     for cont, item in enumerate(population):
         if item.phenotype != None:
-            with open(("./seeds/" + params['TARGET_SEED_FOLDER'] 
-                       + "/" + str(cont) + ".txt"), 'w+', 
+            fname = path.join(SEEDS_PATH, params['TARGET_SEED_FOLDER'],
+                              "{0}.txt".format(str(cont)))
+            with open(fname, 'w+', 
                       encoding="utf-8") as f:
                 f.write("Phenotype:\n")
                 f.write("%s\n" % item.phenotype)
@@ -221,6 +246,9 @@ def list_params(pop, gen, lamarck, multicore, **extra_params):
 
 def get_mlflow(experiment_name):
     import mlflow
+    from os import path
+    URI = path.join("MGEDT", "results", "mlruns")
+    mlflow.set_tracking_uri(URI)
     from mlflow.tracking import MlflowClient
     
     client = MlflowClient()
@@ -233,8 +261,8 @@ def get_mlflow(experiment_name):
 
 def evolve(params, range_generations, mlflow, population, refit=False):
     import numpy as np
-    from src.stats.stats import stats
-    from src.utilities.fitness.error_metric import AUC
+    from .stats.stats import stats
+    from .utilities.fitness.error_metric import AUC
     
     with mlflow.start_run():
         mlflow.log_param("REFIT", refit)
@@ -267,7 +295,7 @@ def evolve(params, range_generations, mlflow, population, refit=False):
 def get_nodes_from_tree(tree, feature_names, params):
     from importlib import import_module
     from sklearn.tree import _tree
-    from src.algorithm.mapper import map_tree_from_genome
+    from .algorithm.mapper import map_tree_from_genome
     
     tree_ = tree.tree_
     feature_name = [
