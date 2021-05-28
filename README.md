@@ -6,7 +6,7 @@ Both variants evolve variable-length DTs and perform a simultaneous optimization
 Both variants both use [PonyGE2](https://github.com/PonyGE/PonyGE2) as GE engine, while MGEDTL uses [sklearn DT](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html).
 
 
-<img width=70% src="imgs/dt_code.png">
+<img width=90% src="imgs/dt_code.png">
 
 More detais about this work can be found at: https://doi.org/10.1016/j.eswa.2020.114287.
 
