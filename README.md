@@ -31,8 +31,14 @@ pip install MGEDT
 This short tutorial contains a set of steps that will help you getting started with **MGEDT**.
 
 ## Load Example Data
+
+MGEDT package includes an example dataset for testing purposes only. Next steps show how to load it.
+
 ```python3
+# Import package
 from MGEDT import MGEDT
+# Create MGEDT object
+mgedt = MGEDT()
 # Loading example dataset, already divided into train, validation and test sets.
 X, y, X_val, y_val, X_ts, y_ts = mgedt.load_example_data()
 print(X)
@@ -40,7 +46,9 @@ print(y)
 ```
 
 ```
- 		  idoperator  idcampaign  idbrowser  idverticaltype  idapplication  idpartner  idaffmanager  regioncontinent  country_name  accmanager
+# Outputs
+## X (train)
+         idoperator  idcampaign  idbrowser  idverticaltype  idapplication  idpartner  idaffmanager  regioncontinent  country_name  accmanager
 0         0.755951    2.875355   0.416159        0.823179       0.101081   2.572643      2.028685         2.689715      4.957863    0.865465
 1         0.755951   11.379666   3.005727        3.662859      11.379666   7.131171      5.018939         3.477055      5.740521    2.173501
 2         0.755951    5.365407   3.005727        0.739897       0.101081   3.174113      1.986985         3.193263      3.378832    0.865465
@@ -55,7 +63,7 @@ print(y)
 
 [708942 rows x 10 columns]
 
-
+## y (train)
 0         NoSale
 1         NoSale
 2         NoSale
@@ -69,5 +77,47 @@ print(y)
 708941    NoSale
 Name: target, Length: 708942, dtype: object
 ```
+
+## Fit MGEDT and MGEDTL models
+
+Next steps present the basic usage of both variants (MGEDT and MGEDTL) for modeling the previously loaded data.
+
+```python3
+# Imports
+from MGEDT import MGEDT
+from sklearn import metrics
+import matplotlib.pyplot as plt
+# Create two MGEDT objects, one for each variant
+mgedt = MGEDT()
+mgedtl = MGEDT()
+# Load dataset
+X, y, X_val, y_val, X_ts, y_ts = mgedt.load_example_data()
+# Fit both versions on train data
+mgedt.fit(X, y, X_val, y_val, pop=100, gen=10, lamarck=False, experiment_name="test") # Normal variant
+mgedtl.fit(X, y, X_val, y_val, pop=100, gen=5, lamarck=True, experiment_name="testLamarck") # Lamarckian variant, doesn't need as much iterations (gen)
+# Predict on test data, using the solution with better predictive performance on validation data
+y_pred1 = mgedt.predict(X_ts, mode="best")
+y_pred2 = mgedtl.predict(X_ts, mode="best")
+# Compute AUC on test data
+fpr1, tpr1, th1 = metrics.roc_curve(y_ts, y_pred1, pos_label='Sale')
+fpr2, tpr2, th2 = metrics.roc_curve(y_ts, y_pred2, pos_label='Sale')
+auc1 = metrics.auc(fpr1, tpr1)
+auc2 = metrics.auc(fpr2, tpr2)
+# Plot results
+fig, ax = plt.subplots(1,1, figsize=(5.5,5))
+plt.plot(fpr2, tpr2, color='royalblue', ls="--", lw=2,
+         label="MGEDTL={}%".format(round(auc2, 2)))
+plt.plot(fpr1, tpr1, color='darkorange', ls="-", lw=2,
+         label="MGEDT={}%".format(round(auc1, 2)))
+plt.plot([0,1], [0,1], color="black", ls='--', label="baseline=50%")
+plt.legend(loc=4)
+plt.xlabel("FPR")
+plt.ylabel("TPR")
+plt.savefig("results.png")
+
+```
+Result:
+![Results.](https://github.com/p-pereira/MGEDT/blob/dev/imgs/results.png)
+
 
 
