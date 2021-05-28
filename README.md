@@ -117,6 +117,7 @@ plt.savefig("results.png")
 
 ```
 Result:
+
 ![Results.](https://github.com/p-pereira/MGEDT/blob/dev/imgs/results.png)
 
 
