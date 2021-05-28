@@ -36,10 +36,11 @@ from MGEDT import MGEDT
 # Loading example dataset, already divided into train, validation and test sets.
 X, y, X_val, y_val, X_ts, y_ts = mgedt.load_example_data()
 print(X)
+print(y)
 ```
 
 ```
-        idoperator  idcampaign  idbrowser  idverticaltype  idapplication  idpartner  idaffmanager  regioncontinent  country_name  accmanager
+ 		  idoperator  idcampaign  idbrowser  idverticaltype  idapplication  idpartner  idaffmanager  regioncontinent  country_name  accmanager
 0         0.755951    2.875355   0.416159        0.823179       0.101081   2.572643      2.028685         2.689715      4.957863    0.865465
 1         0.755951   11.379666   3.005727        3.662859      11.379666   7.131171      5.018939         3.477055      5.740521    2.173501
 2         0.755951    5.365407   3.005727        0.739897       0.101081   3.174113      1.986985         3.193263      3.378832    0.865465
@@ -53,4 +54,20 @@ print(X)
 708941    4.997474    5.141558   2.767041        0.739897       0.101081   2.238128      0.739841         2.301093      3.448381    0.865465
 
 [708942 rows x 10 columns]
+
+
+0         NoSale
+1         NoSale
+2         NoSale
+3         NoSale
+4         NoSale
+           ...
+708937    NoSale
+708938    NoSale
+708939    NoSale
+708940    NoSale
+708941    NoSale
+Name: target, Length: 708942, dtype: object
 ```
+
+
