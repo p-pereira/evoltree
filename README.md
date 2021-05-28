@@ -12,7 +12,7 @@ Solutions are represented as a **numpy.where** expression in the fromat bellow, 
 ```python3
 numpy.where(x[<idx>]<comparison><value>,<result>,<result>) 
 ```
-![Example of a generated Python code (left) and the corresponding DT (right).](".imgs/dt_code.png">)
+![Example of a generated Python code (left) and the corresponding DT (right).](.imgs/dt_code.png)
 
 More detais about this work can be found at: https://doi.org/10.1016/j.eswa.2020.114287.
 
