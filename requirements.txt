@@ -1,0 +1,6 @@
+matplotlib==3.4.1
+numpy==1.20.2
+pandas==1.2.4
+sklearn==0.0
+ply==3.11
+mlflow==1.15.0

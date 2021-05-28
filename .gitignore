@@ -129,13 +129,10 @@ dmypy.json
 .pyre/
 
 #### NEW 11-11-2020
-datasets/**/**/*
-results/*
+/datasets/*
+/results/*
 **/parsetab.py
 **/parser.out
-seeds/**/**
-grammars/**
-src/utilities/lamarck/**
-/src/web/web/**
-/src/web/template_/**
-/mlruns/**
+MGEDT/seeds/**/**
+MGEDT/utilities/lamarck/*/*
+MGEDT/data/

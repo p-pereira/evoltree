@@ -5,8 +5,16 @@ Created on Fri Jan 29 15:27:15 2021
 @author: pedro
 """
 
+from MGEDT import MGEDT
+mgedt = MGEDT()
+mgedtl = MGEDT()
+X, y, X_val, y_val, X_ts, y_ts = mgedt.load_example_data()
+mgedt.fit(X, y, X_val, y_val, pop=100, gen=10, lamarck=False, experiment_name="test", target_seed_folder="test")
+mgedtl.fit(X, y, X_val, y_val, pop=50, gen=10, lamarck=True, experiment_name="testL", target_seed_folder="testL")
+
+
 if __name__ == "__main__":
-    from mgedt import MGEDT
+    from MGEDT import MGEDT
     import pandas as pd
     from sklearn.model_selection import train_test_split
     from sklearn.metrics import roc_auc_score, roc_curve
@@ -55,9 +63,7 @@ if __name__ == "__main__":
             s = time()
             if not mgedt.fitted:
                 mgedt.fit(X, y, X_val, y_val, pop=100, gen=100, lamarck=False, 
-                          experiment_name="PROMOS",
-                          folder_name="MGEDT_{0}_{1}".format(mode, n),
-                          target_seed_folder="MGEDT_PROMOS_{0}".format(mode))
+                          experiment_name="TEST", folder_name="TEST", target_seed_folder="TEST")
             else:
                 mgedt.fit_new_data(X, y, X_val, y_val, pop=100, gen=25, 
                                    lamarck=False, experiment_name="PROMOS", 
