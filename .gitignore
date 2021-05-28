@@ -134,5 +134,5 @@ dmypy.json
 **/parsetab.py
 **/parser.out
 MGEDT/seeds/**/**
-MGEDT/src/utilities/lamarck/*/*
+MGEDT/utilities/lamarck/*/*
 MGEDT/data/
