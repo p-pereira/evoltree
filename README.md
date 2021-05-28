@@ -127,6 +127,7 @@ Result:
 If you use **MGEDT** for your research, please cite the following paper:
 
 Pedro José Pereira, Paulo Cortez, Rui Mendes:
+
 [**Multi-objective Grammatical Evolution of Decision Trees for Mobile Marketing User Conversion Prediction.**](https://doi.org/10.1016/j.eswa.2020.114287) Expert Syst. Appl. 168 (2021)
 
 
