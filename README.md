@@ -36,6 +36,7 @@ MGEDT package includes two example datasets for testing purposes only. Data is o
 To load the datasets, already divided into train, validation and test sets, two functions were created:
 - **load_offline_data** - returns the training, validation and test sets from first dataset, used for static environmnets;
 - **load_online_data** - returns the training, validation and test sets from both datasets, used for online learning scenarios.
+
 Next steps present how to load data in the two different modes (online and offline). Due to privacy issues, all data is anonimized.
 
 ```python3
@@ -86,7 +87,7 @@ Name: target, Length: 708942, dtype: object
 
 ## Offline Learning: Fit MGEDT and MGEDTL models
 
-Next steps present the basic usage of both variants (MGEDT and MGEDTL) for modeling the previously loaded data in an oflline environment.Furthermore, since all solutions are stored, it is possible to continue the learning process if needed, by using the **refit** function, also presented below.
+Next steps present the basic usage of both variants (MGEDT and MGEDTL) for modeling the previously loaded data in an oflline environment. Furthermore, since all solutions are stored, it is possible to continue the learning process if needed, by using the **refit** function, also presented below.
 
 ```python3
 # Imports
