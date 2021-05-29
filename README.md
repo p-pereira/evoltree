@@ -1,5 +1,8 @@
 # **MGEDT**: Multi-objective Grammatical Evolution Decision Trees for classification tasks
 
+[![Downloads](https://pepy.tech/badge/MGEDT)](https://pepy.tech/project/MGEDT) [![Downloads](https://pepy.tech/badge/MGEDT/month)](https://pepy.tech/project/MGEDT) [![Downloads](https://pepy.tech/badge/MGEDT/week)](https://pepy.tech/project/MGEDT)
+
+
 ## Overview
 
 MGEDT is a novel **Multi-objective Optimization (MO)** approach to evolve **Decision Trees (DT)** using **Grammatical Evolution (GE)**, under two main variants: a pure GE method (**MGEDT**) and a GE with Lamarckian Evolution (**MGEDTL**).
