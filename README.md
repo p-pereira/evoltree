@@ -192,6 +192,10 @@ plt.savefig("results_online.png")
 
 ```
 
+Results:
+
+![results_online](https://github.com/p-pereira/MGEDT/blob/dev/imgs/results_online.png)
+
 # Citation
 
 If you use **MGEDT** for your research, please cite the following paper:
