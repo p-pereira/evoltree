@@ -136,3 +136,4 @@ dmypy.json
 MGEDT/seeds/**/**
 MGEDT/utilities/lamarck/*/*
 MGEDT/data/
+runner.py
