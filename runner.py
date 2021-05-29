@@ -5,13 +5,54 @@ Created on Fri Jan 29 15:27:15 2021
 @author: pedro
 """
 
+# Imports
 from MGEDT import MGEDT
+from sklearn import metrics
+import matplotlib.pyplot as plt
+# Create two MGEDT objects, one for each variant
 mgedt = MGEDT()
 mgedtl = MGEDT()
-X, y, X_val, y_val, X_ts, y_ts = mgedt.load_example_data()
-mgedt.fit(X, y, X_val, y_val, pop=100, gen=10, lamarck=False, experiment_name="test", target_seed_folder="test")
-mgedtl.fit(X, y, X_val, y_val, pop=50, gen=10, lamarck=True, experiment_name="testL", target_seed_folder="testL")
-
+# Load datasets
+X1, y1, X_val1, y_val1, X_ts1, y_ts1, X2, y2, X_val2, y_val2, X_ts2, y_ts2 = mgedt.load_online_data()
+### Train models: first dataset
+# Fit both versions on train data
+## Normal variant:
+mgedt.fit(X1, y1, X_val1, y_val1, pop=100, gen=10, lamarck=False, experiment_name="test")
+## Lamarckian variant, doesn't need as much iterations (gen)
+mgedtl.fit(X1, y1, X_val1, y_val1, pop=100, gen=5, lamarck=True, experiment_name="testLamarck")
+# Predict on test data, using the solution with better predictive performance on validation data
+y_pred1 = mgedt.predict(X_ts1, mode="best")
+y_predL1 = mgedtl.predict(X_ts1, mode="best")
+# Compute AUC on test data
+fpr1, tpr1, th1 = metrics.roc_curve(y_ts1, y_pred1, pos_label='Sale')
+fprL1, tprL1, thL1 = metrics.roc_curve(y_ts1, y_predL1, pos_label='Sale')
+auc1 = metrics.auc(fpr1, tpr1)
+aucL1 = metrics.auc(fprL1, tprL1)
+### Re-Train models: second dataset
+# Fit both versions on train data
+## Normal variant:
+mgedt.fit_new_data(X2, y2, X_val2, y_val2, pop=100, gen=5, lamarck=False)
+## Lamarckian variant, doesn't need as much iterations (gen)
+mgedtl.fit_new_data(X2, y2, X_val2, y_val2, pop=100, gen=2, lamarck=True)
+# Predict on test data, using the solution with better predictive performance on validation data
+y_pred2 = mgedt.predict(X_ts2, mode="best")
+y_predL2 = mgedtl.predict(X_ts2, mode="best")
+# Compute AUC on test data
+fpr2, tpr2, th2 = metrics.roc_curve(y_ts2, y_pred2, pos_label='Sale')
+fprL2, tprL2, thL2 = metrics.roc_curve(y_ts2, y_predL2, pos_label='Sale')
+auc2 = metrics.auc(fpr2, tpr2)
+aucL2 = metrics.auc(fprL2, tprL2)
+# Plot results
+fig, ax = plt.subplots(1,1, figsize=(5.5,5))
+plt.plot(fprL1, tprL1, color='royalblue', ls="--", lw=2, label="MGEDTL (1)={}%".format(round(aucL1, 2)))
+plt.plot(fpr1, tpr1, color='darkorange', ls="-", lw=2, label="MGEDT (1)={}%".format(round(auc1, 2)))
+plt.plot(fprL2, tprL2, color='navy', ls="--", lw=2, label="MGEDTL (2)={}%".format(round(aucL2, 2)))
+plt.plot(fpr2, tpr2, color='tan', ls="-", lw=2, label="MGEDT (2)={}%".format(round(auc2, 2)))
+plt.plot([0,1], [0,1], color="black", ls='--', label="baseline=50%")
+plt.legend(loc=4)
+plt.xlabel("FPR")
+plt.ylabel("TPR")
+plt.savefig("results_online.png")
 
 if __name__ == "__main__":
     from MGEDT import MGEDT

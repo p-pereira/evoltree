@@ -165,7 +165,7 @@ class MGEDT(object):
                  for dt in rf.estimators_]
         return sum(nodes)
     
-    def load_example_data(val=True) -> List:
+    def load_offline_data(val=True) -> List:
         import pandas as pd
         from os import path
         from sklearn.model_selection import train_test_split
@@ -178,6 +178,7 @@ class MGEDT(object):
         
         if val:
             dtr, dval = train_test_split(dtrain, test_size=0.1, 
+                                         random_state=1234, 
                                          stratify=dtrain['target'])
             dtr = dtr.reset_index(drop=True)
             dval = dval.reset_index(drop=True)
@@ -188,7 +189,47 @@ class MGEDT(object):
             return [dtr.drop('target', axis=1), dtr['target'],
                     dts.drop('target', axis=1), dts['target']]
     
-    
+    def load_online_data(val=True) -> List:
+        import pandas as pd
+        from os import path
+        from sklearn.model_selection import train_test_split
+        import pkg_resources
+        DATA_PATH = pkg_resources.resource_filename('MGEDT', 'data')
+        dtr_filename1 = path.join(DATA_PATH, "example1_tr.csv")
+        dts_filename1 = path.join(DATA_PATH, "example1_ts.csv")
+        dtrain1 = pd.read_csv(dtr_filename1, sep=";")
+        dts1 = pd.read_csv(dts_filename1, sep=";")
+        
+        dtr_filename2 = path.join(DATA_PATH, "example2_tr.csv")
+        dts_filename2 = path.join(DATA_PATH, "example2_ts.csv")
+        dtrain2 = pd.read_csv(dtr_filename2, sep=";")
+        dts2 = pd.read_csv(dts_filename2, sep=";")
+        
+        if val:
+            dtr1, dval1 = train_test_split(dtrain1, test_size=0.1, 
+                                           random_state=1234,
+                                           stratify=dtrain1['target'])
+            dtr1 = dtr1.reset_index(drop=True)
+            dval1 = dval1.reset_index(drop=True)
+            
+            dtr2, dval2 = train_test_split(dtrain2, test_size=0.1,
+                                           random_state=1234,
+                                           stratify=dtrain2['target'])
+            dtr2 = dtr2.reset_index(drop=True)
+            dval2 = dval2.reset_index(drop=True)
+            return [dtr1.drop('target', axis=1), dtr1['target'],
+                    dval1.drop('target', axis=1), dval1['target'],
+                    dts1.drop('target', axis=1), dts1['target'],
+                    dtr2.drop('target', axis=1), dtr2['target'],
+                    dval2.drop('target', axis=1), dval2['target'],
+                    dts2.drop('target', axis=1), dts2['target']]
+        else:
+            return [dtr1.drop('target', axis=1), dtr1['target'],
+                    dts1.drop('target', axis=1), dts1['target'],
+                    dtr2.drop('target', axis=1), dtr2['target'],
+                    dts2.drop('target', axis=1), dts2['target']]
+
+
 def store_pop(population):
     from os import path, getcwd, makedirs
     from .algorithm.parameters import params
