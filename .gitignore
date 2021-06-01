@@ -134,6 +134,7 @@ dmypy.json
 **/parsetab.py
 **/parser.out
 evoltree/seeds/**/**
+evoltree/grammars/**/**
 evoltree/utilities/lamarck/*/*
 evoltree/data/
 runner.py
