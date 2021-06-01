@@ -23,7 +23,7 @@ def remove_leading_zeros(phenotype):
 # Automatically creates lammarck mapper file
 def create_lamarck_mapper(params):
     import pkg_resources
-    DATA_PATH = pkg_resources.resource_filename('MGEDT', 'utilities')
+    DATA_PATH = pkg_resources.resource_filename('evoltree', 'utilities')
     # Create mapper folder based on experiment name
     mapper_dir = path.join(DATA_PATH, 'lamarck', params["EXPERIMENT_NAME"])
     makedirs(mapper_dir, exist_ok=True)
@@ -77,5 +77,5 @@ def create_lamarck_mapper(params):
     mapper_file.close()
     
     # Return mapper
-    mapper = "MGEDT.utilities.lamarck.{0}.mapper".format(params["EXPERIMENT_NAME"])
+    mapper = "evoltree.utilities.lamarck.{0}.mapper".format(params["EXPERIMENT_NAME"])
     return mapper

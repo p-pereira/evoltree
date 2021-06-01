@@ -147,7 +147,7 @@ def generate_folders_and_files():
 
     if params['EXPERIMENT_NAME']:
         # Experiment manager is being used.
-        path_1 = path.join(getcwd(), "MGEDT", "results")
+        path_1 = path.join(getcwd(), "evoltree", "results")
 
         if not path.isdir(path_1):
             # Create results folder.

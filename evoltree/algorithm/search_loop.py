@@ -61,7 +61,7 @@ def search_loop():
     """ NEW 27-05-2021: This is now managed in mgedt.py
     if params['TARGET_SEED_FOLDER'] != "":
         import pkg_resources
-        SEEDS_PATH = pkg_resources.resource_filename('MGEDT', 'seeds')
+        SEEDS_PATH = pkg_resources.resource_filename('evoltree', 'seeds')
         os.makedirs(path.join(SEEDS_PATH, params['TARGET_SEED_FOLDER']),
                     exist_ok=True)
         for cont, item in enumerate(individuals):

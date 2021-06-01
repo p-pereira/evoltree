@@ -5,5 +5,5 @@ Created on Fri May 14 15:08:11 2021
 @author: pedro
 """
 
-from .mgedt import MGEDT
+from .evoltree import evoltree
 

@@ -133,7 +133,7 @@ dmypy.json
 /results/*
 **/parsetab.py
 **/parser.out
-MGEDT/seeds/**/**
-MGEDT/utilities/lamarck/*/*
-MGEDT/data/
+evoltree/seeds/**/**
+evoltree/utilities/lamarck/*/*
+evoltree/data/
 runner.py
