@@ -156,9 +156,9 @@ X1, y1, X_val1, y_val1, X_ts1, y_ts1, X2, y2, X_val2, y_val2, X_ts2, y_ts2 = edt
 ### Train models: first dataset
 # Fit both versions on train data
 ## Normal variant:
-edt.fit(X1, y1, X_val1, y_val1, pop=100, gen=10, lamarck=False, experiment_name="test")
+edt.fit(X1, y1, "Sale", X_val1, y_val1, pop=100, gen=10, lamarck=False, experiment_name="test")
 ## Lamarckian variant, doesn't need as much iterations (gen)
-edtl.fit(X1, y1, X_val1, y_val1, pop=100, gen=5, lamarck=True, experiment_name="testLamarck")
+edtl.fit(X1, y1, "Sale", X_val1, y_val1, pop=100, gen=5, lamarck=True, experiment_name="testLamarck")
 # Predict on test data, using the solution with better predictive performance on validation data
 y_pred1 = edt.predict(X_ts1, mode="best")
 y_predL1 = edtl.predict(X_ts1, mode="best")
@@ -185,8 +185,8 @@ aucL2 = metrics.auc(fprL2, tprL2)
 fig, ax = plt.subplots(1,1, figsize=(5.5,5))
 plt.plot(fprL1, tprL1, color='royalblue', ls="--", lw=2, label="EDTL (1)={}%".format(round(aucL1, 2)))
 plt.plot(fpr1, tpr1, color='darkorange', ls="-", lw=2, label="EDT (1)={}%".format(round(auc1, 2)))
-plt.plot(fprL2, tprL2, color='royalblue', ls="--", lw=2, label="EDTL (2)={}%".format(round(aucL2, 2)))
-plt.plot(fpr2, tpr2, color='darkorange', ls="-", lw=2, label="EDT (2)={}%".format(round(auc2, 2)))
+plt.plot(fprL2, tprL2, color='navy', ls="--", lw=2, label="EDTL (2)={}%".format(round(aucL2, 2)))
+plt.plot(fpr2, tpr2, color='tan', ls="-", lw=2, label="EDT (2)={}%".format(round(auc2, 2)))
 plt.plot([0,1], [0,1], color="black", ls='--', label="baseline=50%")
 plt.legend(loc=4)
 plt.xlabel("FPR")

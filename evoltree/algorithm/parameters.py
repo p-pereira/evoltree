@@ -218,6 +218,8 @@ params = {
         'y_train' : None,
         'X_test' : None,
         'y_test' : None,
+        ### New 01-06-2021: positive class should be passed for computing AUC
+        'POS_LABEL': "",
         
 }
 

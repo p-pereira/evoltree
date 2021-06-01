@@ -5,21 +5,25 @@ Created on Sat Nov 21 17:26:33 2020
 @author: pedro
 """
 from typing import List
+import pandas as pd
 
 class evoltree(object):
     """
     evoltree object.
     
     """
-   
+    
     def __init__(self):
         self.params = {}
         self.population = []
         self.stats = {}
         self.fitted = False
     
-    def fit(self, X, y, X_val=None, y_val=None, pop=100, gen=100, 
-            lamarck=True, multicore=True, **extra_params):
+    def fit(self, X: pd.DataFrame, y: pd.Series, pos_label: str, 
+            X_val: pd.DataFrame = None, y_val: pd.Series = None, pop : int =100, 
+            gen : int =100, lamarck : bool =True, multicore: bool =True, 
+            **extra_params):
+        
         from .algorithm.parameters import params, set_params
         from .stats.stats import get_stats, stats
         from .operators.initialisation import initialisation
@@ -31,7 +35,8 @@ class evoltree(object):
         new_params = {'X_train': X, 'y_train': y,
                       'X_test': X_val, 'y_test': y_val,
                       'POPULATION_SIZE': pop, 'GENERATIONS': gen,
-                      'LAMARCK': lamarck, 'MULTICORE': multicore}
+                      'LAMARCK': lamarck, 'MULTICORE': multicore,
+                      'POS_LABEL': pos_label}
         params.update(new_params)
         
         param_list = list_params(pop, gen, lamarck, multicore, **extra_params)
@@ -68,7 +73,7 @@ class evoltree(object):
         self.population = population
         self.fitted = True
     
-    def refit(self, gen):
+    def refit(self, gen: int) -> None:
         if not self.fitted:
             raise Exception("evoltree needs to be fitted first. Use evoltree.fit")
         from .algorithm.parameters import params
@@ -93,7 +98,7 @@ class evoltree(object):
         self.population = population
     
     def fit_new_data(self, X, y, X_val=None, y_val=None, pop=100, gen=100, 
-                     lamarck=True, multicore=True, **extra_params):
+                     lamarck=True, multicore=True, **extra_params) -> None:
         if not self.fitted:
             raise Exception("evoltree needs to be fitted first. Use evoltree.fit")
         from .algorithm.parameters import params, set_params
@@ -122,7 +127,7 @@ class evoltree(object):
         self.stats = stats
         self.population = population
     
-    def predict(self, x, mode="best"):
+    def predict(self, x: pd.DataFrame, mode="best"):
         if mode == "all":
             preds = [ind.predict(x) for ind in self.population]
         elif mode == "best":
@@ -146,7 +151,7 @@ class evoltree(object):
         
         return preds
     
-    def evaluate_all(self, X_test, y_test):
+    def evaluate_all(self, X_test: pd.DataFrame, y_test: pd.Series) -> List:
         import pandas as pd
         from .utilities.fitness.error_metric import AUC
         aucs = [-1*AUC(y_test, ind.predict(X_test)) for ind in self.population]
@@ -230,7 +235,7 @@ class evoltree(object):
                     dts2.drop('target', axis=1), dts2['target']]
 
 
-def store_pop(population):
+def store_pop(population: List) -> None:
     from os import path, getcwd, makedirs
     from .algorithm.parameters import params
     SEEDS_PATH = path.join('evoltree', 'seeds')
@@ -335,7 +340,7 @@ def evolve(params, range_generations, mlflow, population, refit=False):
         mlflow.log_metric("best val AUC", -min(val_aucs))
     return population
 
-def get_nodes_from_tree(tree, feature_names, params):
+def get_nodes_from_tree(tree, feature_names, params) -> int:
     from importlib import import_module
     from sklearn.tree import _tree
     from .algorithm.mapper import map_tree_from_genome

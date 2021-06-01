@@ -15,7 +15,7 @@ with open('requirements.txt') as f:
 
 
 setuptools.setup(name='evoltree',
-                 version='b0.1',
+                 version='0.0.6',
                  description='evoltree - Evolutionary Decision Trees',
                  author='Pedro José Pereira, Paulo Cortez, Rui Mendes',
                  license='MIT',

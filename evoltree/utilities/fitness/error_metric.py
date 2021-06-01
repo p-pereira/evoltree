@@ -1,6 +1,7 @@
 import numpy as np
-from sklearn.metrics import f1_score as sklearn_f1_score
-from sklearn.metrics import roc_auc_score, log_loss
+from sklearn.metrics import (f1_score as sklearn_f1_score, 
+                             log_loss, roc_curve, auc)
+from ...algorithm.parameters import params
 
 def mae(y, yhat):
     """
@@ -131,7 +132,9 @@ def AUC(y, yhat):
     yhat = np.nan_to_num(yhat)
     if type(yhat) != np.ndarray:
         yhat = np.repeat(yhat, len(y))
-    auc_val = roc_auc_score(y, yhat)*100
+    #auc_val = roc_auc_score(y, yhat)*100
+    fpr, tpr, th = roc_curve(y, yhat, pos_label=params['POS_LABEL']) 
+    auc_val = auc(fpr, tpr) * 100
     return(-auc_val)
 
     #print(auc)
