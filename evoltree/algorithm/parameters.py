@@ -20,7 +20,7 @@ params = {
         'SCHC_COUNT_METHOD': "count_all",
 
         # Set optional experiment name
-        'EXPERIMENT_NAME': "MGEDT",
+        'EXPERIMENT_NAME': "evoltree",
         # Set default number of runs to be done.
         # ONLY USED WITH EXPERIMENT MANAGER.
         'RUNS': 1,
@@ -324,7 +324,7 @@ def set_params(command_line_args, create_files=True):
                                                          skip_header=1)
     
     if params['EXPERIMENT_NAME'] == '':
-        params['EXPERIMENT_NAME'] = "MGEDT"
+        params['EXPERIMENT_NAME'] = "evoltree"
     if params['FOLDER_NAME'] == '':
         import time
         params['FOLDER_NAME'] = "{0}".format(time.strftime("%Y%m%d%H%M%S"))
@@ -409,11 +409,11 @@ def set_params(command_line_args, create_files=True):
                                        params['FOLDER_NAME'],
                                        "grammar.bnf")
             import os
-            os.makedirs(path.join(".mgedt", "grammars", params['EXPERIMENT_NAME'], 
+            os.makedirs(path.join(".evoltree", "grammars", params['EXPERIMENT_NAME'], 
                                   params['FOLDER_NAME']), exist_ok=True)
             """
             # Get base grammar
-            GRAMMAR_PATH = pkg_resources.resource_filename('MGEDT', 'grammars')
+            GRAMMAR_PATH = pkg_resources.resource_filename('evoltree', 'grammars')
             default_filepath = path.join(GRAMMAR_PATH, "base.bnf")
             bnf = open(default_filepath, 'r')
             content = bnf.read() + "\n"
@@ -467,7 +467,7 @@ def set_params(command_line_args, create_files=True):
 
             # Import population loading function.
             from ..operators.initialisation import load_population
-            SEEDS_PATH = path.join(getcwd(), 'MGEDT', 'seeds')
+            SEEDS_PATH = path.join(getcwd(), 'evoltree', 'seeds')
             makedirs(path.join(SEEDS_PATH, params['TARGET_SEED_FOLDER']),
                         exist_ok=True)
             # A target folder containing seed individuals has been given.

@@ -375,10 +375,10 @@ def parse_cmd_args(arguments):
     parser.add_argument('--experiment_name',
                         dest='EXPERIMENT_NAME',
                         type=str,
-                        default="MGEDT",
+                        default="evoltree",
                         help='Optional parameter to save results in '
                              'results/[EXPERIMENT_NAME]/[FOLDER_NAME] folder. If not '
-                             'specified then "MGEDT" is used.')
+                             'specified then "evoltree" is used.')
     parser.add_argument('--runs',
                         dest='RUNS',
                         type=int,

@@ -6,9 +6,9 @@ Created on Sat Nov 21 17:26:33 2020
 """
 from typing import List
 
-class MGEDT(object):
+class evoltree(object):
     """
-    MGEDT object.
+    evoltree object.
     
     """
    
@@ -70,7 +70,7 @@ class MGEDT(object):
     
     def refit(self, gen):
         if not self.fitted:
-            raise Exception("MGEDT needs to be fitted first. Use MGEDT.fit")
+            raise Exception("evoltree needs to be fitted first. Use evoltree.fit")
         from .algorithm.parameters import params
         from .stats.stats import get_stats, stats
         from tqdm import tqdm
@@ -95,7 +95,7 @@ class MGEDT(object):
     def fit_new_data(self, X, y, X_val=None, y_val=None, pop=100, gen=100, 
                      lamarck=True, multicore=True, **extra_params):
         if not self.fitted:
-            raise Exception("MGEDT needs to be fitted first. Use MGEDT.fit")
+            raise Exception("evoltree needs to be fitted first. Use evoltree.fit")
         from .algorithm.parameters import params, set_params
         from .stats.stats import get_stats, stats
         from tqdm import tqdm
@@ -170,7 +170,7 @@ class MGEDT(object):
         from os import path
         from sklearn.model_selection import train_test_split
         import pkg_resources
-        DATA_PATH = pkg_resources.resource_filename('MGEDT', 'data')
+        DATA_PATH = pkg_resources.resource_filename('evoltree', 'data')
         dtr_filename = path.join(DATA_PATH, "example1_tr.csv")
         dts_filename = path.join(DATA_PATH, "example1_ts.csv")
         dtrain = pd.read_csv(dtr_filename, sep=";")
@@ -194,7 +194,7 @@ class MGEDT(object):
         from os import path
         from sklearn.model_selection import train_test_split
         import pkg_resources
-        DATA_PATH = pkg_resources.resource_filename('MGEDT', 'data')
+        DATA_PATH = pkg_resources.resource_filename('evoltree', 'data')
         dtr_filename1 = path.join(DATA_PATH, "example1_tr.csv")
         dts_filename1 = path.join(DATA_PATH, "example1_ts.csv")
         dtrain1 = pd.read_csv(dtr_filename1, sep=";")
@@ -233,7 +233,7 @@ class MGEDT(object):
 def store_pop(population):
     from os import path, getcwd, makedirs
     from .algorithm.parameters import params
-    SEEDS_PATH = path.join('MGEDT', 'seeds')
+    SEEDS_PATH = path.join('evoltree', 'seeds')
     makedirs(path.join(getcwd(), SEEDS_PATH, params['TARGET_SEED_FOLDER']),
              exist_ok=True)
     for cont, item in enumerate(population):
@@ -290,7 +290,7 @@ def list_params(pop, gen, lamarck, multicore, **extra_params):
 def get_mlflow(experiment_name):
     import mlflow
     from os import path
-    URI = path.join("MGEDT", "results", "mlruns")
+    URI = path.join("evoltree", "results", "mlruns")
     mlflow.set_tracking_uri(URI)
     from mlflow.tracking import MlflowClient
     

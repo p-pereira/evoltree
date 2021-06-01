@@ -220,7 +220,7 @@ def get_fit_func_imports():
             params[op][i] = return_attr_from_module(module_path, attr)
 
         # Import base multi-objective fitness function class.
-        from MGEDT.fitness.base_ff_classes.moo_ff import moo_ff
+        from evoltree.fitness.base_ff_classes.moo_ff import moo_ff
 
         # Set main fitness function as base multi-objective fitness
         # function class.
@@ -255,7 +255,7 @@ def return_attr_from_module(module_name, attr_name):
     :param attr_name: The name of the attribute.
     :return: The imported attribute from the module.
     """
-    module_name = "MGEDT." + module_name
+    module_name = "evoltree." + module_name
 
     try:
         # Import module.
