@@ -106,9 +106,9 @@ edtl = evoltree()
 X, y, X_val, y_val, X_ts, y_ts = edt.load_offline_data()
 # Fit both versions on train data
 ## Normal variant:
-edt.fit(X, y, X_val, y_val, pop=100, gen=10, lamarck=False, experiment_name="test")
+edt.fit(X, y, "Sale", X_val, y_val, pop=100, gen=10, lamarck=False, experiment_name="test")
 ## Lamarckian variant, doesn't need as much iterations (gen)
-edtl.fit(X, y, X_val, y_val, pop=100, gen=5, lamarck=True, experiment_name="testLamarck")
+edtl.fit(X, y, "Sale", X_val, y_val, pop=100, gen=5, lamarck=True, experiment_name="testLamarck")
 # Continue Fiting both versions on the same datasets for extra 2 iterations
 ## Normal variant:
 edt.refit(gen=2)
@@ -204,7 +204,7 @@ Results:
 If you use **evoltree** for your research, please cite the following paper:
 
 
-Pedro Jos\'{e} Pereira, Paulo Cortez, Rui Mendes:
+Pedro J. Pereira, Paulo Cortez, Rui Mendes:
 
 [**Multi-objective Grammatical Evolution of Decision Trees for Mobile Marketing User Conversion Prediction.**](https://doi.org/10.1016/j.eswa.2020.114287)
 
