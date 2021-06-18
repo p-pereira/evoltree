@@ -14,7 +14,8 @@ import time
 from os import getcwd, path
 import logging
 
-set_params('')
+if __name__ == "__main__":
+    set_params('')
 
 def loadPop(folder="Test", otherDir=getcwd()):
     """

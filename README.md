@@ -37,7 +37,7 @@ This short tutorial contains a set of steps that will help you getting started w
 
 evoltree package includes two example datasets for testing purposes only. Data is ordered in time and the second dataset contains events collected after the first one.
 To load the datasets, already divided into train, validation and test sets, two functions were created:
-- **load_offline_data** - returns the training, validation and test sets from first dataset, used for static environmnets;
+- **load_offline_data** - returns the training, validation and test sets from first dataset, used for static environments;
 - **load_online_data** - returns the training, validation and test sets from both datasets, used for online learning scenarios.
 
 Next steps present how to load data in the two different modes (online and offline). Due to privacy issues, all data is anonimized.
@@ -106,9 +106,9 @@ edtl = evoltree()
 X, y, X_val, y_val, X_ts, y_ts = edt.load_offline_data()
 # Fit both versions on train data
 ## Normal variant:
-edt.fit(X, y, X_val, y_val, pop=100, gen=10, lamarck=False, experiment_name="test")
+edt.fit(X, y, "Sale", X_val, y_val, pop=100, gen=10, lamarck=False, experiment_name="test")
 ## Lamarckian variant, doesn't need as much iterations (gen)
-edtl.fit(X, y, X_val, y_val, pop=100, gen=5, lamarck=True, experiment_name="testLamarck")
+edtl.fit(X, y, "Sale", X_val, y_val, pop=100, gen=5, lamarck=True, experiment_name="testLamarck")
 # Continue Fiting both versions on the same datasets for extra 2 iterations
 ## Normal variant:
 edt.refit(gen=2)
@@ -204,7 +204,7 @@ Results:
 If you use **evoltree** for your research, please cite the following paper:
 
 
-Pedro José Pereira, Paulo Cortez, Rui Mendes:
+Pedro J. Pereira, Paulo Cortez, Rui Mendes:
 
 [**Multi-objective Grammatical Evolution of Decision Trees for Mobile Marketing User Conversion Prediction.**](https://doi.org/10.1016/j.eswa.2020.114287)
 

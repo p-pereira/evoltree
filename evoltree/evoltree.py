@@ -23,7 +23,37 @@ class evoltree(object):
             X_val: pd.DataFrame = None, y_val: pd.Series = None, pop : int =100, 
             gen : int =100, lamarck : bool =True, multicore: bool =True, 
             **extra_params):
+        """
         
+
+        Parameters
+        ----------
+        X : pd.DataFrame
+            DESCRIPTION.
+        y : pd.Series
+            DESCRIPTION.
+        pos_label : str
+            DESCRIPTION.
+        X_val : pd.DataFrame, optional
+            DESCRIPTION. The default is None.
+        y_val : pd.Series, optional
+            DESCRIPTION. The default is None.
+        pop : int, optional
+            DESCRIPTION. The default is 100.
+        gen : int, optional
+            DESCRIPTION. The default is 100.
+        lamarck : bool, optional
+            DESCRIPTION. The default is True.
+        multicore : bool, optional
+            DESCRIPTION. The default is True.
+        **extra_params : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
         from .algorithm.parameters import params, set_params
         from .stats.stats import get_stats, stats
         from .operators.initialisation import initialisation
@@ -144,9 +174,7 @@ class evoltree(object):
                               key=lambda x: x.fitness[1]).fitness[1])
             # get individual with greater distance to point (0, 1)
             balanced = max(self.population,
-                           key=lambda x: self.__get_distance__(x, 
-                                                               min_y, 
-                                                               max_y))
+                           key=lambda x: get_distance(x, min_y, max_y))
             preds = balanced.predict(x)
         
         return preds
