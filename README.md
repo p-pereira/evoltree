@@ -37,7 +37,7 @@ This short tutorial contains a set of steps that will help you getting started w
 
 evoltree package includes two example datasets for testing purposes only. Data is ordered in time and the second dataset contains events collected after the first one.
 To load the datasets, already divided into train, validation and test sets, two functions were created:
-- **load_offline_data** - returns the training, validation and test sets from first dataset, used for static environmnets;
+- **load_offline_data** - returns the training, validation and test sets from first dataset, used for static environments;
 - **load_online_data** - returns the training, validation and test sets from both datasets, used for online learning scenarios.
 
 Next steps present how to load data in the two different modes (online and offline). Due to privacy issues, all data is anonimized.
