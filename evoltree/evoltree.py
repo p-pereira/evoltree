@@ -6,6 +6,9 @@ Created on Sat Nov 21 17:26:33 2020
 """
 from typing import List
 import pandas as pd
+from representation.individual import Individual
+from sklearn.tree import _tree
+import numpy as np
 
 class evoltree(object):
     """
@@ -24,34 +27,36 @@ class evoltree(object):
             gen : int =100, lamarck : bool =True, multicore: bool =True, 
             **extra_params):
         """
-        
+        Build a population of Evolutionary Decision Trees from the training set (X, y).
+        It uses AUC and Tree complexity as metrics.
 
         Parameters
         ----------
         X : pd.DataFrame
-            DESCRIPTION.
+            The training input samples.
         y : pd.Series
-            DESCRIPTION.
+            The target values (class labels) as integers or strings.
         pos_label : str
-            DESCRIPTION.
+            Positive class label. Used to compute AUC.
         X_val : pd.DataFrame, optional
-            DESCRIPTION. The default is None.
+            Validation input samples, used to sort the population. The default is None.
         y_val : pd.Series, optional
-            DESCRIPTION. The default is None.
+            Validation target values (class values), used to sort the population. The default is None.
         pop : int, optional
-            DESCRIPTION. The default is 100.
+            Number of Evolutionary Decision Trees in the population. The default is 100.
         gen : int, optional
-            DESCRIPTION. The default is 100.
+            Number of generations (iterations) of training. The default is 100.
         lamarck : bool, optional
-            DESCRIPTION. The default is True.
+            If Lamarckian Evolutiona is used. The default is True.
         multicore : bool, optional
-            DESCRIPTION. The default is True.
+            If parallelism is used. The default is True.
         **extra_params : TYPE
-            DESCRIPTION.
+            Extra parameters. For details, please check: https://github.com/PonyGE/PonyGE2/wiki/Evolutionary-Parameters.
 
         Returns
         -------
-        None.
+        self
+            Fitted Evolutionary Decision Trees.
 
         """
         from .algorithm.parameters import params, set_params
@@ -103,7 +108,26 @@ class evoltree(object):
         self.population = population
         self.fitted = True
     
-    def refit(self, gen: int) -> None:
+    def refit(self, gen: int):
+        """
+        Continues the training process for <gen> iterations.
+
+        Parameters
+        ----------
+        gen : int
+            Number of generations (iterations).
+
+        Raises
+        ------
+        Exception
+            If Evolutionary Decision Trees are not trained yet, please use evoltree.fit.
+
+        Returns
+        -------
+        self
+            Re-fitted Evolutionary Decision Trees.
+
+        """
         if not self.fitted:
             raise Exception("evoltree needs to be fitted first. Use evoltree.fit")
         from .algorithm.parameters import params
@@ -129,6 +153,43 @@ class evoltree(object):
     
     def fit_new_data(self, X, y, X_val=None, y_val=None, pop=100, gen=100, 
                      lamarck=True, multicore=True, **extra_params) -> None:
+        """
+        Fit Evolutionary Decision Trees to a new data set (X,Y), considering the same positive label.
+        It uses the previous solutions as starting point.
+        Function used for Online Learning environments.
+
+        Parameters
+        ----------
+        X : pd.DataFrame
+            The training input samples.
+        y : pd.Series
+            The target values (class labels) as integers or strings.
+        X_val : pd.DataFrame, optional
+            Validation input samples, used to sort the population. The default is None.
+        y_val : pd.Series, optional
+            Validation target values (class values), used to sort the population. The default is None.
+        pop : int, optional
+            Number of Evolutionary Decision Trees in the population. The default is 100.
+        gen : int, optional
+            Number of generations (iterations) of training. The default is 100.
+        lamarck : bool, optional
+            If Lamarckian Evolutiona is used. The default is True.
+        multicore : bool, optional
+            If parallelism is used. The default is True.
+        **extra_params : TYPE
+            Extra parameters. For details, please check: https://github.com/PonyGE/PonyGE2/wiki/Evolutionary-Parameters.
+
+        Raises
+        ------
+        Exception
+            If Evolutionary Decision Trees are not trained yet, please use evoltree.fit.
+
+        Returns
+        -------
+        self
+            Evolutionary Decision Trees re-fitted to the new data set.
+
+        """
         if not self.fitted:
             raise Exception("evoltree needs to be fitted first. Use evoltree.fit")
         from .algorithm.parameters import params, set_params
@@ -157,7 +218,30 @@ class evoltree(object):
         self.stats = stats
         self.population = population
     
-    def predict(self, x: pd.DataFrame, mode="best"):
+    def predict(self, x: pd.DataFrame, mode: str="best") -> np.array:
+        """
+        Predict class probabilities of the input samples X.
+
+        Parameters
+        ----------
+        x : pd.DataFrame
+            The input samples.
+        mode : str, optional
+            Specifies which Evolutionar Decision Tree is used to perform predictions. 
+            The default is "best". Possibilities:
+                - "best": uses the tree with highest AUC estimated using validation data.
+                - "simplest": uses the tree with lowest complexity.
+                - "all": uses all the trees and returns all the predicted probabilities.
+                - "balanced": chooses the tree with the greatest Euclidean Distance\
+                    to the reference point (0, 1), where 0 is the worst possible AUC\
+                        and 1 is the worst possible complexity (normalized values).
+
+        Returns
+        -------
+        preds : np.array
+            The class probabilities of the input samples.
+
+        """
         if mode == "all":
             preds = [ind.predict(x) for ind in self.population]
         elif mode == "best":
@@ -180,6 +264,23 @@ class evoltree(object):
         return preds
     
     def evaluate_all(self, X_test: pd.DataFrame, y_test: pd.Series) -> List:
+        """
+        Evaluate all Evolutionary Decision Trees in terms of AUC and Complexity,\
+            based on data set (X_test, y_test)
+
+        Parameters
+        ----------
+        X_test : pd.DataFrame
+            The test input samples..
+        y_test : pd.Series
+            The test target values (class labels) as integers or strings.
+
+        Returns
+        -------
+        List
+            List containing [AUC, Complexity] for each Evolutionary Decision Tree in the population.
+
+        """
         import pandas as pd
         from .utilities.fitness.error_metric import AUC
         aucs = [-1*AUC(y_test, ind.predict(X_test)) for ind in self.population]
@@ -189,16 +290,69 @@ class evoltree(object):
         ev2 = ev.groupby('auc').agg({'node':min}).reset_index().values
         return [ev2[:,0], ev2[:,1]]
     
-    def __get_tree_complexity__(self, dt, columns):
+    def __get_tree_complexity__(self, dt: _tree, columns) -> int:
+        """
+        Estimates the complexity of an sklearn Decision Tree.
+        For advanced users only.
+
+        Parameters
+        ----------
+        dt : _tree
+            sklearn Decision Tree.
+        columns : TYPE
+            Data attributes.
+
+        Returns
+        -------
+        int
+            Tree complexity.
+
+        """
         nodes = get_nodes_from_tree(dt, columns, self.params)
         return nodes
     
-    def __get_randForest_complexity__(self, rf, columns):
+    def __get_randForest_complexity__(self, rf, columns) -> int:
+        """
+        Estimates the complexity of an sklearn Random Forest.
+        For advanced users only.
+
+        Parameters
+        ----------
+        rf : TYPE
+            sklearn Random Forest object.
+        columns : TYPE
+            Data attributes.
+
+        Returns
+        -------
+        TYPE
+            Sum of Random Forest Trees complexities.
+
+        """
         nodes = [get_nodes_from_tree(dt, columns, self.params) 
                  for dt in rf.estimators_]
         return sum(nodes)
     
     def load_offline_data(val=True) -> List:
+        """
+        Returns an example dataset [(X_train, Y_train),
+                                    (X_test, Y_test)].
+        If validation = True, returns:  [(X_train, Y_train),
+                                         (X_validation, Y_validation),
+                                         (X_test, Y_test)].
+        Used for static environment (Offline Learning).
+
+        Parameters
+        ----------
+        val : TYPE, optional
+            If validation set is returned. The default is True.
+
+        Returns
+        -------
+        List
+            List of datasets in format: [(X_train, Y_train), (X_test, Y_test)].
+
+        """
         import pandas as pd
         from os import path
         from sklearn.model_selection import train_test_split
@@ -222,7 +376,31 @@ class evoltree(object):
             return [dtr.drop('target', axis=1), dtr['target'],
                     dts.drop('target', axis=1), dts['target']]
     
-    def load_online_data(val=True) -> List:
+    def load_online_data(val: bool=True) -> List:
+        """
+        Returns two example datasets, ordered in time.
+        The format the following, where 1 and 2 denote two different data sets:
+            [(X_train1, Y_train1),
+            (X_test1, Y_test1),
+            (X_train2, Y_train2),
+            (X_test2, Y_test2)].
+        If validation = True, returns:  [(X_train1, Y_train1),
+                                         (X_validation1, Y_validation1),
+                                         (X_test1, Y_test1),
+                                         (X_train2, Y_train2),
+                                         (X_validation2, Y_validation2),
+                                         (X_test2, Y_test2)].
+        Parameters
+        ----------
+        val : bool, optional
+            If validation set is returned. The default is True.
+
+        Returns
+        -------
+        List
+            List of datasets.
+
+        """
         import pandas as pd
         from os import path
         from sklearn.model_selection import train_test_split
@@ -263,7 +441,20 @@ class evoltree(object):
                     dts2.drop('target', axis=1), dts2['target']]
 
 
-def store_pop(population: List) -> None:
+def store_pop(population: List):
+    """
+    Stores the evolved population. For advanced users only.
+
+    Parameters
+    ----------
+    population : List
+        The population to be stored
+
+    Returns
+    -------
+    None.
+
+    """
     from os import path, getcwd, makedirs
     from .algorithm.parameters import params
     SEEDS_PATH = path.join('evoltree', 'seeds')
@@ -285,7 +476,27 @@ def store_pop(population: List) -> None:
                 f.write("%s\n" % item.fitness)
                 f.close()
     
-def get_distance(ind, min_y, max_y):
+def get_distance(ind: Individual, min_y: float, max_y: float) -> float:
+    """
+    Compute Euclidean Distance from a solution to the reference point (0, 1).
+    Data is normalized, 0 is AUC and 1 is tree complexity.
+    For advanced users only.
+
+    Parameters
+    ----------
+    ind : Individual
+        Evolutionary Decision Tree.
+    min_y : float
+        The normalized minimum complexity from the population.
+    max_y : float
+        The normalized maximum complexity from the population..
+
+    Returns
+    -------
+    float
+        The Euclidean Distance.
+
+    """
     import math
     auc = ind.fitness[0] / -100 # auc (positive, from 0 to 1)
     comp = math.log10(ind.fitness[1]) #complexity
@@ -298,7 +509,31 @@ def get_distance(ind, min_y, max_y):
     dist = math.hypot(auc-x, comp-y)
     return dist
     
-def list_params(pop, gen, lamarck, multicore, **extra_params):
+def list_params(pop: list, gen: int, lamarck: bool, multicore: bool, 
+                **extra_params: dict) -> List:
+    """
+    Internal function to list execution parameters.
+    For advanced users only.
+
+    Parameters
+    ----------
+    pop : list
+        List of individuals.
+    gen : int
+        Number of generations.
+    lamarck : bool
+        If Lamarckian Evolution is used.
+    multicore : bool
+        If parallelism is used.
+    **extra_params : dict
+        Extra parameters. For details, please check: https://github.com/PonyGE/PonyGE2/wiki/Evolutionary-Parameters.
+
+    Returns
+    -------
+    param_list : List
+        List of parameters.
+
+    """
     param_list = []
     if 'population_size' not in extra_params.keys():
         param_list.append('--population_size={0}'.format(str(pop)))
@@ -320,7 +555,22 @@ def list_params(pop, gen, lamarck, multicore, **extra_params):
             param_list.append("--{0}={1}".format(key, val))
     return param_list
 
-def get_mlflow(experiment_name):
+def get_mlflow(experiment_name: str):
+    """
+    Internal function for the use of mlflow.
+    For advanced users only.
+
+    Parameters
+    ----------
+    experiment_name : str
+        The mlflow experiment name.
+
+    Returns
+    -------
+    mlflow : mlflow
+        The mlflow execution to store metrics and parameters.
+
+    """
     import mlflow
     from os import path
     URI = path.join("evoltree", "results", "mlruns")
@@ -335,7 +585,31 @@ def get_mlflow(experiment_name):
     mlflow.set_experiment(experiment_name)
     return mlflow
 
-def evolve(params, range_generations, mlflow, population, refit=False):
+def evolve(params: dict, range_generations: range, mlflow, population: list, 
+           refit: bool=False) -> List:
+    """
+    Internal function for the evolutionary process.
+    For advanced users only.
+
+    Parameters
+    ----------
+    params : dict
+        The dictionary with execution parameters..
+    range_generations : range
+        Range of generations.
+    mlflow : mlflow
+        The mlflow execution.
+    population : list
+        List of individuals to evolve.
+    refit : bool, optional
+        If the population is being re-trained. The default is False.
+
+    Returns
+    -------
+    List
+        Fitted population.
+
+    """
     import numpy as np
     from .stats.stats import stats
     from .utilities.fitness.error_metric import AUC
@@ -368,9 +642,27 @@ def evolve(params, range_generations, mlflow, population, refit=False):
         mlflow.log_metric("best val AUC", -min(val_aucs))
     return population
 
-def get_nodes_from_tree(tree, feature_names, params) -> int:
+def get_nodes_from_tree(tree: _tree, feature_names: list, params: dict) -> int:
+    """
+    Returns a sklearn Decision Tree complexity, based on the GE grammar.
+    For advanced users only.
+
+    Parameters
+    ----------
+    tree : _tree
+        sklearn Decision Tree.
+    feature_names : list
+        Data attributes.
+    params : dict
+        The execution parameters.
+
+    Returns
+    -------
+    int
+        Number of GE tree nodes.
+
+    """
     from importlib import import_module
-    from sklearn.tree import _tree
     from .algorithm.mapper import map_tree_from_genome
     
     tree_ = tree.tree_
