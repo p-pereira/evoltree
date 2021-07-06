@@ -10,16 +10,16 @@ Both variants evolve variable-length DTs and perform a simultaneous optimization
 Both variants both use [PonyGE2](https://github.com/PonyGE/PonyGE2) as GE engine, while EDTL uses [sklearn DT](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html).
 
 
-Solutions are represented as a **numpy.where** expression in the fromat bellow, with *x* being a pandas dataframe with data; *idx* a column from the dataset; *comparison* a comparison signal (e.g., <, ==); *value* being a numerical value; and *result* can be another **numpy.where** expression (creating chained expressions), or a class probabability (numeric value from 0 to 1).
+Solutions are represented as a **numpy.where** expression in the format bellow, with *x* being a pandas dataframe with data; *idx* a column from the dataset; *comparison* a comparison signal (e.g., <, ==); *value* being a numerical value; and *result* can be another **numpy.where** expression (creating chained expressions), or a class probability (numeric value from 0 to 1).
 Due to this representation, current evoltree implementation only allows numerical attributes.
 
 ```python3
 numpy.where(x[<idx>]<comparison><value>,<result>,<result>) 
 ```
 Example of a generated Python code (left) and the corresponding DT (right):
-![DT and code](https://github.com/p-pereira/evoltree/blob/dev/imgs/dt_code.png)
+![DT and code](https://raw.githubusercontent.com/p-pereira/evoltree/main/imgs/dt_code.png)
 
-More detais about this work can be found at: https://doi.org/10.1016/j.eswa.2020.114287.
+More details about this work can be found at: https://doi.org/10.1016/j.eswa.2020.114287.
 
 # Install
 
@@ -40,7 +40,7 @@ To load the datasets, already divided into train, validation and test sets, two 
 - **load_offline_data** - returns the training, validation and test sets from first dataset, used for static environments;
 - **load_online_data** - returns the training, validation and test sets from both datasets, used for online learning scenarios.
 
-Next steps present how to load data in the two different modes (online and offline). Due to privacy issues, all data is anonimized.
+Next steps present how to load data in the two different modes (online and offline). Due to privacy issues, all data is anonymized.
 
 ```python3
 # Import package
@@ -92,7 +92,7 @@ Name: target, Length: 708942, dtype: object
 
 ## Offline Learning: Fit EDT and EDTL models
 
-Next steps present the basic usage of both variants (EDT and EDTL) for modeling the previously loaded data in an oflline environment. Furthermore, since all solutions are stored, it is possible to continue the learning process if needed, by using the **refit** function, also presented below.
+Next steps present the basic usage of both variants (EDT and EDTL) for modeling the previously loaded data in an offline environment. Furthermore, since all solutions are stored, it is possible to continue the learning process if needed, by using the **refit** function, also presented below.
 
 ```python3
 # Imports
@@ -109,7 +109,7 @@ X, y, X_val, y_val, X_ts, y_ts = edt.load_offline_data()
 edt.fit(X, y, "Sale", X_val, y_val, pop=100, gen=10, lamarck=False, experiment_name="test")
 ## Lamarckian variant, doesn't need as much iterations (gen)
 edtl.fit(X, y, "Sale", X_val, y_val, pop=100, gen=5, lamarck=True, experiment_name="testLamarck")
-# Continue Fiting both versions on the same datasets for extra 2 iterations
+# Continue Fitting both versions on the same datasets for extra 2 iterations
 ## Normal variant:
 edt.refit(gen=2)
 ## Lamarckian variant, doesn't need as much iterations (gen)
@@ -135,7 +135,7 @@ plt.savefig("results.png")
 ```
 Result:
 
-![Results.](https://github.com/p-pereira/evoltree/blob/dev/imgs/results.png)
+![Results.](https://raw.githubusercontent.com/p-pereira/evoltree/main/imgs/results.png)
 
 
 ## Online Learning: Fit EDT and EDTL models
@@ -197,7 +197,7 @@ plt.savefig("results_online.png")
 
 Results:
 
-![results_online](https://github.com/p-pereira/evoltree/blob/dev/imgs/results_online.png)
+![results_online](https://raw.githubusercontent.com/p-pereira/evoltree/main/imgs/results_online.png)
 
 # Citation
 
@@ -206,9 +206,8 @@ If you use **evoltree** for your research, please cite the following paper:
 
 Pedro J. Pereira, Paulo Cortez, Rui Mendes:
 
-[**Multi-objective Grammatical Evolution of Decision Trees for Mobile Marketing User Conversion Prediction.**](https://doi.org/10.1016/j.eswa.2020.114287)
-
-Expert Syst. Appl. 168 (2021)
+[**Multi-objective Grammatical Evolution of Decision Trees for Mobile Marketing User Conversion Prediction.**](https://doi.org/10.1016/j.eswa.2020.114287).
+Expert Systems with Applications 168: 114287 (2021).
 
 
 ```
