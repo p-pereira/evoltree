@@ -204,9 +204,10 @@ Results:
 If you use **evoltree** for your research, please cite the following paper:
 
 
-Pedro J. Pereira, Paulo Cortez, Rui Mendes:
+Pedro Jose Pereira, Paulo Cortez, Rui Mendes:
 
-[**Multi-objective Grammatical Evolution of Decision Trees for Mobile Marketing User Conversion Prediction.**](https://doi.org/10.1016/j.eswa.2020.114287).
+[**Multi-objective Grammatical Evolution of Decision Trees for Mobile Marketing User Conversion Prediction.**](https://doi.org/10.1016/j.eswa.2020.114287)
+
 Expert Systems with Applications 168: 114287 (2021).
 
 
@@ -214,9 +215,10 @@ Expert Systems with Applications 168: 114287 (2021).
 @article{DBLP:journals/eswa/PereiraCM21,
 	author    = {Pedro Jos{\'{e}} Pereira and Paulo Cortez and Rui Mendes},
 	title     = {Multi-objective Grammatical Evolution of Decision Trees for Mobile Marketing user conversion prediction},
-	journal   = {Expert Syst. Appl.},
+	journal   = {Expert Systems with Applications},
 	volume    = {168},
 	pages     = {114287},
-	year      = {2021}
+	year      = {2021},
+	doi       = {10.1016/j.eswa.2020.114287},
 }
 ```
