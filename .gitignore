@@ -138,3 +138,4 @@ evoltree/grammars/**/**
 evoltree/utilities/lamarck/*/*
 evoltree/data/
 runner.py
+/docs/*
