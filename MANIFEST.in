@@ -2,3 +2,4 @@ include evoltree/data/*
 include evoltree/grammars/*
 include evoltree/seeds/*
 include evoltree/utilities/lamarck/mapper_base
+include requirements.txt

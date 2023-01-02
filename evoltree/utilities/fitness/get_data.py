@@ -115,3 +115,27 @@ def get_data(train, test):
     #get_Xy_train_test_separate(train_set, test_set, skip_header=1)
     
     return training_in, training_out, test_in, test_out
+
+def get_data_sample(N: int):
+    """
+    Return a training data sample for the current experiment.
+
+
+    Parameters
+    ----------
+    N : int
+        Number of examples of each class.
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+    Xtr, ytr, _, _ = get_data(None, None)
+    Xtr2 = Xtr.copy()
+    Xtr2[params["TARGET"]] = ytr.copy()
+    Xtr2 = Xtr2.groupby(params["TARGET"]).apply(lambda x: x.sample(N)).reset_index(drop=True)
+    ytr2 = Xtr2[params["TARGET"]]
+    Xtr2.drop(params["TARGET"], axis=1, inplace=True)
+    return Xtr2, ytr2
+    

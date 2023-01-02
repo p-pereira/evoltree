@@ -1,14 +1,16 @@
 import numpy as np
+
 np.seterr(all="raise")
 
 from ...algorithm.parameters import params
-from ...utilities.fitness.get_data import get_data
+from ...utilities.fitness.get_data import get_data, get_data_sample
 from ...utilities.fitness.optimize_constants import optimize_constants
 from random import sample
 from ..base_ff_classes.base_ff import base_ff
 import numpy as np
 import pandas as pd
 import time
+
 
 class supervised_learning(base_ff):
     """
@@ -31,14 +33,18 @@ class supervised_learning(base_ff):
         super().__init__()
 
         # Get training and test data
-        self.training_in, self.training_exp, self.test_in, self.test_exp = \
-            get_data(params['DATASET_TRAIN'], params['DATASET_TEST'])
+        (
+            self.training_in,
+            self.training_exp,
+            self.test_in,
+            self.test_exp,
+        ) = get_data(params["DATASET_TRAIN"], params["DATASET_TEST"])
 
         # Find number of variables.
         self.n_vars = np.shape(self.training_in)[0]
 
         # Regression/classification-style problems use training and test data.
-        if params['DATASET_TEST']:
+        if params["DATASET_TEST"]:
             self.training_test = True
 
     def evaluate(self, ind, savePred=False, **kwargs):
@@ -52,23 +58,17 @@ class supervised_learning(base_ff):
         evaluation is to be performed.
         :return: The fitness of the evaluated individual.
         """
-        
-        dist = kwargs.get('dist', 'training')
+
+        dist = kwargs.get("dist", "training")
 
         if dist == "training":
             # Set training datasets.
             x = self.training_in
             y = self.training_exp
             # If data sampling is used
-            if params['N_SAMPLING'] > 0:
-                N = params['N_SAMPLING']
-                pos = np.where(y == 'Sale')[0]
-                neg = np.where(y == 'NoSale')[0]
-                randPos = sample(list(pos), N)
-                randNeg = sample(list(neg), N)
-                x = x.iloc[(randPos+randNeg),:]
-                y = y.iloc[(randPos+randNeg)]
-            
+            if params["N_SAMPLING"] > 0:
+                x, y = get_data_sample(params["N_SAMPLING"])
+
         elif dist == "test":
             # Set test datasets.
             x = self.test_in
@@ -112,10 +112,12 @@ class supervised_learning(base_ff):
             start = time.time()
             yhat = ind.predict(x)
             end = time.time()
-        except SyntaxError: # invalid solutions due to leading zeros
+        except SyntaxError:  # invalid solutions due to leading zeros
             from ...utilities.utils import remove_leading_zeros
+
             ind.phenotype = remove_leading_zeros(ind.phenotype)
             from importlib import import_module
+
             i = import_module(params["LAMARCK_MAPPER"])
             ind.genotype = i.get_genome_from_dt_idf(ind.phenotype)
             start = time.time()
@@ -123,17 +125,16 @@ class supervised_learning(base_ff):
             end = time.time()
         if savePred:
             from ...utilities.fitness.error_metric import AUC
+
             auc_ = AUC(y, yhat)
-            d = pd.DataFrame({'y': y, 'pred':yhat, 'auc':auc_},index=None)
-            d.to_csv(params['FILE_PATH']+'/preds.csv', sep=";",index=False)
-            f = open(params['FILE_PATH']+'/time_preds.txt', 'w')
-            f.write(str((end-start)/len(y)))
+            d = pd.DataFrame({"y": y, "pred": yhat, "auc": auc_}, index=None)
+            d.to_csv(params["FILE_PATH"] + "/preds.csv", sep=";", index=False)
+            f = open(params["FILE_PATH"] + "/time_preds.txt", "w")
+            f.write(str((end - start) / len(y)))
             f.close()
-            
+
         assert np.isrealobj(yhat)
 
         # let's always call the error function with the true
         # values first, the estimate second
-        return params['ERROR_METRIC'](y, yhat)
-            
-            
+        return params["ERROR_METRIC"](y, yhat)
