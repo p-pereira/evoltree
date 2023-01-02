@@ -137,5 +137,5 @@ evoltree/seeds/**/**
 evoltree/grammars/**/**
 evoltree/utilities/lamarck/*/*
 evoltree/data/
-runner.py
+examples/evoltree/results/
 /docs/*

@@ -90,114 +90,102 @@ print(y)
 Name: target, Length: 708942, dtype: object
 ```
 
-## Offline Learning: Fit EDT and EDTL models
+## Offline Learning: Fit DT, EDT and EDTL models
 
-Next steps present the basic usage of both variants (EDT and EDTL) for modeling the previously loaded data in an offline environment. Furthermore, since all solutions are stored, it is possible to continue the learning process if needed, by using the **refit** function, also presented below.
+Next steps present the basic usage of both variants (EDT and EDTL) for modeling the previously loaded data in an offline environment.
 
 ```python3
 # Imports
-from evoltree import evoltree
 from sklearn import metrics
+from sklearn.tree import DecisionTreeClassifier
+from evoltree import evoltree
 import matplotlib.pyplot as plt
+
 # Create two evoltree objects, one for each variant
 edt = evoltree()
 edtl = evoltree()
 # Load dataset
 X, y, X_val, y_val, X_ts, y_ts = edt.load_offline_data()
+
 # Fit both versions on train data
 ## Normal variant:
-edt.fit(X, y, "Sale", X_val, y_val, pop=100, gen=10, lamarck=False, experiment_name="test")
-## Lamarckian variant, doesn't need as much iterations (gen)
-edtl.fit(X, y, "Sale", X_val, y_val, pop=100, gen=5, lamarck=True, experiment_name="testLamarck")
-# Continue Fitting both versions on the same datasets for extra 2 iterations
-## Normal variant:
-edt.refit(gen=2)
-## Lamarckian variant, doesn't need as much iterations (gen)
-edtl.refit(gen=2)
-# Predict on test data, using the solution with better predictive performance on validation data
+edt.fit(
+    X,
+    y,
+    "Sale",
+    X_val,
+    y_val,
+    pop=100,
+    gen=10,
+    lamarck=False,
+    experiment_name="test",
+)
 y_pred1 = edt.predict(X_ts, mode="best")
+
+## Lamarckian variant, doesn't need as much iterations (gen)
+edtl.fit(
+    X,
+    y,
+    "Sale",
+    X_val,
+    y_val,
+    pop=100,
+    gen=5,
+    lamarck=True,
+    experiment_name="testLamarck",
+)
+# Predict on test data, using the solution with better predictive performance on validation data
 y_predL1 = edtl.predict(X_ts, mode="best")
+
+# Fit a traditional Decision Tree for comparison
+dt = DecisionTreeClassifier(random_state=1234).fit(X, y)
+prob = dt.predict_proba(X_ts)
+
 # Compute AUC on test data
-fpr1, tpr1, th1 = metrics.roc_curve(y_ts, y_pred1, pos_label='Sale')
-fprL1, tprL1, thL1 = metrics.roc_curve(y_ts, y_predL1, pos_label='Sale')
-auc1 = metrics.auc(fpr1, tpr1)
+fpr, tpr, th = metrics.roc_curve(y_ts, y_pred1, pos_label="Sale")
+fprL1, tprL1, thL1 = metrics.roc_curve(y_ts, y_predL1, pos_label="Sale")
+fprdt, tprdt, thdt = metrics.roc_curve(y_ts, prob[:, 1], pos_label="Sale")
+auc1 = metrics.auc(fpr, tpr)
 aucL1 = metrics.auc(fprL1, tprL1)
+aucdt = metrics.auc(fprdt, tprdt)
 # Plot results
-fig, ax = plt.subplots(1,1, figsize=(5.5,5))
-plt.plot(fprL1, tprL1, color='royalblue', ls="--", lw=2, label="EDTL={}%".format(round(aucL1, 2)))
-plt.plot(fpr1, tpr1, color='darkorange', ls="-", lw=2, label="EDT={}%".format(round(auc1, 2)))
-plt.plot([0,1], [0,1], color="black", ls='--', label="baseline=50%")
+plt.rcParams["font.family"] = "sans-serif"
+fig, ax = plt.subplots(1, 1, figsize=(5.5, 5))
+plt.plot(
+    fpr,
+    tpr,
+    color="red",
+    ls="--",
+    lw=2,
+    label="EDT={}%".format(round(auc1 * 100, 2)),
+)
+plt.plot(
+    fprL1,
+    tprL1,
+    color="royalblue",
+    ls="--",
+    lw=2,
+    label="EDTL={}%".format(round(aucL1 * 100, 2)),
+)
+plt.plot(
+    fprdt,
+    tprdt,
+    color="darkgreen",
+    ls=":",
+    lw=2,
+    label="DT={}%".format(round(aucdt * 100, 2)),
+)
+plt.plot([0, 1], [0, 1], color="black", ls="--", label="baseline=50%")
 plt.legend(loc=4)
 plt.xlabel("FPR")
 plt.ylabel("TPR")
+plt.show()
 plt.savefig("results.png")
 
 ```
 Result:
 
 ![Results.](https://raw.githubusercontent.com/p-pereira/evoltree/main/imgs/results.png)
-
-
-## Online Learning: Fit EDT and EDTL models
-
-EDT variants can both be applied to online learning environmnets, saving previous solutions and using it as starting point for the learning process, thus, needing a smaller number of iterations to achieve good results.
-Next steps show how to implement it.
-
-```python3
-# Imports
-from evoltree import evoltree
-from sklearn import metrics
-import matplotlib.pyplot as plt
-# Create two evoltree objects, one for each variant
-edt = evoltree()
-edtl = evoltree()
-# Load datasets
-X1, y1, X_val1, y_val1, X_ts1, y_ts1, X2, y2, X_val2, y_val2, X_ts2, y_ts2 = edt.load_online_data()
-### Train models: first dataset
-# Fit both versions on train data
-## Normal variant:
-edt.fit(X1, y1, "Sale", X_val1, y_val1, pop=100, gen=10, lamarck=False, experiment_name="test")
-## Lamarckian variant, doesn't need as much iterations (gen)
-edtl.fit(X1, y1, "Sale", X_val1, y_val1, pop=100, gen=5, lamarck=True, experiment_name="testLamarck")
-# Predict on test data, using the solution with better predictive performance on validation data
-y_pred1 = edt.predict(X_ts1, mode="best")
-y_predL1 = edtl.predict(X_ts1, mode="best")
-# Compute AUC on test data
-fpr1, tpr1, th1 = metrics.roc_curve(y_ts1, y_pred1, pos_label='Sale')
-fprL1, tprL1, thL1 = metrics.roc_curve(y_ts1, y_predL1, pos_label='Sale')
-auc1 = metrics.auc(fpr1, tpr1)
-aucL1 = metrics.auc(fprL1, tprL1)
-### Re-Train models: second dataset
-# Fit both versions on train data
-## Normal variant:
-edt.fit_new_data(X2, y2, X_val2, y_val2, pop=100, gen=5, lamarck=False)
-## Lamarckian variant, doesn't need as much iterations (gen)
-edtl.fit_new_data(X2, y2, X_val2, y_val2, pop=100, gen=2, lamarck=True)
-# Predict on test data, using the solution with better predictive performance on validation data
-y_pred2 = edt.predict(X_ts2, mode="best")
-y_predL2 = edtl.predict(X_ts2, mode="best")
-# Compute AUC on test data
-fpr2, tpr2, th2 = metrics.roc_curve(y_ts2, y_pred2, pos_label='Sale')
-fprL2, tprL2, thL2 = metrics.roc_curve(y_ts2, y_predL2, pos_label='Sale')
-auc2 = metrics.auc(fpr2, tpr2)
-aucL2 = metrics.auc(fprL2, tprL2)
-# Plot results
-fig, ax = plt.subplots(1,1, figsize=(5.5,5))
-plt.plot(fprL1, tprL1, color='royalblue', ls="--", lw=2, label="EDTL (1)={}%".format(round(aucL1, 2)))
-plt.plot(fpr1, tpr1, color='darkorange', ls="-", lw=2, label="EDT (1)={}%".format(round(auc1, 2)))
-plt.plot(fprL2, tprL2, color='navy', ls="--", lw=2, label="EDTL (2)={}%".format(round(aucL2, 2)))
-plt.plot(fpr2, tpr2, color='tan', ls="-", lw=2, label="EDT (2)={}%".format(round(auc2, 2)))
-plt.plot([0,1], [0,1], color="black", ls='--', label="baseline=50%")
-plt.legend(loc=4)
-plt.xlabel("FPR")
-plt.ylabel("TPR")
-plt.savefig("results_online.png")
-
-```
-
-Results:
-
-![results_online](https://raw.githubusercontent.com/p-pereira/evoltree/main/imgs/results_online.png)
 
 # Citation
 

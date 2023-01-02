@@ -3,12 +3,15 @@ import random
 import re
 import math
 from importlib import import_module
+from sklearn.tree import DecisionTreeClassifier
 
 from ..algorithm.mapper import map_tree_from_genome
 from ..operators.lamarck import tree_to_code
 from ..algorithm.mapper import mapper
 from ..algorithm.parameters import params
-from ..utilities.fitness.get_data import get_data
+from ..utilities.fitness.get_data import get_data, get_data_sample
+from ..utilities.algorithm.NSGA2 import dominates
+
 
 class Individual(object):
     """
@@ -30,14 +33,21 @@ class Individual(object):
         if map_ind:
             # The individual needs to be mapped from the given input
             # parameters.
-            self.phenotype, self.genome, self.tree, self.nodes, self.invalid, \
-                self.depth, self.used_codons = mapper(genome, ind_tree)
+            (
+                self.phenotype,
+                self.genome,
+                self.tree,
+                self.nodes,
+                self.invalid,
+                self.depth,
+                self.used_codons,
+            ) = mapper(genome, ind_tree)
 
         else:
             # The individual does not need to be mapped.
             self.genome, self.tree = genome, ind_tree
 
-        self.fitness = params['FITNESS_FUNCTION'].default_fitness
+        self.fitness = params["FITNESS_FUNCTION"].default_fitness
         self.runtime_error = False
         self.name = None
 
@@ -55,9 +65,16 @@ class Individual(object):
         greater than the comparison individual.
         """
 
-        if np.isnan(self.fitness): return True
-        elif np.isnan(other.fitness): return False
-        else: return self.fitness < other.fitness if params['FITNESS_FUNCTION'].maximise else other.fitness < self.fitness
+        if np.isnan(self.fitness):
+            return True
+        elif np.isnan(other.fitness):
+            return False
+        else:
+            return (
+                self.fitness < other.fitness
+                if params["FITNESS_FUNCTION"].maximise
+                else other.fitness < self.fitness
+            )
 
     def __le__(self, other):
         """
@@ -73,9 +90,16 @@ class Individual(object):
         greater than or equal to the comparison individual.
         """
 
-        if np.isnan(self.fitness): return True
-        elif np.isnan(other.fitness): return False
-        else: return self.fitness <= other.fitness if params['FITNESS_FUNCTION'].maximise else other.fitness <= self.fitness
+        if np.isnan(self.fitness):
+            return True
+        elif np.isnan(other.fitness):
+            return False
+        else:
+            return (
+                self.fitness <= other.fitness
+                if params["FITNESS_FUNCTION"].maximise
+                else other.fitness <= self.fitness
+            )
 
     def __str__(self):
         """
@@ -84,8 +108,14 @@ class Individual(object):
 
         :return: A string describing the individual.
         """
-        return ("Individual: " +
-                str(self.phenotype) + "; " + str(self.fitness) + ";" + str(self.genome))
+        return (
+            "Individual: "
+            + str(self.phenotype)
+            + "; "
+            + str(self.fitness)
+            + ";"
+            + str(self.genome)
+        )
 
     def deep_copy(self):
         """
@@ -94,7 +124,7 @@ class Individual(object):
         :return: A unique copy of the individual.
         """
 
-        if not params['GENOME_OPERATIONS']:
+        if not params["GENOME_OPERATIONS"]:
             # Create a new unique copy of the tree.
             new_tree = self.tree.__copy__()
 
@@ -124,9 +154,10 @@ class Individual(object):
         case, returns self.
         """
         # Evaluate fitness using specified fitness function.
-        if params['OPTIMIZE_CONSTANTS']:
+        if params["OPTIMIZE_CONSTANTS"]:
             from utilities.fitness.optimize_constants import optimize_constants
             from utilities.utils import remove_leading_zeros
+
             self.phenotype = remove_leading_zeros(self.phenotype)
             # if we are training, then optimize the constants by
             # gradient descent and save the resulting phenotype
@@ -134,17 +165,17 @@ class Individual(object):
             # c[0] * x[1]**c[1]) and values for constants as
             # ind.opt_consts (eg (0.5, 0.7). Later, when testing,
             # use the saved string and constants to evaluate.
-            _, ind =  optimize_constants(params['X_train'], 
-                                         params['y_train'], 
-                                         self)
+            _, ind = optimize_constants(
+                params["X_train"], params["y_train"], self
+            )
             if ind is not None:
                 self = ind.deep_copy()
-        
-        self.fitness = params['FITNESS_FUNCTION'](self)
 
-        if params['MULTICORE']:
+        self.fitness = params["FITNESS_FUNCTION"](self)
+
+        if params["MULTICORE"]:
             return self
-    
+
     def applyLamarck(self):
         """
         Applies Lamarck to individual. It consists in select a random node,
@@ -155,144 +186,177 @@ class Individual(object):
         :returns: The changed individual.
         """
         if random.random() < params["LAMARCK_PROBABILITY"]:
-            from sklearn import tree
+            x, y, _, _ = get_data(
+                params["DATASET_TRAIN"], params["DATASET_TEST"]
+            )
             ind = self.deep_copy()
             phenotype = ind.phenotype
             # Check number of nodes (np.where)
             nrNodes = phenotype.count("np.where")
             # Expressions with root node only, are replaced by a traditional dt
             if nrNodes == 1:
-                x, y, x_test, y_test = \
-                get_data(params['DATASET_TRAIN'], params['DATASET_TEST'])
-                
-                dt = tree.DecisionTreeClassifier()
-                dt = dt.fit(x, y)
+                dt = self.__get_traditional_tree(x, y, max_depth=5)
                 # get the tree rules
-                try: ### NEW 16-11-2020
-                    rules = tree_to_code(dt, x.columns.tolist() + ['target'])
-                except: # decision tree is too small, generates error
+                try:  ### NEW 16-11-2020
+                    rules = tree_to_code(dt, x.columns.tolist() + ["target"])
+                except:  # decision tree is too small, generates error
                     return self
                 ind.phenotype = rules
                 ind.evaluate()
-                if hasattr(params['FITNESS_FUNCTION'], 'multi_objective'):
-                    if ind.fitness[0] < self.fitness[0] or math.isnan(self.fitness[0]):
-                        i = import_module(params['LAMARCK_MAPPER'])
-                        
-                        genome = i.get_genome_from_dt_idf(ind.phenotype)
-                        ind.genome = genome
-                        mapped = map_tree_from_genome(genome)
-                        ind.tree = mapped[2]
-                        ind.nodes = mapped[3]
-                        ind.evaluate()
-                        return ind
-                    else:
-                        return self
+                if dominates(ind, self):
+                    fitness = ind.fitness
+                    ind = self.__update_individual(ind, rules)
+                    ind.fitness = fitness
+                    return ind
                 else:
-                    if ind.fitness > self.fitness or math.isnan(self.fitness):
-                        i = import_module(params['LAMARCK_MAPPER'])
-                        
-                        genome = i.get_genome_from_dt_idf(ind.phenotype)
-                        ind.genome = genome
-                        mapped = map_tree_from_genome(genome)
-                        ind.tree = mapped[2]
-                        ind.nodes = mapped[3]
-                        return ind
-                    else:
-                        return self
+                    return self
+
             else:
-                # select a random node (can't be the first)
-                randNode = random.randint(0, nrNodes-1) # -1 due to the index starting at 0
-                # get all nodes' positions
-                allNodes = [node.start() for node in re.finditer('np.where', phenotype)]
-                # get node position
-                nodePosition = allNodes[randNode]    
-                # get the expression
-                #   get opened and closed brackets' positions
-                openBrPos = [m.start() for m in re.finditer('\(', phenotype[nodePosition:])]
-                closeBrPos = [m.start() for m in re.finditer('\)', phenotype[nodePosition:])]
-                allBrPos = sorted(openBrPos + closeBrPos)
-                # get the position where the expression to be replaced ends
-                openBr = 0
-                closeBr = 0
-                position = 1
-                for i in range(0,len(allBrPos)):
-                    pos = allBrPos[i]
-                    if pos in openBrPos:
-                        openBr = openBr + 1
-                    elif pos in closeBrPos:
-                        closeBr = closeBr + 1
-                    if openBr == closeBr:
-                        position = pos
-                        break
-                # expression to be replaced:
-                replaceExp = phenotype[nodePosition:(position+nodePosition+1)]
-                #   subtree leafs, to identify records that fall there
-                toReplace = re.findall("\([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?\)", replaceExp)
-                for val in toReplace:
-                    replaceExp = replaceExp.replace(val, '100')
-               # new expression with this values
-                newExp = phenotype[0:nodePosition] + replaceExp + phenotype[(position+nodePosition+1):]
-                # get data
-                x, y, _, _ = get_data(params['DATASET_TRAIN'], 
-                                      params['DATASET_TEST'])
-                if params['N_SAMPLING'] > 0:
-                    from random import sample
-                    N = params['N_SAMPLING']
-                    pos = np.where(y == 'Sale')[0]
-                    neg = np.where(y == 'NoSale')[0]
-                    randPos = sample(list(pos), N)
-                    randNeg = sample(list(neg), N)
-                    x = x.iloc[(randPos+randNeg),:]
-                    y = y.iloc[(randPos+randNeg)]
+                newExp, startPos, endPos = self.__get_subtree(
+                    phenotype, nrNodes
+                )
+                # if params["N_SAMPLING"] > 0:
+                #    x, y = get_data_sample(params["N_SAMPLING"])
                 # index of records that fall on the changed expression
                 index = np.where(eval(newExp) == 100)[0]
                 if len(index) > 0:
-                    x = x.iloc[index,:]
-                    y = y.iloc[index]
-                    # train a traditional decision tree
-                    dt = tree.DecisionTreeClassifier(max_depth=10)
-                    dt = dt.fit(x, y)
+                    X2 = x.iloc[index, :]
+                    y2 = y.iloc[index]
+                    # train a traditional decision tree using only the data that falls in the subtree
+                    dt = self.__get_traditional_tree(X2, y2, max_depth=5)
                     # get the tree rules
-                    try: ### NEW 16-11-2020
-                        rules = tree_to_code(dt, x.columns.tolist() + ['target'])
-                    except: # decision tree is too small, generates error
+                    try:  ### NEW 16-11-2020
+                        rules = tree_to_code(
+                            dt, x.columns.tolist() + ["target"]
+                        )
+                    except:  # decision tree is too small, generates error
                         return self
                     # add the rules to the old phenotype
-                    newPhenotype = phenotype[0:nodePosition] + rules + phenotype[(position+nodePosition+1):]
-                    
+                    newPhenotype = (
+                        phenotype[0:startPos]
+                        + rules
+                        + phenotype[(startPos + endPos + 1) :]
+                    )
+
                     ind.phenotype = newPhenotype
                     ind.evaluate()
-                    if hasattr(params['FITNESS_FUNCTION'], 'multi_objective'):
-                        if ind.fitness[0] < self.fitness[0] or math.isnan(self.fitness[0]):
-                            i = import_module(params['LAMARCK_MAPPER'])
-                            
-                            genome = i.get_genome_from_dt_idf(ind.phenotype)
-                            ind.genome = genome
-                            mapped = map_tree_from_genome(genome)
-                            ind.tree = mapped[2]
-                            ind.nodes = mapped[3]
-                            ind.evaluate()
-                            return ind
-                        else:
-                            return self
+                    if dominates(ind, self):
+                        fitness = ind.fitness
+                        ind = self.__update_individual(ind, newPhenotype)
+                        ind.fitness = fitness
+                        return ind
                     else:
-                        if ind.fitness > self.fitness or math.isnan(self.fitness):
-                            i = import_module(params['LAMARCK_MAPPER'])
-                            
-                            genome = i.get_genome_from_dt_idf(ind.phenotype)
-                            ind.genome = genome
-                            mapped = map_tree_from_genome(genome)
-                            ind.tree = mapped[2]
-                            ind.nodes = mapped[3]
-                            return ind
-                        else:
-                            return self
+                        return self
+
                 else:
-                    return self
-        
+                    # NEW: 21/11/2022
+                    # If no data fals in this node, let's replace it by 0.5 (tree prunning)
+                    # AUC will be the same, but the tree is smaller :)
+                    # TODO: if grammar changes (which is my next idea), this won't work :(
+                    newPhenotype = (
+                        phenotype[0:startPos]
+                        + "(0.5)"
+                        + phenotype[(startPos + endPos + 1) :]
+                    )
+                    ind = self.__update_individual(ind, newPhenotype)
+                    if params["N_SAMPLING"] > 0:
+                        x, y = get_data_sample(params["N_SAMPLING"])
+                    ind.evaluate()
+                    return ind
+
         else:
             return self
-    
+
     ### NEW 02-01-2021
     def predict(self, x):
         return eval(self.phenotype)
+
+    # NEW 21/11/2022: clean the code using auxiliary functions
+    def __get_traditional_tree(self, X, y, **kwargs) -> DecisionTreeClassifier:
+        return DecisionTreeClassifier(
+            random_state=params["RANDOM_SEED"], **kwargs
+        ).fit(X, y)
+
+    def __update_individual(self, ind, phenotype):
+        i = import_module(params["LAMARCK_MAPPER"])
+        ind.phenotype = phenotype
+        # print(phenotype)
+
+        try:
+            genome = i.get_genome_from_dt_idf(phenotype)
+            ind.genome = genome
+            mapped = map_tree_from_genome(genome)
+            ind.tree = mapped[2]
+            ind.nodes = mapped[3]
+            return ind
+        except Exception as e:
+            # print(f"exception: {e} \n Phenotype: {phenotype} \n Genome: {genome}")
+            return self
+
+    def __get_subtree(self, phenotype, nrNodes):
+        """
+        Get a random subtree to be replaced by a traditional decision tree.
+
+        Gets a random subtree (sub-expression) from the original phenotype, and
+        its start and end indexes in the original phenotype.
+        This subtree (expression) will be further replaced by a traditional DT (rules).
+
+        Parameters
+        ----------
+        phenotype : _type_
+            Original phenotype (Evolutionary Decision Tree).
+        nrNodes : _type_
+            Number of nodes/decisions (subtrees).
+
+        Returns
+        -------
+        Tuple
+            Returns the subtree and its start and end indexes in the original phenotype.
+        """
+        # select a random node (can't be the first)
+        randNode = random.randint(
+            0, nrNodes - 1
+        )  # -1 due to the index starting at 0
+        # get all nodes' positions
+        allNodes = [node.start() for node in re.finditer("np.where", phenotype)]
+        # get node position
+        nodePosition = allNodes[randNode]
+        # get the expression
+        #   get opened and closed brackets' positions
+        openBrPos = [
+            m.start() for m in re.finditer("\(", phenotype[nodePosition:])
+        ]
+        closeBrPos = [
+            m.start() for m in re.finditer("\)", phenotype[nodePosition:])
+        ]
+        allBrPos = sorted(openBrPos + closeBrPos)
+        # get the position where the expression to be replaced ends
+        openBr = 0
+        closeBr = 0
+        position = 1
+        for i in range(0, len(allBrPos)):
+            pos = allBrPos[i]
+            if pos in openBrPos:
+                openBr = openBr + 1
+            elif pos in closeBrPos:
+                closeBr = closeBr + 1
+            if openBr == closeBr:
+                position = pos
+                break
+        # expression to be replaced:
+        replaceExp = phenotype[nodePosition : (position + nodePosition + 1)]
+        #   subtree leafs, to identify records that fall there
+        toReplace = re.findall(
+            "\([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?\)",
+            replaceExp,
+        )
+        for val in toReplace:
+            replaceExp = replaceExp.replace(val, "100")
+        # new expression with this values
+        newExp = (
+            phenotype[0:nodePosition]
+            + replaceExp
+            + phenotype[(position + nodePosition + 1) :]
+        )
+
+        return newExp, nodePosition, position
