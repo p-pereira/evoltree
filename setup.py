@@ -22,7 +22,7 @@ setuptools.setup(
     license="MIT",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author_email="id6927@alunos.uminho.pt",
+    author_email="pedro.pereira@dsi.uminho.pt",
     packages=setuptools.find_packages(),
     install_requires=requirements,
     url="https://github.com/p-pereira/evoltree",
